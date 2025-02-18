@@ -1,0 +1,95 @@
+@use "../../foundation" as *;
+
+.p-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 30px;
+    position: absolute;
+    bottom: 100px;
+    left: 250px;
+    z-index: 11;
+    background-color: $black;
+    border: 1px solid $theme;
+    border-radius: 10px;
+    height: 500px;
+    width: 400px;
+    overflow-y: scroll;
+    transform: none;
+    color: $white;
+
+
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        height: 100%;
+    }
+
+    &__room {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        height: 60px;
+        padding: 5px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+            background: $dark-gray;
+        }
+
+        &.-unread {
+            background-color: rgb(from $gray r g b / 0.2);
+
+        }
+    }
+
+    &__icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    &__info {
+        display: flex;
+        flex-direction: column;
+        width: calc(100% - 100px);
+        padding: 5px;
+        font-size: $fs-text;
+        height: 100%;
+        justify-content: space-between;
+    }
+
+    &__info-title {
+        font-weight: bold;
+        text-align: start;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+
+    &__latest {
+        color: $gray;
+        text-align: start;
+    }
+
+    &__empty {
+        text-align: center;
+        font-size: 16px;
+        color: gray;
+    }
+
+    &__right {
+        width: 50px;
+        height: 50px;
+        align-self: flex-end;
+    }
+}

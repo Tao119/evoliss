@@ -1,0 +1,8 @@
+@use 'variable' as *;
+@use "sass:map";
+
+@mixin mq($breakpoint: md) {
+    @media screen and (max-width: #{map.get($breakpoints, $breakpoint)}) {
+        @content;
+    }
+}

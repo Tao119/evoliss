@@ -1,0 +1,344 @@
+@use "../../foundation" as *;
+
+.p-mypage {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow-y: scroll;
+
+    &__title {
+        flex-shrink: 0;
+        font-size: $fs-title;
+        width: 100%;
+        height: 20px;
+        margin-bottom: 20px;
+        color: $white;
+    }
+
+    &__header {
+        flex-shrink: 0;
+        position: relative;
+        width: 100%;
+        height: 150px;
+
+        &-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        &-edit {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: $soft-gray;
+        }
+
+        &-upload {
+            display: none;
+        }
+    }
+
+    &__icon {
+        position: absolute;
+        bottom: -20px;
+        left: 10px;
+        translate: 0 50%;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+
+        &__edit-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        &-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        &-edit {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: $soft-gray;
+            padding: 5px;
+        }
+
+        &-upload {
+            display: none;
+        }
+    }
+
+    &__profile {
+        display: flex;
+        width: 50%;
+        align-items: center;
+        height: 100%;
+        flex-direction: column;
+        padding: 10px 20px;
+
+        &-container {
+            flex-shrink: 0;
+            width: calc(100% - 170px);
+            margin-left: auto;
+            height: 100px;
+            display: flex;
+            flex-direction: row;
+            margin-bottom: 20px;
+        }
+
+        &-info {
+            width: 100%;
+            height: 50%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        &-name {
+            font-size: $fs-medium ;
+            color: $white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        &-edit {
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: $soft-gray;
+            padding: 5px;
+            margin-left: 10px;
+        }
+
+        &-input {
+            display: none;
+        }
+
+        &-submit {
+            cursor: pointer;
+            width: 100px;
+            height: 30px;
+            background-color: transparent;
+            border-radius: 0;
+            border: 1px solid $gray;
+            padding: 5px;
+            margin-left: 10px;
+        }
+
+        &-cansel {
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            background-color: transparent;
+            margin-left: 10px;
+        }
+
+        &-rating {
+            width: 100%;
+            height: 50%;
+            color: $white;
+
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        &-stars {
+            width: 100px;
+        }
+
+        &-rating-text {
+            margin-left: 10px;
+            font-size: $fs-text;
+        }
+
+        &-buttons {
+            width: 50%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        &-button {
+            background: none;
+            border: 1px solid $white;
+            border-radius: 0;
+            width: 200px;
+            height: 30px;
+            font-size: $fs-text;
+            margin: 0 10px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    }
+
+    &__bio {
+        text-align: start;
+
+        &-switcher {
+            flex-shrink: 0;
+            height: 40px;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+        }
+
+        &-switcher-item {
+            height: 100%;
+            width: 50%;
+            border-bottom: 1px solid $white;
+            font-size: $fs-text;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+
+            &.-active {
+                border-top: 1px solid $white;
+                border-left: 1px solid $white;
+                border-right: 1px solid $white;
+                border-bottom: none;
+                cursor: default;
+            }
+        }
+
+        &-area {
+            width: 100%;
+            height: 100%;
+            color: $white;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100% - 470px);
+        }
+
+        &-textarea {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            font-size: $fs-text;
+            padding: 5px;
+        }
+
+        &-content {
+            padding: 30px 20px;
+            font-size: $fs-text;
+            border-bottom: 1px solid $white;
+            border-left: 1px solid $white;
+            border-right: 1px solid $white;
+            white-space: pre-wrap;
+            text-align: start;
+            height: calc(100% - 40px);
+            overflow-x: scroll;
+        }
+
+        &-title {
+            font-size: $fs-medium;
+
+            margin-bottom: 20px;
+            text-align: start;
+            color: $white;
+        }
+
+        &-games {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        &-game {
+            border: 1px solid $white;
+            height: 20px;
+            width: auto;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-items: center;
+            margin: 2px;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        &-courses {
+            height: 240px;
+            width: 100%;
+            overflow-x: scroll;
+            display: flex;
+            flex-direction: row;
+            gap: 20px
+        }
+
+        &-course-container {
+            height: 220px;
+            width: 220px;
+            position: relative;
+        }
+
+        &-course-edit {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            translate: 50% 50%;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: $soft-gray;
+            z-index: 2;
+        }
+
+        &-courses-add {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        &-courses-add-button {
+            height: 30px;
+            width: 30px;
+        }
+
+        &-edit {
+            position: absolute;
+            top: 50%;
+            left: calc(50% + 100px);
+            translate: -50% -50%;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: $soft-gray;
+            padding: 5px;
+        }
+    }
+
+}

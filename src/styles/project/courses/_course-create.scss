@@ -1,0 +1,169 @@
+@use '../../foundation' as *;
+
+.p-course-create {
+    color: $white;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 30px;
+
+    &__back {
+        height: 30px;
+        width: 30px;
+        margin-bottom: 10px;
+    }
+
+    &__title {
+        font-size: $fs-sub_title;
+        margin-bottom: 20px;
+        height: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+
+    &__section {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: row;
+    }
+
+    &__subtitle {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: flex-start;
+        width: 150px;
+        flex-shrink: 0;
+        font-size: $fs-input;
+        margin-bottom: 10px;
+    }
+
+    &__detail-filter {
+        width: 100px;
+        height: 30px;
+        border-radius: 0;
+        background-color: transparent;
+        color: $white;
+    }
+
+    &__detail-input {
+        width: 100%;
+        border: 1px solid $white;
+        background-color: transparent;
+        padding: 10px;
+        resize: vertical;
+    }
+
+    &__tag-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        height: auto;
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        width: 100%;
+        min-height: 30px;
+    }
+
+    &__tag {
+        display: flex;
+        align-items: center;
+        padding: 5px 10px;
+        width: auto;
+        height: 20px;
+        border: 1px solid $white;
+        background-color: transparent;
+        text-overflow: ellipsis;
+
+    }
+
+    &__tag-remove {
+        margin-left: 5px;
+        cursor: pointer;
+    }
+
+    &__tag-input-area {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+    }
+
+    &__tag-input {
+        border: 1px solid $white;
+        background-color: transparent;
+        padding: 5px 10px;
+        width: 100%;
+    }
+
+    &__single-input {
+        border: 1px solid $white;
+        background-color: transparent;
+        padding: 5px 10px;
+        width: 100%;
+    }
+
+    &__tag-add {
+        color: $white;
+        padding: 10px 20px;
+        width: 100px;
+        background-color: transparent;
+        border: 1px solid $white;
+        color: $white;
+        margin-left: 10px;
+    }
+
+    &__save-button {
+        margin: 20px;
+        background-color: transparent;
+        color: $white;
+        height: 50px;
+        padding: 10px 20px;
+        border-radius: 10px;
+        width: calc(100% - 150px);
+        background-color: $theme;
+        color: $black;
+        margin-left: auto;
+    }
+
+    &__image {
+        width: 300px;
+        height: 200px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    &__image-null {
+        width: 300px;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid $white;
+        cursor: pointer;
+    }
+
+    &__add-button {
+        width: 50px;
+        height: 50px;
+    }
+
+    &__delete-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+    }
+
+    &__image-upload {
+        display: none;
+    }
+
+}

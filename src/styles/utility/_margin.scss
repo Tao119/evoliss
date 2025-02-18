@@ -1,0 +1,33 @@
+@use "../foundation" as *;
+
+@each $space in $spaces {
+    .u-m#{ $space } {
+        margin: #{ $space }px !important;
+    }
+
+    .u-mx#{ $space } {
+        margin-left: #{ $space }px !important;
+        margin-right: #{ $space }px !important;
+    }
+
+    .u-my#{ $space } {
+        margin-top: #{ $space }px !important;
+        margin-bottom: #{ $space }px !important;
+    }
+
+    .u-mt#{ $space } {
+        margin-top: #{ $space }px !important;
+    }
+
+    .u-mb#{ $space } {
+        margin-bottom: #{ $space }px !important;
+    }
+
+    .u-ml#{ $space } {
+        margin-left: #{ $space }px !important;
+    }
+
+    .u-mr#{ $space } {
+        margin-right: #{ $space }px !important;
+    }
+}

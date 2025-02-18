@@ -1,0 +1,11 @@
+@use "../foundation" as *;
+
+@each $size in $sizes {
+    .u-w#{ $size } {
+        width: #{ $size }px !important;
+    }
+
+    .u-h#{ $size } {
+        height: #{ $size }px !important;
+    }
+}

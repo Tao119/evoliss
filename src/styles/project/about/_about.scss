@@ -1,0 +1,404 @@
+@use '../../foundation' as *;
+
+.p-about {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  padding: 30px;
+
+  &__more {
+    width: 30px;
+    height: 30px;
+    align-self: center;
+  }
+
+  &__top-panel {
+    width: 100%;
+    height: 300px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  &__top-panel-left {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    color: $white;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 30px;
+  }
+
+  &__top-panel-title {
+    font-size: $fs-title;
+    height: 50px;
+  }
+
+  &__top-panel-phrase-container {
+    font-size: $fs-x-large;
+    font-family: 'Noto Serif JP', serif;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  &__top-panel-button {
+    border-radius: 999px;
+    width: 200px;
+    height: 50px;
+    font-size: $fs-text;
+    background-color: $green;
+    color: $black;
+    display: flex;
+    padding: 0 30px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  &__top-panel-right {
+    padding: 10px;
+    flex-grow: 1;
+    height: 100%;
+
+  }
+
+  &__section-title {
+    color: $white;
+    font-size: $fs-medium;
+    height: 50px;
+  }
+
+  &__game-panel {
+    width: 100%;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  &__game-list {
+    height: 210px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+    overflow-x: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__game-item {
+    width: 150px;
+    height: 180px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    margin-right: 30px;
+    background-color: $gray;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  &__game-image {
+    width: 150px;
+    height: 120px;
+    border-radius: 10px;
+  }
+
+  &__game-name {
+    font-size: $fs-text;
+    color: $black;
+
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__coach-panel {
+    width: 100%;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  &__coach-list {
+    height: 180px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+    overflow-x: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__coach-item {
+    width: 250px;
+    height: 150px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    margin-right: 30px;
+    background-color: rgb(from $soft-gray r g b / 0.5);
+    overflow: hidden;
+    color: $white;
+    padding: 0 20px;
+    cursor: pointer;
+  }
+
+  &__coach-upper {
+    display: flex;
+    flex-direction: row;
+    height: 90px;
+    align-items: center;
+  }
+
+  &__coach-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-right: 20px;
+    flex-shrink: 0;
+  }
+
+  &__coach-details {
+    width: calc(100% - 80px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: space-around;
+  }
+
+  &__coach-name {
+    font-size: $fs-medium;
+    color: $white;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    text-align: start;
+  }
+
+  &__coach-rating {
+    width: 100%;
+    color: $white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__coach-stars {
+    width: 100px;
+  }
+
+  &__coach-rating-text {
+    font-size: $fs-text;
+  }
+
+  &__coach-tag-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+  }
+
+  &__coach-games {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 60px;
+    padding: 2px;
+  }
+
+  &__coach-game-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  &__coach-game {
+    border: 1px solid $white;
+    height: 20px;
+    width: auto;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    margin: 2px;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__course-panel {
+    width: 100%;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+
+
+  &__course-list {
+    height: 250px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+    overflow-x: scroll;
+
+  }
+
+  &__course-item {
+    width: 220px;
+    height: 220px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    margin-right: 30px;
+    color: $white;
+    cursor: pointer;
+  }
+
+  &__course-image-container {
+    width: 220px;
+    height: 120px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  &__course-image {
+    width: 220px;
+    height: 120px;
+    border-radius: 10px;
+  }
+
+  &__course-title {
+    font-size: $fs-text;
+    color: $white;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  &__course-details {
+    height: 60px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__course-details-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 120px;
+  }
+
+  &__course-details-upper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+
+  &__course-user-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  &__course-user-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__course-rating {
+    width: 100%;
+    color: $white;
+    padding: 0 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__course-stars {
+    width: 100px;
+    margin-right: 10px;
+  }
+
+  &__course-rating-text {
+    font-size: $fs-text;
+  }
+
+  &__course-games {
+    border: 1px solid $white;
+    display: flex;
+    flex-direction: column;
+    height: 60px;
+    width: 100px;
+    padding: 5px;
+  }
+
+  &__course-tag {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 45px;
+    width: 100%;
+  }
+
+  &__course-tag-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+  }
+
+  &__course-game {
+    width: 100%;
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: $fs-small;
+  }
+
+  &__course-value {
+    height: 45px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: $fs-small;
+  }
+}

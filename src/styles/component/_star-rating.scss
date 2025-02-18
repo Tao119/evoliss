@@ -1,0 +1,21 @@
+@use "../foundation" as *;
+
+
+.c-star-rating {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 100%;
+
+    &__stars {
+        height: 100%;
+    }
+
+    &__star {
+        fill: $white;
+    }
+
+    &__score {
+        line-height: 1;
+    }
+}

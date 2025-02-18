@@ -1,0 +1,32 @@
+@use "../../foundation" as *;
+
+.p-not-found {
+    display: flex;
+    flex-direction: column;
+
+    &__title {
+        font-size: $fs-title * 3;
+        font-weight: bold;
+        flex: 2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &__err {
+        font-size: $fs-sub_title;
+        height: 100px;
+        flex: 1;
+    }
+
+    &__text {
+        font-size: $fs-sub_title;
+        flex: 1;
+        margin-bottom: 50vh;
+    }
+
+    &__link {
+        color: $blue;
+        cursor: pointer;
+    }
+}

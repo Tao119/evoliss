@@ -1,0 +1,43 @@
+@use "../foundation" as *;
+
+.c-switcher {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 32px;
+    background-color: $light-gray;
+    border-radius: 4px;
+
+    &.-mb24 {
+        margin-bottom: 24px;    
+    }
+}
+
+.c-switcher__item {
+    width: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: $fs-text;
+    color: $dark-gray;
+    cursor: pointer;
+    transition: color 0.5s;
+
+    &:hover{
+        color: $black;
+        transition: color 0.5s;
+    }
+
+    &.-active {
+        background-color: $white;
+        height: 30px;
+        border-radius: 4px;
+        box-shadow: 0 0 1px rgba(0, 0, 0, 0.4);
+        transition: 0.1s;
+        color: $black;
+        font-weight: $fw-bold;
+    }
+    &.-w102 {
+        width: 102px;
+    }
+}

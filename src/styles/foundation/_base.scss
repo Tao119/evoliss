@@ -1,0 +1,64 @@
+@use "variable" as *;
+
+html {
+  font-size: 62.5%;
+  min-width: 320px;
+}
+
+body {
+  background-color: $white;
+  color: $black;
+
+  font-family: Avenir, Helvetica;
+  display: flex;
+  place-items: center;
+  box-sizing: border-box;
+  text-align: center;
+
+  min-width: 320px;
+  width: 100vw;
+  height: 100vh;
+  cursor: default;
+
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+li {
+  list-style: none;
+}
+
+.is-hidden {
+  display: none !important;
+  z-index: -1;
+}
+
+h1 {
+  font-size: $fs-title;
+}
+
+h2 {
+  font-size: $fs-sub_title;
+}
+
+h3 {
+  font-size: $fs-medium;
+}
+
+h4 {
+  font-size: $fs-text;
+}
+
+image {
+  user-drag: none;
+  -webkit-user-drag: none;
+  -moz-user-select: none;
+}
+
+.-hidden {
+  display: none;
+}

@@ -1,0 +1,16 @@
+@use "../foundation" as *;
+@use "sass:map";
+
+@each $color in map.keys($colors) {
+    .u-#{ $color } {
+        color: map.get($colors, $color) !important;
+    }
+
+    .u-bg-#{ $color } {
+        background-color: map.get($colors, $color) !important;
+    }
+}
+
+.u-tr {
+    background: none !important;
+}

@@ -1,0 +1,193 @@
+@use "../foundation" as *;
+
+.c-progressbar {
+    width: 25px;
+    height: 5px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    box-sizing: unset;
+    border-radius: 999px;
+    background-color: $soft-gray;
+    border: none;
+
+
+    &::-webkit-progress-value {
+        border-radius: 999px;
+    }
+
+    &::-webkit-progress-bar {
+        background-color: $soft-gray;
+        border-radius: 999px;
+    }
+
+    &::-moz-progress-bar {
+        border-radius: 999px;
+    }
+
+    &.-red::-webkit-progress-value {
+        background-color: $red;
+    }
+
+    &.-red::-moz-progress-bar {
+        background-color: $red;
+    }
+
+    &.-yellow::-webkit-progress-value {
+        background-color: $yellow;
+    }
+
+    &.-yellow::-moz-progress-value {
+        background-color: $yellow;
+    }
+
+    &.-blue::-webkit-progress-value {
+        background-color: $blue;
+    }
+
+    &.-blue::-moz-progress-value {
+        background-color: $blue;
+    }
+
+    &.-green::-webkit-progress-value {
+        background-color: $green;
+    }
+
+    &.-green::-moz-progress-value {
+        background-color: $green;
+    }
+
+
+}
+
+.c-progress-calendar__box {
+    width: 25px;
+    height: 5px;
+    position: relative;
+}
+
+.c-progress-calendar__total {
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 5px;
+    border-radius: 999px;
+    background-color: $soft-gray;
+    position: absolute;
+}
+
+.c-progressbar-calendar__progress {
+    top: 0;
+    left: 0;
+    height: 5px;
+    border-radius: 999px;
+    position: absolute;
+
+    &.-zero {
+        background-color: $soft-gray;
+
+        &::-moz-progress-value,
+        &::-webkit-progress-value {
+            background-color: $soft-gray;
+        }
+
+        &.-hover {
+            background-color: $light-gray;
+
+            &::-moz-progress-value,
+            &::-webkit-progress-value {
+                background-color: $light-gray;
+            }
+        }
+
+        &.-clicked {
+            background-color: $dark-gray;
+
+            &::-moz-progress-value,
+            &::-webkit-progress-value {
+                background-color: $dark-gray;
+            }
+        }
+    }
+
+    &.-hundred {
+        background-color: $green;
+
+        &::-moz-progress-value,
+        &::-webkit-progress-value {
+            background-color: $green;
+        }
+
+        &.-hover {
+            background-color: $light-green;
+
+            &::-moz-progress-value,
+            &::-webkit-progress-value {
+                background-color: $light-green;
+            }
+        }
+
+        &.-clicked {
+            background-color: $dark-green;
+
+            &::-moz-progress-value,
+            &::-webkit-progress-value {
+                background-color: $dark-green;
+            }
+        }
+    }
+
+    &.-current {
+        background-color: $blue;
+
+        &::-moz-progress-value,
+        &::-webkit-progress-value {
+            background-color: $blue;
+        }
+
+        &.-hover {
+            background-color: $light-blue;
+
+            &::-moz-progress-value,
+            &::-webkit-progress-value {
+                background-color: $light-blue;
+            }
+        }
+
+        &.-clicked {
+            background-color: $dark-blue;
+
+            &::-moz-progress-value,
+            &::-webkit-progress-value {
+                background-color: $dark-blue;
+            }
+        }
+    }
+
+    &.-outdated {
+        background-color: $red;
+
+        &::-moz-progress-value,
+        &::-webkit-progress-value {
+            background-color: $red;
+        }
+
+        &.-hover {
+            background-color: $light-red;
+
+            &::-moz-progress-value,
+            &::-webkit-progress-value {
+                background-color: $light-red;
+            }
+        }
+
+        &.-clicked {
+            background-color: $dark-red;
+
+            &::-moz-progress-value,
+            &::-webkit-progress-value {
+                background-color: $dark-red;
+            }
+        }
+    }
+}

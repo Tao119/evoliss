@@ -1,0 +1,91 @@
+@use "../../foundation" as *;
+
+.p-signup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    width: 450px;
+    height: 450px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: $white;
+
+    &__title {
+        font-size: $fs-title;
+        width: 250px;
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    &__item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;
+    }
+
+    &__input {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-direction: row;
+        border-radius: 10px;
+        border: 1px solid $gray;
+        width: 250px;
+        height: 50px;
+        font-size: $fs-medium;
+    }
+
+    &__input-label {
+        font-size: $fs-text;
+        color: $dark-gray;
+        text-align: left;
+        height: 20px;
+    }
+
+    &__input-icon {
+        position: absolute;
+        top: 30px;
+        right: 5px;
+        height: 30px;
+        width: 30px;
+    }
+
+
+
+    &__submit {
+        font-size: $fs-medium;
+        width: 200px;
+        height: 50px;
+        color: $white;
+        background-color: $blue;
+        border-radius: 10px;
+        margin-bottom: 20px;
+
+        &.-disabled {
+            color: $blue;
+            background-color: $light-blue;
+        }
+    }
+
+    &__link {
+        font-size: $fs-text;
+        height: 20px;
+        color: $blue;
+    }
+
+    &__err {
+        text-align: left;
+        width: 250px;
+        font-size: $fs-text;
+        color: $red;
+        height: 30px;
+    }
+}

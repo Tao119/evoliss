@@ -1,0 +1,168 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URI")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  name              String?
+  email             String    @unique
+  icon              String?
+  header            String?
+  bio               String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // 関連フィールド
+  sentMessages      Message[]
+  messageRooms      MessageRoom[] 
+  courses           Course[] 
+  reservations      Reservation[]
+  payments          Payment[]
+  reviews           Review[]
+  searchHistories   SearchHistory[]
+  userGames         UserGame[]
+  accesses    CourseAccess[]
+  notification    Notification[]
+}
+
+model Course {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String
+  price       Int
+  duration    Int        @default(30)
+  image       String?
+  coachId     Int
+  coach       User         @relation(fields: [coachId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  gameId       Int
+  game         Game          @relation(fields: [gameId], references: [id])
+
+  schedules   Schedule[]
+  reservations Reservation[] @relation("CourseReservations") 
+  reviews     Review[]
+  payments    Payment[]
+  messageRooms    MessageRoom[]
+  accesses    CourseAccess[]
+}
+
+model Schedule {
+  id          Int          @id @default(autoincrement())
+  courseId    Int
+  course      Course       @relation(fields: [courseId], references: [id] ,onDelete: Cascade)
+  startTime   DateTime
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  reservations Reservation[]
+}
+
+model Reservation {
+  id          Int          @id @default(autoincrement())
+  customerId  Int
+  customer    User         @relation(fields: [customerId], references: [id])
+  scheduleId  Int
+  schedule    Schedule     @relation(fields: [scheduleId], references: [id])
+  courseId    Int
+  course      Course       @relation("CourseReservations", fields: [courseId], references: [id] ,onDelete: Cascade)
+  status      Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model MessageRoom {
+  id         Int     @id @default(autoincrement())
+  roomKey    String    @unique
+  courseId   Int
+  course     Course  @relation(fields: [courseId], references: [id])
+  customerId Int
+  customer   User    @relation(fields: [customerId], references: [id])
+  messages   Message[]
+}
+
+model Message {
+  id        Int         @id @default(autoincrement())
+  roomId    Int
+  room      MessageRoom @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
+  senderId  Int
+  sender    User        @relation(fields: [senderId], references: [id])
+  content   String
+  isRead    Boolean     @default(false)
+  sentAt    DateTime    @default(now())
+}
+
+
+model Payment {
+  id          Int          @id @default(autoincrement())
+  customerId  Int
+  customer    User         @relation(fields: [customerId], references: [id] ,onDelete: Cascade)
+  courseId    Int
+  course      Course       @relation(fields: [courseId], references: [id] ,onDelete: Cascade)
+  amount      Int
+  method      String
+  status      Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Review {
+  id          Int          @id @default(autoincrement())
+  customerId  Int
+  customer    User         @relation(fields: [customerId], references: [id])
+  courseId    Int
+  course      Course       @relation(fields: [courseId], references: [id] ,onDelete: Cascade)
+  rating      Int
+  comment     String?
+  createdAt   DateTime     @default(now())
+}
+
+model SearchHistory {
+  id          Int          @id @default(autoincrement())
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id] ,onDelete: Cascade)
+  query       String
+  show        Boolean      @default(true)
+  searchedAt  DateTime     @default(now())
+}
+
+model Game {
+  id          Int          @id @default(autoincrement())
+  name        String      
+  image       String?
+  createdAt   DateTime     @default(now())
+
+  courses      Course[]
+  userGames    UserGame[]
+}
+
+model UserGame {
+  id          Int          @id @default(autoincrement())
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id] ,onDelete: Cascade)
+  gameId       Int
+  game         Game          @relation(fields: [gameId], references: [id])
+}
+
+model CourseAccess {
+  id          Int          @id @default(autoincrement())
+  courseId      Int
+  course        Course        @relation(fields: [courseId], references: [id] ,onDelete: Cascade)
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  createdAt   DateTime     @default(now())
+}
+
+
+model Notification {
+  id          Int          @id @default(autoincrement())
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id] ,onDelete: Cascade)
+  content     String
+  createdAt   DateTime     @default(now())
+}
