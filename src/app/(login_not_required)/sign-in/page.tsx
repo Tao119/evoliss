@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import mailIcon from "@/assets/image/mail.png";
+import mailIcon from "@/assets/image/mail.svg";
 import lockIcon from "@/assets/image/lock.png";
 import hideInput from "@/assets/image/hide_input.svg";
 import showInput from "@/assets/image/show_input.svg";

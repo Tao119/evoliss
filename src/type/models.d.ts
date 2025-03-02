@@ -18,6 +18,8 @@ export interface User {
     userGames: UserGame[];
     messageRooms: MessageRoom[]
     notification: Notification[]
+    sentNotification: Notification[]
+    purchaseMessages: PurchaseMessage[];
 
 }
 
@@ -39,7 +41,6 @@ export interface Course {
     schedules: Schedule[];
     reservations: Reservation[];
     reviews: Review[];
-    payments: Payment[];
     messageRooms: MessageRoom[]
     courseAccesses: CourseAccess[]
 }
@@ -63,6 +64,8 @@ export interface Schedule {
 
     course: Course;
     reservations: Reservation[];
+    payments: Payment[];
+    purchaseMessages: PurchaseMessage[];
 }
 
 // Reservation型
@@ -88,6 +91,7 @@ export interface MessageRoom {
     customerId: number;
     customer: User;
     messages: Message[];
+    purchaseMessages: PurchaseMessage[];
 }
 
 export interface Message {
@@ -100,12 +104,23 @@ export interface Message {
     isRead: boolean;
     sentAt: Date;
 }
+export interface PurchaseMessage {
+    id: number;
+    roomId: number;
+    room: MessageRoom;
+    senderId: number;
+    sender: User;
+    scheduleId: number;
+    schedule: Schedule;
+    isRead: boolean;
+    sentAt: Date;
+}
 
 // Payment型
 export interface Payment {
     id: number;
     customerId: number;
-    courseId: number;
+    scheduleId: number;
     amount: number;
     method: string;
     status: number;
@@ -113,7 +128,7 @@ export interface Payment {
     updatedAt: Date;
 
     customer: User;
-    course: Course;
+    schedule: Schedule;
 }
 
 // CourseReview型
@@ -168,6 +183,8 @@ export interface Notification {
     id: number;
     userId: number;
     user: User;
+    senderId: number;
+    sender: User;
     content: string;
     createdAt: Date;
 }

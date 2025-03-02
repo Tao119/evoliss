@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import hideInput from "@/assets/image/hide_input.svg";
 import showInput from "@/assets/image/show_input.svg";
-import mailIcon from "@/assets/image/mail.png";
+import mailIcon from "@/assets/image/mail.svg";
 import lockIcon from "@/assets/image/lock.png";
 import Image from "next/image";
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";

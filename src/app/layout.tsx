@@ -2,7 +2,7 @@ import "@/styles/style.scss";
 import { ContextProvider } from "./contextProvider";
 import SessionProvider from "./sessionProvider";
 export const metadata = {
-  title: "game masters",
+  title: "EVOLISS",
   description: "",
 };
 

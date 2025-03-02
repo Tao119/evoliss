@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { PrismaClient } from "@prisma/client";
 import { requestDB } from "@/services/axios";
+import { Course } from "@/type/models";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -28,28 +29,43 @@ export async function POST(request: Request) {
             console.log("💳 Checkout Session Completed:", session);
 
             const userId = session.metadata?.userId;
-            const scheduleIds = session.metadata?.scheduleIds;
+            const scheduleId = session.metadata?.scheduleId;
             const courseId = session.metadata?.courseId;
+            const paymentId = session.metadata?.paymentId;
             const amount = session.amount_total;
 
-            if (!userId || !scheduleIds || !courseId) {
+            if (!userId || !scheduleId || !courseId || !paymentId) {
                 console.error("🚨 Missing required metadata:", {
                     userId,
-                    scheduleIds,
+                    scheduleId,
                     courseId,
+                    paymentId
                 });
                 return NextResponse.json({ message: "Missing metadata" }, { status: 400 });
             }
-            console.log({ userId, courseId, scheduleIds })
 
             const parsedUserId = parseInt(userId);
             const parsedCourseId = parseInt(courseId);
-            const parsedScheduleIds = JSON.parse(scheduleIds) as number[];
+            const parsedScheduleId = parseInt(scheduleId);
+            const parsedPaymentId = parseInt(paymentId);
 
+            const courseRes = await requestDB("course", "readCourseById", {
+                id: parsedCourseId,
+            });
+            const course = courseRes.data
+            const userRes = await requestDB("user", "readUserById", {
+                id: parsedUserId,
+            });
+            const user = userRes.data
 
-            await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleIds: parsedScheduleIds })
-
-
+            await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId })
+            await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: 1 })
+            await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId })
+            await requestDB("notification", "createNotification", {
+                userId: course.coachId,
+                content: `${user.name}さんがあなたの講座を購入しました。`,
+                senderId: parsedUserId
+            })
 
             console.log("📝 Reservations Created:");
 

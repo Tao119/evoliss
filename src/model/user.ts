@@ -43,6 +43,12 @@ async function readUserById({ id }: { id: number }) {
                                 orderBy: { sentAt: "asc" },
                                 select: { content: true, sentAt: true, isRead: true, senderId: true },
                             },
+                            purchaseMessages: {
+                                orderBy: { sentAt: "asc" },
+                                include: {
+                                    sender: true, schedule: { include: { course: { include: { coach: true } } } }
+                                }
+                            },
                             customer: true
                         },
                     },
@@ -77,6 +83,12 @@ async function readUserById({ id }: { id: number }) {
                     messages: {
                         orderBy: { sentAt: "asc" },
                         select: { content: true, sentAt: true, isRead: true, senderId: true },
+                    },
+                    purchaseMessages: {
+                        orderBy: { sentAt: "asc" },
+                        include: {
+                            sender: true, schedule: { include: { course: { include: { coach: true } } } }
+                        }
                     },
                     customer: true
                 },

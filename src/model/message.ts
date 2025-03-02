@@ -7,7 +7,8 @@ export const messageFuncs: { [funcName: string]: Function } = {
     sendMessage,
     sendFirstMessage,
     confirmUser,
-    markMessagesAsRead
+    markMessagesAsRead,
+    sendSystemMessage
 };
 
 
@@ -37,7 +38,7 @@ async function confirmUser({ userId, roomKey }: { userId: number; roomKey: strin
 async function readRoomByKey({ roomKey }: { roomKey: string }) {
     return await prisma.messageRoom.findUnique({
         where: { roomKey },
-        select: { id: true, customerId: true, course: { select: { coach: { select: { name: true, icon: true, courses: true } }, title: true } }, messages: { include: { sender: true } } },
+        select: { id: true, customerId: true, course: { include: { coach: { include: { courses: true } } } }, messages: { include: { sender: true } }, purchaseMessages: { include: { sender: true, schedule: { include: { course: { include: { coach: true } } } } } } },
     });
 }
 
@@ -59,6 +60,61 @@ async function sendMessage({ userId, roomKey, content }: { userId: number; roomK
         },
         include: { room: true }
     });
+}
+
+async function sendSystemMessage({ userId, courseId, scheduleId }: { userId: number; courseId: number, scheduleId: number }) {
+
+    console.log("sendsystem", { userId, courseId, scheduleId })
+    const existingRoom = await prisma.messageRoom.findFirst({
+        where: {
+            customerId: userId,
+            courseId
+        },
+    });
+
+
+    console.log("existingRoom", existingRoom)
+    if (existingRoom) {
+        return await prisma.purchaseMessage.create({
+            data: {
+                roomId: existingRoom.id,
+                senderId: userId,
+                scheduleId
+            },
+        });
+    }
+    let roomKey: string = "";
+    let isUnique = false;
+
+    while (!isUnique) {
+        roomKey = nanoid(10);
+        const existingKey = await prisma.messageRoom.findUnique({
+            where: { roomKey },
+        });
+
+        if (!existingKey) {
+            isUnique = true;
+        }
+    }
+
+    const newRoom = await prisma.messageRoom.create({
+        data: {
+            roomKey,
+            customerId: userId,
+            courseId,
+        },
+    });
+    console.log("newRoom", newRoom)
+
+    await prisma.purchaseMessage.create({
+        data: {
+            roomId: newRoom.id,
+            senderId: userId,
+            scheduleId
+        },
+    });
+
+    return newRoom
 }
 
 
@@ -114,7 +170,7 @@ async function sendFirstMessage({ userId, courseId, content }: { userId: number;
 }
 
 export async function markMessagesAsRead({ userId, roomKey }: { userId: number; roomKey: string }) {
-    return await prisma.message.updateMany({
+    await prisma.message.updateMany({
         where: {
             room: { roomKey },
             senderId: { not: userId }, // 自分が送ったものは関係なし
@@ -122,4 +178,13 @@ export async function markMessagesAsRead({ userId, roomKey }: { userId: number; 
         },
         data: { isRead: true },
     });
+    await prisma.purchaseMessage.updateMany({
+        where: {
+            room: { roomKey },
+            senderId: { not: userId },
+            isRead: false,
+        },
+        data: { isRead: true },
+    });
+    return true
 }

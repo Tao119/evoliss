@@ -5,12 +5,13 @@ export const courseFuncs: { [funcName: string]: Function } = {
     readCourses,
     readTopCourses,
     readCoursesByGameId,
+    readCourseByPaymentId,
     readCourseById,
     createCourse,
     updateCourse,
     readCoursesByCoachId,
     readRecommendedCourses,
-    readCoursesByQuery
+    readCoursesByQuery,
 };
 
 async function readCourseById({ id }: { id: number }) {
@@ -53,6 +54,7 @@ async function readCourseById({ id }: { id: number }) {
                 select: {
                     id: true,
                     startTime: true,
+                    reservations: true
                 },
             },
         },
@@ -382,3 +384,59 @@ async function readCoursesByQuery({ query }: { query: string }) {
         .slice(0, 10); // トップ10を返す
 }
 
+async function readCourseByPaymentId({ paymentId }: { paymentId: number }) {
+    return await prisma.course.findFirst({
+        where: {
+            schedules: {
+                some: {
+                    payments: {
+                        some: {
+                            id: paymentId,
+                        },
+                    },
+                },
+            },
+        },
+        include: {
+            coach: {
+                select: {
+                    id: true,
+                    name: true,
+                    bio: true,
+                    icon: true,
+                    courses: {
+                        include: {
+                            reviews: true,
+                            accesses: true,
+                        },
+                    },
+                    userGames: {
+                        include: {
+                            game: true,
+                        },
+                    },
+
+                },
+            },
+            reviews: {
+                select: {
+                    id: true,
+                    rating: true,
+                    comment: true,
+                    customer: {
+                        select: { id: true, name: true, icon: true },
+                    },
+                    createdAt: true,
+                },
+            },
+            game: true,
+            schedules: {
+                select: {
+                    id: true,
+                    startTime: true,
+                    reservations: true
+                },
+            },
+        },
+    });
+}

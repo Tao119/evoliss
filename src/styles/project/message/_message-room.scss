@@ -171,4 +171,59 @@
     &__coach-rating-text {
         font-size: $fs-text;
     }
+
+    &__purchase {
+        width: 300px;
+        height: auto;
+        font-size: 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: rgb(from $gray r g b / 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+
+        &.-received {
+            align-self: flex-start;
+        }
+
+        &.-sent {
+            align-self: flex-end;
+        }
+    }
+
+    &__purchase-text {
+        font-size: $fs-small;
+    }
+
+    &__purchase-title {
+        font-size: $fs-sub_title;
+        font-weight: $fw-bold;
+    }
+
+    &__purchase-info {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        gap: 10px;
+    }
+
+    &__purchase-coach {
+        font-size: $fs-text;
+    }
+
+    &__purchase-duration {
+        font-size: $fs-medium;
+        margin-left: auto;
+        font-weight: $fw-bold;
+    }
+
+    &__purchase-price {
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+    }
 }

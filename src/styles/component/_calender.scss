@@ -188,7 +188,15 @@
     }
 
     &__selected-schedule {
-        font-size: $fs-text;
+        font-size: $fs-input;
+        border: 1px solid $white;
+        padding: 5px;
+        width: 100px;
+        text-align: start;
+
+        &.-active {
+            border: 1px solid $theme;
+        }
     }
 
 }
