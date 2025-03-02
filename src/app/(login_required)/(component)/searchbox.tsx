@@ -1,4 +1,4 @@
-import searchIcon from "@/assets/image/search.svg";
+import searchIcon from "@/assets/image/search_icon.svg";
 import { requestDB } from "@/services/axios";
 import {
   KeyboardEventHandler,
