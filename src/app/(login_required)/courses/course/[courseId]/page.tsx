@@ -14,6 +14,7 @@ import Calendar, {
   CalendarTarget,
 } from "@/app/(login_required)/(component)/calender";
 import StarRating from "@/components/starRating";
+import dayjs from "dayjs";
 
 const Page = () => {
   const { userData, fetchUserData } = useContext(UserDataContext)!;
@@ -107,6 +108,12 @@ const Page = () => {
         )
       : 0;
 
+  const updateChosenSchedule = (s: Date | undefined) => {
+    setChosenSchedule((prev) =>
+      dayjs(s).isSame(dayjs(prev), "minutes") ? undefined : s
+    );
+  };
+
   return (
     <div className="p-courses l-page">
       <div className="p-courses__navigation">
@@ -153,7 +160,7 @@ const Page = () => {
                 )
                 .map((s) => new Date(s.startTime))}
               target={CalendarTarget.viewer}
-              setChosenSchedule={setChosenSchedule}
+              setChosenSchedule={updateChosenSchedule}
               chosenSchedule={chosenSchedule}
             />
           </div>

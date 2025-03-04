@@ -1,14 +1,12 @@
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import { Issuer } from 'openid-client'
-import { jwtDecode } from 'jwt-decode'
-import * as crypto from 'crypto'
 import CognitoProvider from 'next-auth/providers/cognito'
+import CredentialsProvider from 'next-auth/providers/credentials'
 import { getSecretHash } from '@/services/hash'
 import {
     CognitoIdentityProvider,
     InitiateAuthCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
-import CredentialsProvider from 'next-auth/providers/credentials'
 
 const cognitoProvider = CognitoProvider({
     clientId: process.env.COGNITO_CLIENT_ID || '',
@@ -25,8 +23,7 @@ const refreshAccessToken = async (refreshToken?: string) => {
     const client_secret = process.env.COGNITO_CLIENT_SECRET ?? ''
     const issuer = await Issuer.discover(cognitoProvider.wellKnown ?? '')
     const token_endpoint = issuer.metadata.token_endpoint ?? ''
-    const basicAuthParams = `${client_id}:${client_secret}`
-    const basicAuth = Buffer.from(basicAuthParams).toString('base64')
+
     const params = new URLSearchParams({
         client_id,
         client_secret,
@@ -38,7 +35,6 @@ const refreshAccessToken = async (refreshToken?: string) => {
         const response = await fetch(token_endpoint, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Authorization: `Basic ${basicAuth}`,
             },
             method: 'POST',
             body: params.toString(),
@@ -46,17 +42,26 @@ const refreshAccessToken = async (refreshToken?: string) => {
 
         const newTokens = await response.json()
 
+        if (!response.ok) {
+            throw new Error('Failed to refresh access token')
+        }
+
         return {
             idToken: newTokens.id_token,
             accessToken: newTokens.access_token,
+            expiresAt: Math.floor(Date.now() / 1000) + (newTokens.expires_in ?? 3600),
         }
     } catch (error) {
-        console.error('Error refreshing access token')
-        throw error
+        console.error('Error refreshing access token', error)
+        return null
     }
 }
 
 const authOptions: NextAuthOptions = {
+    session: {
+        strategy: "jwt",
+        maxAge: 60 * 60 * 24,
+    },
     providers: [
         CredentialsProvider({
             name: 'Cognito',
@@ -76,7 +81,7 @@ const authOptions: NextAuthOptions = {
                     const response = await cognitoClient.send(
                         new InitiateAuthCommand({
                             AuthFlow: 'USER_PASSWORD_AUTH',
-                            ClientId: process.env.COGNITO_CLIENT_ID,
+                            ClientId: process.env.COGNITO_CLIENT_ID!,
                             AuthParameters: {
                                 USERNAME: email,
                                 PASSWORD: password,
@@ -86,25 +91,17 @@ const authOptions: NextAuthOptions = {
                     )
 
                     if (response.AuthenticationResult) {
-                        if (!response.AuthenticationResult.IdToken) {
-                            throw new Error('No Id Token')
-                        }
-
-                        const { IdToken, AccessToken, ExpiresIn, RefreshToken } =
-                            response.AuthenticationResult
-
                         return {
                             email,
-                            idToken: IdToken,
-                            accessToken: AccessToken,
-                            expiresIn: ExpiresIn,
-                            refreshToken: RefreshToken,
-                        }
+                            idToken: response.AuthenticationResult.IdToken,
+                            refreshToken: response.AuthenticationResult.RefreshToken,
+                            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+                        };
                     } else {
-                        throw new Error('有効なレスポンスがありませんでした')
+                        throw new Error('有効なレスポンスがありませんでした');
                     }
                 } catch (error: any) {
-                    throw new Error(error.name)
+                    throw new Error(error.message || '認証に失敗しました');
                 }
             },
         }),
@@ -112,42 +109,43 @@ const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.idToken = user.idToken
-                token.accessToken = user.accessToken
-                token.expiresIn = user.expiresIn
-                token.refreshToken = user.refreshToken
-                token.email = user.email
+                token.email = user.email;
+                token.refreshToken = user.refreshToken;
+                token.expiresIn = user.expiresIn;
             }
 
-            const decodedToken = jwtDecode(token.idToken!)
-            const currentTime = Math.floor(Date.now() / 1000)
+            const now = Math.floor(Date.now() / 1000);
 
-            if (decodedToken.exp && decodedToken.exp < currentTime) {
-                try {
-                    const refreshedTokens = await refreshAccessToken(token.refreshToken)
-
-                    if (refreshedTokens?.idToken && refreshedTokens?.accessToken) {
-                        token.idToken = refreshedTokens.idToken
-                        token.accessToken = refreshedTokens.accessToken
-                    } else {
-                        throw new Error()
-                    }
-                } catch (error) {
-                    token.error = 'RefreshTokenError'
+            if (token.expiresIn && token.expiresIn < now) {
+                console.log("Refreshing access token...");
+                const newToken = await refreshAccessToken(token.refreshToken);
+                if (newToken) {
+                    token.idToken = newToken.idToken;
+                    token.expiresIn = newToken.expiresAt;
                 }
             }
 
-            return token
+            return token;
         },
         async session({ session, token }) {
-            session.idToken = token.idToken
-            session.accessToken = token.accessToken
-            session.error = token.error
-            return session
+            session.user = { email: token.email };
+            session.idToken = token.idToken;
+            return session;
         },
     },
     secret: process.env.NEXTAUTH_SECRET,
-}
+    cookies: {
+        sessionToken: {
+            name: `next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+            },
+        },
+    },
+};
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

@@ -22,7 +22,7 @@ interface CalendarProps {
   target: CalendarTarget;
   duration: number;
   chosenSchedule?: Date | undefined;
-  setChosenSchedule?: Dispatch<SetStateAction<Date | undefined>>;
+  setChosenSchedule?: (_: Date | undefined) => void;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -189,7 +189,9 @@ const Calendar: React.FC<CalendarProps> = ({
                 className={`p-calendar__selected-schedule ${
                   dayjs(chosenSchedule).isSame(s, "minutes") ? "-active" : ""
                 }`}
-                onClick={() => setChosenSchedule && setChosenSchedule(s)}
+                onClick={() => {
+                  setChosenSchedule && setChosenSchedule(s);
+                }}
               >
                 ・{dayjs(s).format("H:mm")}~
               </div>

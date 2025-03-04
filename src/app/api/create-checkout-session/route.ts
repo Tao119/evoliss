@@ -59,7 +59,7 @@ export async function POST(req: Request) {
             ],
             mode: "payment",
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?paymentId=${payment.id}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/courses/course/${courseId}/purchase`,
             metadata: { userId: userId.toString(), courseId: courseId.toString(), scheduleId: scheduleId.toString(), paymentId: payment.id.toString(), }, // メタデータにuserIdを含める
         });
 
