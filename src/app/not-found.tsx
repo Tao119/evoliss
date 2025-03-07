@@ -5,7 +5,7 @@ const ErrorPage = () => {
   return (
     <>
       <span>このページは存在しません。</span>
-      <Link href="/about">TOP</Link>へ戻る
+      <Link href="/">TOP</Link>へ戻る
     </>
   );
 };

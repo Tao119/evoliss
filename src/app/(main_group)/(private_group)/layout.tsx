@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";
+import { UserDataStatus } from "@/hooks/useUserData";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useContext, useEffect, useState, useRef, useMemo } from "react";
@@ -10,19 +11,17 @@ export default function GuestLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userData } = useContext(UserDataContext)!;
+  const { userDataStatus } = useContext(UserDataContext)!;
   const router = useRouter();
   const path = usePathname();
   const animation = useContext(AnimationContext)!;
   const session = useSession();
   useEffect(() => {
-    if (session) {
-      if (!session.data?.user && !userData) {
-        animation.endAnimation();
-        router.push(`/sign-in?callback=${path}`);
-      }
+    if (userDataStatus == UserDataStatus.unAuthorized) {
+      animation.endAnimation();
+      router.push(`/sign-in?callback=${path}`);
     }
-  }, [userData, session]);
+  }, [userDataStatus]);
 
   return <>{children}</>;
 }

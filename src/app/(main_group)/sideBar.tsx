@@ -30,7 +30,7 @@ const Sidebar = ({
   const pathname = usePathname()!;
 
   const mainRoutes = [
-    { path: "/about", text: "EVOLISSとは" },
+    { path: "/", text: "EVOLISSとは" },
     { path: "/courses", text: "講座を探す" },
     { path: "/create", text: "コーチをしてみる" },
   ];
