@@ -1,4 +1,4 @@
-import defaultImage from "@/assets/image/picture-icon.svg"; // 差し替え
+import defaultImage from "@/assets/image/user_icon.svg"; // 差し替え
 import tagImage from "@/assets/image/tag.svg"; // 差し替え
 import { ImageBox } from "@/components/imageBox";
 import StarRating from "@/components/starRating";

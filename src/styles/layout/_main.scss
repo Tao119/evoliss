@@ -71,6 +71,10 @@
     &__wrapper {
         width: calc(100% - 60px);
         padding: 10px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 }
 

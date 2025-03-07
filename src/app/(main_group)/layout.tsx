@@ -199,7 +199,9 @@ export default function GuestLayout({
         </>
       )}
       <div className="l-content">
-        <SearchBox name="Research" className="l-search-box" />
+        <div className="l-search-box__wrapper">
+          <SearchBox name="Research" className="l-search-box" />
+        </div>
         <div className="l-top">
           {children}
           <div className="l-footer">

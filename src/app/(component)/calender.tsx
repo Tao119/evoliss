@@ -107,31 +107,6 @@ const Calendar: React.FC<CalendarProps> = ({
     }
   }, [selectedSchedule]);
 
-  useEffect(() => {
-    if (!setSchedule || schedule.length === 0) return;
-
-    const sortedSchedule = [...schedule].sort(
-      (a, b) => dayjs(a).valueOf() - dayjs(b).valueOf()
-    );
-
-    const filteredSchedule: Date[] = [];
-    let lastAddedTime: dayjs.Dayjs | null = null;
-
-    sortedSchedule.forEach((s) => {
-      const currentTime = dayjs(s);
-
-      if (
-        !lastAddedTime ||
-        currentTime.diff(lastAddedTime, "minute") >= duration
-      ) {
-        filteredSchedule.push(currentTime.toDate());
-        lastAddedTime = currentTime;
-      }
-    });
-
-    setSchedule(filteredSchedule);
-  }, [duration]);
-
   const addToSchedule = () => {
     if (!setSchedule || !selectedSchedule) return;
     if (schedule.some((s) => selectedSchedule.getTime() === s.getTime())) {
@@ -147,8 +122,16 @@ const Calendar: React.FC<CalendarProps> = ({
   };
   return (
     <div className={`p-calendar`}>
-      <div className="p-calendar__upper">
-        <div className="p-calendar__calender">
+      <div
+        className={`p-calendar__upper ${
+          target != CalendarTarget.editor ? "-customer" : ""
+        }`}
+      >
+        <div
+          className={`p-calendar__calender ${
+            target != CalendarTarget.editor ? "-customer" : ""
+          }`}
+        >
           <div className="p-calendar__header">
             <div className="p-calendar__current">
               <div className="p-calendar__current-year">
@@ -200,8 +183,16 @@ const Calendar: React.FC<CalendarProps> = ({
             ))}
           </div>
         </div>
-        <div className="p-calendar__selected-date-customer">
-          <div className="p-calendar__selected-current">
+        <div
+          className={`p-calendar__selected-date ${
+            target != CalendarTarget.editor ? "-customer" : ""
+          }`}
+        >
+          <div
+            className={`p-calendar__selected-current ${
+              target != CalendarTarget.editor ? "-customer" : ""
+            }`}
+          >
             <div className="p-calendar__current-year">
               {dayjs(selectedDate).format("YYYY")}
             </div>
@@ -209,35 +200,48 @@ const Calendar: React.FC<CalendarProps> = ({
               {dayjs(selectedDate).format("M月D日")}
             </div>
           </div>
-          {schedule
-            .filter((s) => dayjs(selectedDate).isSame(dayjs(s), "day"))
-            .sort((a, b) => (a.getTime() > b.getTime() ? 1 : -1))
-            .map((s, i) => (
-              <div className="p-calendar__selected-schedule" key={i}>
+          <div
+            className={`p-calendar__selected-list ${
+              target != CalendarTarget.editor ? "-customer" : ""
+            }`}
+          >
+            {schedule
+              .filter((s) => dayjs(selectedDate).isSame(dayjs(s), "day"))
+              .sort((a, b) => (a.getTime() > b.getTime() ? 1 : -1))
+              .map((s, i) => (
                 <div
-                  className={`p-calendar__selected-schedule-schedule ${
-                    dayjs(chosenSchedule).isSame(s, "minutes") ? "-active" : ""
+                  className={`p-calendar__selected-schedule ${
+                    target != CalendarTarget.editor ? "-customer" : ""
                   }`}
-                  onClick={() => {
-                    setChosenSchedule && setChosenSchedule(s);
-                  }}
+                  key={i}
                 >
-                  ・{dayjs(s).format("H:mm")}~
-                </div>
-                {target == CalendarTarget.editor ? (
                   <div
-                    className="p-calendar__selected-schedule-delete"
-                    onClick={() => removeFromSchedule(s.getTime())}
+                    className={`p-calendar__selected-schedule-schedule ${
+                      dayjs(chosenSchedule).isSame(s, "minutes")
+                        ? "-active"
+                        : ""
+                    }  ${target != CalendarTarget.editor ? "-customer" : ""}`}
+                    onClick={() => {
+                      setChosenSchedule && setChosenSchedule(s);
+                    }}
                   >
-                    ×
+                    ・{dayjs(s).format("H:mm")}~
                   </div>
-                ) : null}
-              </div>
-            ))}
+                  {target == CalendarTarget.editor ? (
+                    <div
+                      className="p-calendar__selected-schedule-delete"
+                      onClick={() => removeFromSchedule(s.getTime())}
+                    >
+                      ×
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+          </div>
         </div>
       </div>
       {target == CalendarTarget.editor ? (
-        <div className="p-calendar__selected-date">
+        <div className="p-calendar__selected-date-input">
           <Filter
             selectedValue={selectedSchedule}
             className="p-calendar__filter"

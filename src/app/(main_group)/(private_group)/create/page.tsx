@@ -14,6 +14,7 @@ import closeImage from "@/assets/image/cross.svg";
 import { IconButton } from "@/components/iconButton";
 import { BackButton } from "@/components/backbutton";
 import { Filter } from "@/components/filter";
+import { Game } from "@/type/models";
 
 const Page = () => {
   const { userData, fetchUserData } = useContext(UserDataContext)!;
@@ -25,16 +26,21 @@ const Page = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [tag, setTag] = useState("");
   const [image, setImage] = useState<{ path: string; data: File }>();
   const [schedules, setSchedules] = useState<Date[]>([]);
   const durationNumber = [30, 60, 90, 120];
   const [duration, setDuration] = useState(durationNumber[0]);
+  const [gameData, setGameData] = useState<Game[]>();
+  const [selectedGame, setSelectedGame] = useState<Game>();
+  const [newGame, setNewGame] = useState("");
 
-  const onReady = userData;
+  const [showNewGame, setShowNewGame] = useState(false);
+
+  const onReady = userData && gameData;
 
   useEffect(() => {
     animation.startAnimation();
+    fetchGames();
   }, []);
 
   useEffect(() => {
@@ -43,10 +49,22 @@ const Page = () => {
     }
   }, [onReady]);
 
+  const fetchGames = async () => {
+    try {
+      const response = await requestDB("game", "readGames");
+      if (response.success) {
+        setGameData(response.data);
+      } else {
+        animation.endAnimation();
+        alert("ゲーム情報の取得中にエラーが発生しました");
+      }
+    } catch (error) {
+      console.error("Error fetching games:", error);
+    }
+  };
   if (!onReady) {
     return <>Loading...</>;
   }
-
   const handleSave = async () => {
     if (title.trim() == "") {
       alert("講座タイトルを入力してください");
@@ -66,6 +84,7 @@ const Page = () => {
         alert("画像のアップロードに失敗しました");
         return;
       }
+      const tag = !showNewGame ? selectedGame?.name : newGame;
       const response = await requestDB("course", "createCourse", {
         title,
         description,
@@ -139,13 +158,37 @@ const Page = () => {
     <div className="p-course-create l-page">
       <div className="p-course-create__title">講座の出品</div>
       <div className="p-course-create__section">
-        <div className="p-course-create__subtitle">・ゲームタグ</div>
-        <InputBox
-          value={tag}
-          onChange={(e) => setTag(e.target.value)}
-          placeholder="ゲームを入力"
-          className="p-course-create__single-input"
-        />
+        <div className="p-course-create__subtitle">・ゲーム</div>
+        <div className="p-course-create__inputs">
+          {!showNewGame ? (
+            <Filter
+              className="p-course-create__two-input"
+              options={gameData.map((g) => ({
+                label: g.name,
+                value: g.id,
+              }))}
+              selectedValue={selectedGame?.id}
+              onChange={(v: number | string) =>
+                setSelectedGame(
+                  gameData.find((g) => g.id == parseInt(v as string))
+                )
+              }
+            />
+          ) : (
+            <InputBox
+              value={newGame}
+              onChange={(e) => setNewGame(e.target.value)}
+              placeholder="ゲームを入力"
+              className="p-course-create__two-input"
+            />
+          )}
+          <Button
+            className="p-course-create__toggle-button"
+            onClick={() => setShowNewGame((prev) => !prev)}
+          >
+            {showNewGame ? "ゲーム一覧から選ぶ" : "新しいゲームを登録する"}
+          </Button>
+        </div>
       </div>
       <div className="p-course-create__section">
         <div className="p-course-create__subtitle">・講座タイトル</div>

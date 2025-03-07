@@ -13,6 +13,12 @@
         display: flex;
         gap: 10px;
         flex-direction: row;
+        border-radius: 10px;
+
+
+        &.-customer {
+            flex-direction: column;
+        }
     }
 
     &__calender {
@@ -22,8 +28,13 @@
         border: 1px solid $white;
         padding: 10px;
         height: 350px;
+        border-radius: 10px;
 
         width: calc(100% - 210px);
+
+        &.-customer {
+            width: 100%;
+        }
     }
 
     &__header {
@@ -129,7 +140,7 @@
         width: 10px;
     }
 
-    &__selected-date {
+    &__selected-date-input {
         width: 100%;
         padding: 10px;
         display: flex;
@@ -151,7 +162,7 @@
         height: 30px;
     }
 
-    &__selected-date-customer {
+    &__selected-date {
         width: 200px;
         border: 1px solid $white;
         display: flex;
@@ -160,7 +171,13 @@
         padding: 10px;
         height: 350px;
         gap: 10px;
-        overflow-y: scroll;
+        border-radius: 10px;
+
+        &.-customer {
+            width: 100%;
+            flex-direction: row;
+            height: auto;
+        }
     }
 
     &__selected-current {
@@ -168,6 +185,20 @@
         flex-direction: column;
         align-items: flex-start;
         height: 50px;
+        width: 100%;
+
+        &.-customer {
+            width: 100px;
+        }
+    }
+
+    &__selected-list {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+        gap: 10px;
+        overflow-y: scroll;
         width: 100%;
     }
 
@@ -185,6 +216,8 @@
         align-items: center;
         gap: 5px;
         font-size: $fs-input;
+
+
     }
 
     &__selected-schedule {
@@ -196,6 +229,11 @@
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
+
+        &.-customer {
+            width: 100%;
+            flex-direction: row;
+        }
     }
 
     &__selected-schedule-schedule {
@@ -207,6 +245,11 @@
 
         &.-active {
             border: 1px solid $theme;
+        }
+
+        &.-customer {
+            width: 100%;
+            text-align: center;
         }
     }
 

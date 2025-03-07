@@ -196,7 +196,10 @@ const MessageRoomPage = () => {
   return (
     <div className="p-message-room l-page -fixed">
       <div className="p-message-room__title">メッセージ</div>
-      <div className="p-message-room__coach">
+      <div
+        className="p-message-room__coach"
+        onClick={() => router.push(`/courses/course/${roomData.course.id}`)}
+      >
         <ImageBox
           className="p-message-room__coach-icon"
           src={roomData.course.coach.icon ?? defaultIcon}

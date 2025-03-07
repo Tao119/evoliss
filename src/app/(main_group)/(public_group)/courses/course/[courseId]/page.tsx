@@ -146,59 +146,11 @@ const Page = () => {
               {courseData.description}
             </div>
           </div>
-          <div className="p-course__section">
-            <div className="p-course__subtitle">日程調整</div>
-            <Calendar
-              duration={courseData.duration}
-              schedule={courseData.schedules
-                .filter(
-                  (s) =>
-                    s.reservations.length == 0 &&
-                    new Date(s.startTime) >= new Date()
-                )
-                .map((s) => new Date(s.startTime))}
-              target={CalendarTarget.viewer}
-              setChosenSchedule={updateChosenSchedule}
-              chosenSchedule={chosenSchedule}
-            />
-          </div>
-        </div>
-        <div className="p-course__info">
-          <div className="p-course__info-price">
-            <div className="p-course__price">
-              ¥{courseData.price.toLocaleString("ja-JP")}
-            </div>
-            {(!userData || userData.id != courseData.coachId) && (
-              <>
-                <Button
-                  className="p-course__info-button"
-                  onClick={() =>
-                    router.push(`/courses/course/${courseId}/message`)
-                  }
-                >
-                  個人メッセージ
-                </Button>
-                <Button
-                  className="p-course__info-button"
-                  onClick={() => {
-                    if (!chosenSchedule) {
-                      alert("日程を選択してください");
-                      return;
-                    }
-                    sessionStorage.setItem(
-                      "chosenSchedule",
-                      chosenSchedule.toISOString()
-                    );
-                    router.push(`/courses/course/${courseId}/purchase`);
-                    router.push(`/courses/course/${courseId}/purchase`);
-                  }}
-                >
-                  購入
-                </Button>
-              </>
-            )}
-          </div>
-          <div key={coach.id} className="p-course__coach-item">
+          <div
+            key={coach.id}
+            className="p-course__coach-item"
+            onClick={() => router.push(`/courses/coach/${coach.id}`)}
+          >
             <div className="p-course__coach-upper">
               <ImageBox
                 className="p-course__coach-icon"
@@ -246,6 +198,59 @@ const Page = () => {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="p-course__info">
+          <div className="p-course__section">
+            <div className="p-course__subtitle">日程調整</div>
+            <Calendar
+              duration={courseData.duration}
+              schedule={courseData.schedules
+                .filter(
+                  (s) =>
+                    s.reservations.length == 0 &&
+                    new Date(s.startTime) >= new Date()
+                )
+                .map((s) => new Date(s.startTime))}
+              target={CalendarTarget.viewer}
+              setChosenSchedule={updateChosenSchedule}
+              chosenSchedule={chosenSchedule}
+            />
+          </div>
+          <div className="p-course__info-price">
+            <div className="p-course__price">
+              ¥{courseData.price.toLocaleString("ja-JP")}
+            </div>
+            {(!userData || userData.id != courseData.coachId) && (
+              <>
+                <Button
+                  className="p-course__info-button"
+                  onClick={() =>
+                    router.push(`/courses/course/${courseId}/message`)
+                  }
+                >
+                  個人メッセージ
+                </Button>
+                <Button
+                  className="p-course__info-button"
+                  onClick={() => {
+                    if (!chosenSchedule) {
+                      alert("日程を選択してください");
+                      return;
+                    }
+                    sessionStorage.setItem(
+                      "chosenSchedule",
+                      chosenSchedule.toISOString()
+                    );
+                    router.push(`/courses/course/${courseId}/purchase`);
+                    router.push(`/courses/course/${courseId}/purchase`);
+                  }}
+                >
+                  購入
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
