@@ -28,6 +28,7 @@ const Sidebar = ({
 }: Prop) => {
   const { userData } = useContext(UserDataContext)!;
   const pathname = usePathname()!;
+  const router = useRouter();
 
   const mainRoutes = [
     { path: "/", text: "EVOLISSとは" },
@@ -58,7 +59,7 @@ const Sidebar = ({
   return (
     <>
       <div className="p-side-bar">
-        <div className="p-side-bar__icon">
+        <div className="p-side-bar__icon" onClick={() => router.push("/")}>
           <ImageBox
             src={profileIcon}
             alt="Profile"
