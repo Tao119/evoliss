@@ -79,7 +79,15 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
         .map((n) => (
-          <div key={n.id} className={`p-notification__notification`}>
+          <div
+            key={n.id}
+            className={`p-notification__notification`}
+            onClick={() =>
+              n.room?.roomKey
+                ? router.push(`/messages/${n.room.roomKey}`)
+                : null
+            }
+          >
             <ImageBox
               className="p-notification__icon"
               round

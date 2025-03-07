@@ -103,8 +103,13 @@ async function readCoachesByQuery({ query }: { query: string }) {
         },
         where: {
             AND: [
-                { name: { contains: query } },
-                { courses: { some: {} } }
+                {
+                    OR: [
+                        { name: { contains: query } },
+                        { userGames: { some: { game: { name: { contains: query } } } } }
+                    ]
+                },
+                { courses: { some: {} } },
             ]
         },
         take: 50,

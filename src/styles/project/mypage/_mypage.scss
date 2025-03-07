@@ -284,6 +284,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            cursor: pointer;
         }
 
         &-courses {
@@ -323,8 +324,8 @@
         }
 
         &-courses-add-button {
-            height: 30px;
-            width: 30px;
+            height: 50px;
+            width: 50px;
         }
 
         &-edit {

@@ -87,6 +87,7 @@ model MessageRoom {
   customerId Int
   customer   User    @relation(fields: [customerId], references: [id])
   messages   Message[]
+  notifications Notification[]
   purchaseMessages  PurchaseMessage[]
 }
 
@@ -184,4 +185,6 @@ model Notification {
   content     String
   createdAt   DateTime     @default(now())
   isRead      Boolean  @default(false)
+  roomId    Int?
+  room      MessageRoom? @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
 }

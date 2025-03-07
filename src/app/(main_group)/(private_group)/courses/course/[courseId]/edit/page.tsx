@@ -8,13 +8,13 @@ import { MultilineInput } from "@/components/multilineInput";
 import { ImageBox } from "@/components/imageBox";
 import { Axios, AxiosLongTimeOut, requestDB } from "@/services/axios";
 import { useParams, useRouter } from "next/navigation";
-import Calendar, { CalendarTarget } from "../../../../../(component)/calender";
 import plusImage from "@/assets/image/plus_white.svg";
 import closeImage from "@/assets/image/cross.svg";
 import { IconButton } from "@/components/iconButton";
-import { Course } from "@/type/models";
+import { Course, Game } from "@/type/models";
 import { BackButton } from "@/components/backbutton";
 import { Filter } from "@/components/filter";
+import Calendar, { CalendarTarget } from "@/app/(component)/calender";
 
 const Page = () => {
   const { userData, fetchUserData } = useContext(UserDataContext)!;
@@ -29,18 +29,43 @@ const Page = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [tag, setTag] = useState("");
   const [image, setImage] = useState<{ path: string; data: File }>();
   const [schedules, setSchedules] = useState<Date[]>([]);
   const durationNumber = [30, 60, 90, 120];
   const [duration, setDuration] = useState(durationNumber[0]);
+  const [gameData, setGameData] = useState<Game[]>();
+  const [selectedGame, setSelectedGame] = useState<Game>();
+  const [newGame, setNewGame] = useState("");
 
-  const onReady = userData && courseData;
+  const [showNewGame, setShowNewGame] = useState(false);
+
+  const onReady = userData && courseData && gameData;
 
   useEffect(() => {
     animation.startAnimation();
+    fetchGames();
     fetchCourse();
   }, []);
+
+  useEffect(() => {
+    if (onReady) {
+      animation.endAnimation();
+    }
+  }, [onReady]);
+
+  const fetchGames = async () => {
+    try {
+      const response = await requestDB("game", "readGames");
+      if (response.success) {
+        setGameData(response.data);
+      } else {
+        animation.endAnimation();
+        alert("ゲーム情報の取得中にエラーが発生しました");
+      }
+    } catch (error) {
+      console.error("Error fetching games:", error);
+    }
+  };
 
   useEffect(() => {
     if (onReady) {
@@ -54,7 +79,7 @@ const Page = () => {
       setTitle(courseData.title ?? "");
       setDescription(courseData.description ?? "");
       setPrice((courseData.price ?? "").toString());
-      setTag(courseData.game.name ?? "");
+      setSelectedGame(courseData.game ?? "");
       setDuration(courseData.duration ?? durationNumber[0]);
       if (courseData.image) {
         setImage({ path: courseData.image, data: null! });
@@ -105,6 +130,7 @@ const Page = () => {
         alert("画像のアップロードに失敗しました");
         return;
       }
+      const tag = !showNewGame ? selectedGame?.name : newGame;
 
       const response = await requestDB("course", "updateCourse", {
         id: courseIdNumber,
@@ -183,13 +209,37 @@ const Page = () => {
       />
       <div className="p-course-create__title">講座の出品</div>
       <div className="p-course-create__section">
-        <div className="p-course-create__subtitle">・ゲームタグ</div>
-        <InputBox
-          value={tag}
-          onChange={(e) => setTag(e.target.value)}
-          placeholder="ゲームを入力"
-          className="p-course-create__single-input"
-        />
+        <div className="p-course-create__subtitle">・ゲーム</div>
+        <div className="p-course-create__inputs">
+          {!showNewGame ? (
+            <Filter
+              className="p-course-create__two-input"
+              options={gameData.map((g) => ({
+                label: g.name,
+                value: g.id,
+              }))}
+              selectedValue={selectedGame?.id}
+              onChange={(v: number | string) =>
+                setSelectedGame(
+                  gameData.find((g) => g.id == parseInt(v as string))
+                )
+              }
+            />
+          ) : (
+            <InputBox
+              value={newGame}
+              onChange={(e) => setNewGame(e.target.value)}
+              placeholder="ゲームを入力"
+              className="p-course-create__two-input"
+            />
+          )}
+          <Button
+            className="p-course-create__toggle-button"
+            onClick={() => setShowNewGame((prev) => !prev)}
+          >
+            {showNewGame ? "ゲーム一覧から選ぶ" : "新しいゲームを登録する"}
+          </Button>
+        </div>
       </div>
       <div className="p-course-create__section">
         <div className="p-course-create__subtitle">・講座タイトル</div>

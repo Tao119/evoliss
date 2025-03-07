@@ -187,4 +187,6 @@ export interface Notification {
     sender: User;
     content: string;
     createdAt: Date;
+    roomId?: number;
+    room?: MessageRoom
 }

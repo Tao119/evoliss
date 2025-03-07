@@ -368,8 +368,9 @@ async function readCoursesByQuery({ query }: { query: string }) {
         },
         where: {
             OR: [
-                { title: { contains: query } }, // 🔥 `mode: "insensitive"` を削除
-                { description: { contains: query } }
+                { title: { contains: query } },
+                { description: { contains: query } },
+                { game: { name: { contains: query } } }
             ]
         },
         take: 50,

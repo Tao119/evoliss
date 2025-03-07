@@ -53,7 +53,11 @@ const Page = () => {
           <div className="p-mypage__bio-title">ゲームタグ</div>
           <div className="p-mypage__bio-games">
             {(userData.userGames ?? []).map((game, idx) => (
-              <div key={idx} className="p-mypage__bio-game">
+              <div
+                key={idx}
+                className="p-mypage__bio-game"
+                onClick={() => router.push(`/courses/game/${game.gameId}`)}
+              >
                 {game.game.name}
               </div>
             )) || "自己紹介文がありません"}
