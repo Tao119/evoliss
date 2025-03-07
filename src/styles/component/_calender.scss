@@ -188,6 +188,17 @@
     }
 
     &__selected-schedule {
+        width: 100%;
+        height: 30px;
+        padding: 5px;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    &__selected-schedule-schedule {
         font-size: $fs-input;
         border: 1px solid $white;
         padding: 5px;
@@ -197,6 +208,12 @@
         &.-active {
             border: 1px solid $theme;
         }
+    }
+
+    &__selected-schedule-delete {
+        font-size: $fs-input;
+        margin-left: auto;
+        cursor: pointer;
     }
 
 }

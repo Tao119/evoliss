@@ -17,7 +17,7 @@ export default function GuestLayout({
   const session = useSession();
   useEffect(() => {
     if (session) {
-      if (!session.data?.user) {
+      if (!session.data?.user && !userData) {
         animation.endAnimation();
         router.push(`/sign-in?callback=${path}`);
       }

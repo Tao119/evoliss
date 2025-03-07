@@ -35,6 +35,9 @@ const Calendar: React.FC<CalendarProps> = ({
 }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(dayjs());
+  const [prevSelectIndex, setPrevSelectIndex] = useState<number | undefined>(
+    undefined
+  );
 
   const handlePrevMonth = () =>
     setCurrentMonth(currentMonth.subtract(1, "month"));
@@ -69,20 +72,40 @@ const Calendar: React.FC<CalendarProps> = ({
         return dayjs(selectedDate)
           .hour(0)
           .minute(0)
+          .second(0)
+          .millisecond(0)
           .add(i * 30, "minute")
           .toDate();
       }).filter((slot) => {
         return !schedule.some((s) => {
-          const startTime = dayjs(s);
-          const endTime = startTime.add(duration, "minute");
-          const beforeTime = startTime.add(-duration, "minute");
-          return dayjs(slot).isBetween(beforeTime, endTime, "minute", "[)");
+          return dayjs(slot).isSame(dayjs(s), "minute");
         });
       })
     );
   }, [schedule, selectedDate]);
 
-  useEffect(() => setSelectedSchedule(timeSlots[0]), [selectedDate, timeSlots]);
+  useEffect(() => {
+    let num = prevSelectIndex;
+    if (!num) {
+      setSelectedSchedule(timeSlots[0]);
+      return;
+    }
+    while (num >= timeSlots.length) {
+      num--;
+    }
+    setSelectedSchedule(timeSlots[num]);
+  }, [selectedDate, timeSlots]);
+
+  useEffect(() => {
+    if (selectedSchedule != undefined) {
+      const newIndex = timeSlots.findIndex((s) => {
+        return s.getTime() == selectedSchedule.getTime();
+      });
+      if (newIndex != prevSelectIndex) {
+        setPrevSelectIndex(newIndex);
+      }
+    }
+  }, [selectedSchedule]);
 
   useEffect(() => {
     if (!setSchedule || schedule.length === 0) return;
@@ -115,6 +138,12 @@ const Calendar: React.FC<CalendarProps> = ({
       return;
     }
     setSchedule((prev) => [...prev, selectedSchedule]);
+  };
+  const removeFromSchedule = (time: number) => {
+    if (!setSchedule) return;
+    const newSchedule = [...schedule].filter((s) => s.getTime() != time);
+
+    setSchedule(newSchedule);
   };
   return (
     <div className={`p-calendar`}>
@@ -184,16 +213,25 @@ const Calendar: React.FC<CalendarProps> = ({
             .filter((s) => dayjs(selectedDate).isSame(dayjs(s), "day"))
             .sort((a, b) => (a.getTime() > b.getTime() ? 1 : -1))
             .map((s, i) => (
-              <div
-                key={i}
-                className={`p-calendar__selected-schedule ${
-                  dayjs(chosenSchedule).isSame(s, "minutes") ? "-active" : ""
-                }`}
-                onClick={() => {
-                  setChosenSchedule && setChosenSchedule(s);
-                }}
-              >
-                ・{dayjs(s).format("H:mm")}~
+              <div className="p-calendar__selected-schedule" key={i}>
+                <div
+                  className={`p-calendar__selected-schedule-schedule ${
+                    dayjs(chosenSchedule).isSame(s, "minutes") ? "-active" : ""
+                  }`}
+                  onClick={() => {
+                    setChosenSchedule && setChosenSchedule(s);
+                  }}
+                >
+                  ・{dayjs(s).format("H:mm")}~
+                </div>
+                {target == CalendarTarget.editor ? (
+                  <div
+                    className="p-calendar__selected-schedule-delete"
+                    onClick={() => removeFromSchedule(s.getTime())}
+                  >
+                    ×
+                  </div>
+                ) : null}
               </div>
             ))}
         </div>
@@ -206,7 +244,9 @@ const Calendar: React.FC<CalendarProps> = ({
             options={timeSlots.map((slot) => {
               return { label: `${dayjs(slot).format("H:mm")}~`, value: slot };
             })}
-            onChange={(value: any) => setSelectedSchedule(new Date(value))}
+            onChange={(value: any) => {
+              setSelectedSchedule(new Date(value));
+            }}
           />
           <IconButton
             className="p-calendar__plus"
