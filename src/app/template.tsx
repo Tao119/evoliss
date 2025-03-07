@@ -15,10 +15,10 @@ export default function GuestTemplate({
   const session = useSession();
 
   useEffect(() => {
-    if (!userData && session.data?.user) {
+    if (!userData && session) {
       fetchUserData();
     }
-  }, [userData, session.data?.user]);
+  }, [userData, session]);
 
   return (
     <>

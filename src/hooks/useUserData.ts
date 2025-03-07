@@ -35,14 +35,16 @@ export const useUserData = (): UserDataContextType => {
                 });
                 setUserData(user);
                 setUserDataStatus(UserDataStatus.Authorized)
-            } else if (session.data?.user) {
+            } else if (session.data !== undefined) {
                 const { data: user } = await requestDB("user", "readUserByEmail", {
                     email: session.data?.user?.email,
                 });
-                setUserData(user);
-                setUserDataStatus(UserDataStatus.Authorized)
-            } else {
-                setUserDataStatus(UserDataStatus.unAuthorized);
+                if (user) {
+                    setUserData(user);
+                    setUserDataStatus(UserDataStatus.Authorized)
+                } else {
+                    setUserDataStatus(UserDataStatus.unAuthorized);
+                }
             }
         } catch (e) {
             console.log(e)
