@@ -30,7 +30,23 @@ model User {
   accesses    CourseAccess[]
   notification    Notification[] @relation("receicvedNotification")
   sentNotification    Notification[] @relation("sentNotification")
+  paymentAccount    PaymentAccount[]
+  refunds    Refund[]
 }
+
+model PaymentAccount {
+  id            Int       @id @default(autoincrement())
+  userId        Int      @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankName      String
+  branchName    String
+  accountType   Int
+  accountNumber String    
+  accountHolder String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
 
 model Course {
   id          Int          @id @default(autoincrement())
@@ -64,6 +80,17 @@ model Schedule {
   reservations Reservation[]
   payments    Payment[]
   purchaseMessages   PurchaseMessage[]
+  
+}
+
+model Refund{
+  id          Int          @id @default(autoincrement())
+  customerId  Int
+  customer    User         @relation(fields: [customerId], references: [id])
+  reservationId  Int
+  reservation    Reservation     @relation(fields: [reservationId], references: [id])
+  status      Int
+  text        String
 }
 
 model Reservation {
@@ -77,6 +104,9 @@ model Reservation {
   status      Int
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  roomId    Int?    @unique 
+  room      MessageRoom? @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
+  refunds    Refund[]
 }
 
 model MessageRoom {
@@ -89,6 +119,7 @@ model MessageRoom {
   messages   Message[]
   notifications Notification[]
   purchaseMessages  PurchaseMessage[]
+  reservation  Reservation[]
 }
 
 model Message {

@@ -320,7 +320,9 @@ const Page = () => {
       <div className="p-course-create__section">
         <div className="p-course-create__subtitle">・スケジュール</div>
         <Calendar
-          schedule={schedules}
+          schedule={schedules.map((s) => ({
+            startTime: s,
+          }))}
           setSchedule={setSchedules}
           target={CalendarTarget.editor}
           duration={duration}

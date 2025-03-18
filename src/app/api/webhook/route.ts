@@ -2,22 +2,33 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { PrismaClient } from "@prisma/client";
 import { requestDB } from "@/services/axios";
-import { Course } from "@/type/models";
+
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 const prisma = new PrismaClient();
 
+// ✅ Next.js の API Route の `config` を設定
+export const config = {
+    api: {
+        bodyParser: false, // `bodyParser` を無効にすることで `raw` ボディを取得
+    },
+};
+
 export async function POST(request: Request) {
     const signature = request.headers.get("stripe-signature");
+
     if (!signature) {
-        return NextResponse.json({ message: "Bad request" }, { status: 400 });
+        return NextResponse.json({ message: "🚨 Bad request: Missing signature" }, { status: 400 });
     }
 
     try {
-        const body = await request.arrayBuffer();
+        // ✅ 修正: `request.arrayBuffer()` で `Buffer` に変換
+        const rawBody = Buffer.from(await request.arrayBuffer());
+
+        // ✅ 署名の検証
         const event = stripe.webhooks.constructEvent(
-            Buffer.from(body),
+            rawBody,
             signature,
             process.env.STRIPE_WEBHOOK_SECRET as string
         );
@@ -41,7 +52,7 @@ export async function POST(request: Request) {
                     courseId,
                     paymentId
                 });
-                return NextResponse.json({ message: "Missing metadata" }, { status: 400 });
+                return NextResponse.json({ message: "🚨 Missing metadata" }, { status: 400 });
             }
 
             const parsedUserId = parseInt(userId);
@@ -58,24 +69,31 @@ export async function POST(request: Request) {
             });
             const user = userRes.data
 
-            await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId })
+
             await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: 1 })
-            await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId })
+            const room = await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId })
             await requestDB("notification", "createNotification", {
                 userId: course.coachId,
                 content: `${user.name}さんがあなたの講座を購入しました。`,
                 senderId: parsedUserId
             })
+            await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId, roomId: room.id })
 
-            console.log("📝 Reservations Created:");
+            console.log("📝 Reservations Created:", {
+                userId: parsedUserId,
+                courseId: parsedCourseId,
+                scheduleId: parsedScheduleId,
+                paymentId: parsedPaymentId,
+                roomId: room.id
+            });
 
-            return NextResponse.json({ message: "Reservations created" }, { status: 200 });
+            return NextResponse.json({ message: "✅ Reservations created" }, { status: 200 });
         }
 
         return NextResponse.json({ message: "Unhandled event type" }, { status: 400 });
 
-    } catch (err) {
-        console.error("🚨 Webhook Handling Error:", err);
-        return new Response("Internal Server Error", { status: 500 });
+    } catch (err: any) {
+        console.error("🚨 Webhook Handling Error:", err.message);
+        return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }

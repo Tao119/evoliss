@@ -12,11 +12,13 @@ export const reservationFuncs: { [funcName: string]: Function } = {
 async function createReservation({
     userId,
     courseId,
-    scheduleId
+    scheduleId,
+    roomId
 }: {
     userId: number;
     courseId: number;
     scheduleId: number
+    roomId?: number
 }) {
     console.log({ userId, courseId, scheduleId })
     return await prisma.reservation.create({
@@ -25,6 +27,7 @@ async function createReservation({
             scheduleId: scheduleId,
             courseId: courseId,
             status: ReservationStatus.Reserved,
+            roomId: roomId
         }
     });
 }

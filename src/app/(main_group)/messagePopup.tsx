@@ -16,6 +16,7 @@ import { ImageBox } from "@/components/imageBox";
 import rightIcon from "@/assets/image/arrow_right.svg";
 import defaultIcon from "@/assets/image/user_icon.svg";
 import dayjs from "dayjs";
+import { Switcher } from "@/components/switcher";
 
 interface Props {
   setShowMessagePopup: Dispatch<SetStateAction<boolean>>;
@@ -25,6 +26,12 @@ const MessagePopup = ({ setShowMessagePopup }: Props) => {
   const { userData } = useContext(UserDataContext)!;
   const router = useRouter();
   const animation = useContext(AnimationContext)!;
+  enum MessageBoxType {
+    General,
+    Customer,
+  }
+
+  const [messageBoxType, setMessageBoxType] = useState(MessageBoxType.General);
 
   const onReady = userData;
 
@@ -63,59 +70,72 @@ const MessagePopup = ({ setShowMessagePopup }: Props) => {
 
   return (
     <div className="p-message">
+      <Switcher
+        className="p-message__switcher"
+        contents={[
+          { label: "一般", value: MessageBoxType.General },
+          { label: "購入者", value: MessageBoxType.Customer },
+        ]}
+        onChange={(value) => setMessageBoxType(value)}
+      />
       <div className="p-message__list">
-        {rooms.map((room) => {
-          const hasUnread =
-            room.messages.some(
-              (msg) => !msg.isRead && msg.senderId !== userData.id
-            ) ||
-            room.purchaseMessages.some(
-              (msg) => !msg.isRead && msg.senderId !== userData.id
-            );
+        {rooms
+          .filter(
+            (r) =>
+              r.reservation != null || messageBoxType == MessageBoxType.General
+          )
+          .map((room) => {
+            const hasUnread =
+              room.messages.some(
+                (msg) => !msg.isRead && msg.senderId !== userData.id
+              ) ||
+              room.purchaseMessages.some(
+                (msg) => !msg.isRead && msg.senderId !== userData.id
+              );
 
-          const latestMessage = [...room.messages, ...room.purchaseMessages]
-            .sort(
-              (a, b) =>
-                new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
-            )
-            .pop();
+            const latestMessage = [...room.messages, ...room.purchaseMessages]
+              .sort(
+                (a, b) =>
+                  new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
+              )
+              .pop();
 
-          return (
-            <div
-              key={room.id}
-              className={`p-message__room ${hasUnread ? "-unread" : ""}`}
-              onClick={() => openRoom(room.roomKey)}
-            >
-              <ImageBox
-                className="p-message__icon"
-                round
-                objectFit="cover"
-                src={
-                  (room.customerId == userData.id
-                    ? room.course.coach.icon
-                    : room.customer.icon) ?? defaultIcon
-                }
-              />
-              <div className="p-message__info">
-                <div className="p-message__info-title">
-                  {`${
-                    room.customerId == userData.id
-                      ? room.course.coach.name
-                      : room.customer.name
-                  } (${room.course.title})`}
+            return (
+              <div
+                key={room.id}
+                className={`p-message__room ${hasUnread ? "-unread" : ""}`}
+                onClick={() => openRoom(room.roomKey)}
+              >
+                <ImageBox
+                  className="p-message__icon"
+                  round
+                  objectFit="cover"
+                  src={
+                    (room.customerId == userData.id
+                      ? room.course.coach.icon
+                      : room.customer.icon) ?? defaultIcon
+                  }
+                />
+                <div className="p-message__info">
+                  <div className="p-message__info-title">
+                    {`${
+                      room.customerId == userData.id
+                        ? room.course.coach.name
+                        : room.customer.name
+                    } (${room.course.title})`}
+                  </div>
+
+                  <div className="p-message__latest">
+                    {latestMessage &&
+                      ("content" in latestMessage
+                        ? latestMessage.content
+                        : `購入した講座 ${latestMessage.schedule.course.title}`)}
+                  </div>
                 </div>
-
-                <div className="p-message__latest">
-                  {latestMessage &&
-                    ("content" in latestMessage
-                      ? latestMessage.content
-                      : `購入した講座 ${latestMessage.schedule.course.title}`)}
-                </div>
+                <ImageBox className="p-message__right" src={rightIcon} />
               </div>
-              <ImageBox className="p-message__right" src={rightIcon} />
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </div>
   );

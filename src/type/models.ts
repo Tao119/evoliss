@@ -20,7 +20,25 @@ export interface User {
     notification: Notification[]
     sentNotification: Notification[]
     purchaseMessages: PurchaseMessage[];
+    refunds: Refund[]
+    paymentAccount: PaymentAccount[]
+}
+export interface PaymentAccount {
+    id: number
+    userId: number
+    user: User
+    bankName: string
+    branchName: string
+    accountType: number
+    accountNumber: string
+    accountHolder: string
+    createdAt: Date
+    updatedAt: Date
+}
 
+export enum AccountType {
+    Saving,
+    Checking
 }
 
 // Course型
@@ -81,6 +99,18 @@ export interface Reservation {
     customer: User;
     schedule: Schedule;
     course: Course;
+    refunds: Refund[]
+    roomId: number
+    room: MessageRoom
+}
+export interface Refund {
+    id: number
+    customerId: number
+    customer: User
+    reservationId: number
+    reservation: Reservation
+    status: number
+    text: string
 }
 
 export interface MessageRoom {
@@ -92,6 +122,7 @@ export interface MessageRoom {
     customer: User;
     messages: Message[];
     purchaseMessages: PurchaseMessage[];
+    reservation: Reservation[];
 }
 
 export interface Message {
@@ -164,7 +195,7 @@ export interface Game {
     image: string | null;
     createdAt: Date;
 
-    courseGames: CourseGame[];
+    courses: Course[];
     userGames: UserGame[];
 }
 

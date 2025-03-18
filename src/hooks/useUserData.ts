@@ -22,9 +22,6 @@ export const useUserData = (): UserDataContextType => {
     const [userData, setUserData] = useState<User>();
     const session = useSession();
     const [userDataStatus, setUserDataStatus] = useState(UserDataStatus.Loading)
-    useEffect(() => {
-        console.log(userDataStatus)
-    }, [userDataStatus])
 
     const fetchUserData = async () => {
 
@@ -36,6 +33,10 @@ export const useUserData = (): UserDataContextType => {
                 setUserData(user);
                 setUserDataStatus(UserDataStatus.Authorized)
             } else if (session.data !== undefined) {
+                if (!session.data?.user?.email) {
+                    setUserDataStatus(UserDataStatus.unAuthorized);
+                    return
+                }
                 const { data: user } = await requestDB("user", "readUserByEmail", {
                     email: session.data?.user?.email,
                 });

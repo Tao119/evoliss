@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { User } from "@prisma/client";
+import { tree } from "next/dist/build/templates/app-page";
 
 export const userFuncs: { [funcName: string]: Function } = {
     createUser,
@@ -8,6 +9,7 @@ export const userFuncs: { [funcName: string]: Function } = {
     deleteUser,
     readUserByEmail,
     readUserById,
+    updatePaymentAccount
 };
 
 async function createUser({ email, name }: { email: string; name: string }) {
@@ -49,9 +51,11 @@ async function readUserById({ id }: { id: number }) {
                                     sender: true, schedule: { include: { course: { include: { coach: true } } } }
                                 }
                             },
-                            customer: true
+                            customer: true,
+                            reservation: true
                         },
                     },
+                    reservations: { include: { schedule: true, customer: true } }
                 }
             },
             userGames: {
@@ -93,6 +97,8 @@ async function readUserById({ id }: { id: number }) {
                     customer: true
                 },
             },
+            paymentAccount: true,
+            refunds: true
         },
     });
 }
@@ -182,4 +188,47 @@ async function updateUser({
         where: { id },
         data: { bio, header, icon, name },
     });
+}
+async function updatePaymentAccount({
+    userId,
+    bankName,
+    branchName,
+    accountType,
+    accountNumber,
+    accountHolder }: {
+        userId: number,
+        bankName: string,
+        branchName: string,
+        accountType: number,
+        accountNumber: number,
+        accountHolder: string
+    }) {
+    const existing = await prisma.paymentAccount.findUnique({
+        where: { userId },
+    });
+    if (existing) {
+
+        return prisma.paymentAccount.update({
+            where: { userId },
+            data: {
+                bankName,
+                branchName,
+                accountType: accountType,
+                accountNumber: accountNumber as unknown as string,
+                accountHolder
+            },
+        })
+    } else {
+        return prisma.paymentAccount.create({
+            data: {
+                userId,
+                bankName,
+                branchName,
+                accountType: accountType,
+                accountNumber: accountNumber as unknown as string,
+                accountHolder
+            },
+
+        });
+    }
 }

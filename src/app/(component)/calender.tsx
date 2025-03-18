@@ -17,7 +17,10 @@ export enum CalendarTarget {
 }
 
 interface CalendarProps {
-  schedule: Date[];
+  schedule: {
+    startTime: Date;
+    hasReservation?: boolean;
+  }[];
   setSchedule?: Dispatch<SetStateAction<Date[]>>;
   target: CalendarTarget;
   duration: number;
@@ -78,7 +81,7 @@ const Calendar: React.FC<CalendarProps> = ({
           .toDate();
       }).filter((slot) => {
         return !schedule.some((s) => {
-          return dayjs(slot).isSame(dayjs(s), "minute");
+          return dayjs(slot).isSame(dayjs(s.startTime), "minute");
         });
       })
     );
@@ -109,14 +112,18 @@ const Calendar: React.FC<CalendarProps> = ({
 
   const addToSchedule = () => {
     if (!setSchedule || !selectedSchedule) return;
-    if (schedule.some((s) => selectedSchedule.getTime() === s.getTime())) {
+    if (
+      schedule.some((s) => selectedSchedule.getTime() === s.startTime.getTime())
+    ) {
       return;
     }
     setSchedule((prev) => [...prev, selectedSchedule]);
   };
   const removeFromSchedule = (time: number) => {
     if (!setSchedule) return;
-    const newSchedule = [...schedule].filter((s) => s.getTime() != time);
+    const newSchedule = [...schedule]
+      .filter((s) => s.startTime.getTime() != time)
+      .map((s) => s.startTime);
 
     setSchedule(newSchedule);
   };
@@ -176,9 +183,21 @@ const Calendar: React.FC<CalendarProps> = ({
                 onClick={() => date && setSelectedDate(date.toDate())}
               >
                 {date ? date.date() : ""}
-                {date && schedule.some((d) => dayjs(d).isSame(date, "day")) && (
-                  <span className="p-calendar__circle"></span>
-                )}
+                {date &&
+                  schedule.some(
+                    (d) =>
+                      dayjs(d.startTime).isSame(date, "day") &&
+                      !d.hasReservation
+                  ) && <span className="p-calendar__circle"></span>}
+                {date &&
+                  schedule.some((d) =>
+                    dayjs(d.startTime).isSame(date, "day")
+                  ) &&
+                  schedule
+                    .filter((d) => dayjs(d.startTime).isSame(date, "day"))
+                    .every((d) => d.hasReservation) && (
+                    <span className="p-calendar__cross">×</span>
+                  )}
               </div>
             ))}
           </div>
@@ -206,8 +225,12 @@ const Calendar: React.FC<CalendarProps> = ({
             }`}
           >
             {schedule
-              .filter((s) => dayjs(selectedDate).isSame(dayjs(s), "day"))
-              .sort((a, b) => (a.getTime() > b.getTime() ? 1 : -1))
+              .filter((s) =>
+                dayjs(selectedDate).isSame(dayjs(s.startTime), "day")
+              )
+              .sort((a, b) =>
+                a.startTime.getTime() > b.startTime.getTime() ? 1 : -1
+              )
               .map((s, i) => (
                 <div
                   className={`p-calendar__selected-schedule ${
@@ -217,20 +240,33 @@ const Calendar: React.FC<CalendarProps> = ({
                 >
                   <div
                     className={`p-calendar__selected-schedule-schedule ${
-                      dayjs(chosenSchedule).isSame(s, "minutes")
+                      dayjs(chosenSchedule).isSame(s.startTime, "minutes")
                         ? "-active"
                         : ""
-                    }  ${target != CalendarTarget.editor ? "-customer" : ""}`}
+                    }  ${target != CalendarTarget.editor ? "-customer" : ""} ${
+                      s.hasReservation
+                        ? "-disabled"
+                        : new Date(s.startTime).getTime() <=
+                          new Date().getTime()
+                        ? "-inactive"
+                        : ""
+                    }`}
                     onClick={() => {
-                      setChosenSchedule && setChosenSchedule(s);
+                      if (
+                        s.hasReservation ||
+                        new Date(s.startTime).getTime() <= new Date().getTime()
+                      )
+                        return;
+                      setChosenSchedule && setChosenSchedule(s.startTime);
                     }}
                   >
-                    ・{dayjs(s).format("H:mm")}~
+                    ・{dayjs(s.startTime).format("H:mm")}~
+                    {s.hasReservation ? "(予約済み)" : ""}
                   </div>
                   {target == CalendarTarget.editor ? (
                     <div
                       className="p-calendar__selected-schedule-delete"
-                      onClick={() => removeFromSchedule(s.getTime())}
+                      onClick={() => removeFromSchedule(s.startTime.getTime())}
                     >
                       ×
                     </div>

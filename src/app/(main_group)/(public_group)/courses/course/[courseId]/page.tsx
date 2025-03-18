@@ -207,12 +207,15 @@ const Page = () => {
             <Calendar
               duration={courseData.duration}
               schedule={courseData.schedules
-                .filter(
-                  (s) =>
-                    s.reservations.length == 0 &&
-                    new Date(s.startTime) >= new Date()
-                )
-                .map((s) => new Date(s.startTime))}
+                // .filter(
+                //   (s) =>
+                //     s.reservations.length == 0 &&
+                //     new Date(s.startTime) >= new Date()
+                // )
+                .map((s) => ({
+                  startTime: new Date(s.startTime),
+                  hasReservation: s.reservations.length > 0,
+                }))}
               target={CalendarTarget.viewer}
               setChosenSchedule={updateChosenSchedule}
               chosenSchedule={chosenSchedule}

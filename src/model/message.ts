@@ -75,13 +75,14 @@ async function sendSystemMessage({ userId, courseId, scheduleId }: { userId: num
 
     console.log("existingRoom", existingRoom)
     if (existingRoom) {
-        return await prisma.purchaseMessage.create({
+        await prisma.purchaseMessage.create({
             data: {
                 roomId: existingRoom.id,
                 senderId: userId,
                 scheduleId
             },
         });
+        return existingRoom
     }
     let roomKey: string = "";
     let isUnique = false;

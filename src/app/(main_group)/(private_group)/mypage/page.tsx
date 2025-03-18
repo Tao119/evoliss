@@ -13,6 +13,7 @@ import StarRating from "@/components/starRating";
 import { CourseCard } from "../../../(component)/courseCard";
 import { useRouter } from "next/navigation";
 import { IconButton } from "@/components/iconButton";
+import Dashboard from "./dashboard";
 
 const Page = () => {
   const { userData, fetchUserData } = useContext(UserDataContext)!;
@@ -97,6 +98,14 @@ const Page = () => {
               className="p-mypage__bio-courses-add-button"
             />
           </div>
+        </>
+      ),
+    },
+    dashboard: {
+      label: "ダッシュボード",
+      content: (
+        <>
+          <Dashboard />
         </>
       ),
     },
