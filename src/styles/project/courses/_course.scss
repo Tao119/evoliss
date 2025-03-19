@@ -15,6 +15,10 @@
 
     gap: 30px;
 
+    @include mq(sp) {
+        flex-direction: column;
+    }
+
     &__content {
         display: flex;
         flex-direction: column;
@@ -23,7 +27,12 @@
         width: 700px;
         flex-shrink: 0;
         height: auto;
-        gap: 20px
+
+        gap: 20px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
     &__section {
@@ -55,6 +64,10 @@
     &__image {
         width: 100%;
         aspect-ratio: 5/3;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
     &__title {
@@ -69,12 +82,15 @@
 
         flex-direction: column;
         width: 400px;
-        padding: 20px;
         gap: 10px;
         position: sticky;
         top: 20px;
         align-self: flex-start;
         padding-bottom: 20px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
     &__info-price {
