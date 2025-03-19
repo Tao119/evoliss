@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { PrismaClient } from "@prisma/client";
 import { requestDB } from "@/services/axios";
-
+import { Readable } from "stream";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -14,6 +14,14 @@ export const config = {
     },
 };
 
+async function getRawBody(readable: Readable) {
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of readable) {
+        chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+    }
+    return Buffer.concat(chunks);
+}
+
 export async function POST(request: Request) {
     const signature = request.headers.get("stripe-signature");
 
@@ -22,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     try {
-        const rawBody = Buffer.from(await request.arrayBuffer());
+        const rawBody = await getRawBody(request.body as unknown as Readable);
 
         const event = stripe.webhooks.constructEvent(
             rawBody,
@@ -60,21 +68,20 @@ export async function POST(request: Request) {
             const courseRes = await requestDB("course", "readCourseById", {
                 id: parsedCourseId,
             });
-            const course = courseRes.data
+            const course = courseRes.data;
             const userRes = await requestDB("user", "readUserById", {
                 id: parsedUserId,
             });
-            const user = userRes.data
+            const user = userRes.data;
 
-
-            await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: 1 })
-            const room = await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId })
+            await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: 1 });
+            const room = await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId });
             await requestDB("notification", "createNotification", {
                 userId: course.coachId,
                 content: `${user.name}さんがあなたの講座を購入しました。`,
                 senderId: parsedUserId
-            })
-            await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId, roomId: room.id })
+            });
+            await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId, roomId: room.id });
 
             console.log("📝 Reservations Created:", {
                 userId: parsedUserId,
