@@ -80,7 +80,7 @@ export async function POST(request: Request) {
             const user = userRes.data;
 
             await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: 1 });
-            const room = await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId });
+            const { data: room } = await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId });
             await requestDB("notification", "createNotification", {
                 userId: course.coachId,
                 content: `${user.name}さんがあなたの講座を購入しました。`,
