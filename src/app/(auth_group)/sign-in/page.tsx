@@ -31,7 +31,7 @@ const Page = () => {
 
   useEffect(() => {
     if (userData) {
-      router.push("/");
+      router.push(callbackPath ?? "/");
     }
   }, [userData, router]);
 

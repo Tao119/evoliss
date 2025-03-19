@@ -8,10 +8,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 const prisma = new PrismaClient();
 
-// ✅ Next.js の API Route の `config` を設定
 export const config = {
     api: {
-        bodyParser: false, // `bodyParser` を無効にすることで `raw` ボディを取得
+        bodyParser: false,
     },
 };
 
@@ -23,10 +22,8 @@ export async function POST(request: Request) {
     }
 
     try {
-        // ✅ 修正: `request.arrayBuffer()` で `Buffer` に変換
         const rawBody = Buffer.from(await request.arrayBuffer());
 
-        // ✅ 署名の検証
         const event = stripe.webhooks.constructEvent(
             rawBody,
             signature,
