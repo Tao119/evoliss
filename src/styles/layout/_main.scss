@@ -3,6 +3,7 @@
 .l-main {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -46,11 +47,13 @@
     width: calc(100vw - 250px);
     align-self: flex-end;
     height: 100vh;
+    height: 100dvh;
     position: relative;
     z-index: 1;
 
     @include mq(sp) {
         height: 100vh;
+        height: 100dvh;
         align-self: flex-end;
         width: 100vw;
     }
