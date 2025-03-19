@@ -32,7 +32,6 @@ export function useBreakpoint(): BreakpointContextType {
     }, []);
 
     const orLower = (bq: Breakpoint) => {
-        console.log(isBreakpointOrLower(breakpoint, bq))
         return isBreakpointOrLower(breakpoint, bq)
     }
 
