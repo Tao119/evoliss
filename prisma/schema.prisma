@@ -56,11 +56,11 @@ model Course {
   duration    Int        @default(30)
   image       String?
   coachId     Int
-  coach       User         @relation(fields: [coachId], references: [id])
+  coach       User         @relation(fields: [coachId], references: [id],onDelete: Cascade)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  gameId       Int
-  game         Game          @relation(fields: [gameId], references: [id])
+  gameId       Int?
+  game         Game?          @relation(fields: [gameId], references: [id],onDelete: SetNull)
 
   schedules   Schedule[]
   reservations Reservation[] @relation("CourseReservations") 
@@ -85,10 +85,10 @@ model Schedule {
 
 model Refund{
   id          Int          @id @default(autoincrement())
-  customerId  Int
-  customer    User         @relation(fields: [customerId], references: [id])
-  reservationId  Int
-  reservation    Reservation     @relation(fields: [reservationId], references: [id])
+  customerId  Int?
+  customer    User?         @relation(fields: [customerId], references: [id],onDelete: SetNull)
+  reservationId  Int?
+  reservation    Reservation?     @relation(fields: [reservationId], references: [id],onDelete: SetNull)
   status      Int
   text        String
 }
@@ -96,9 +96,9 @@ model Refund{
 model Reservation {
   id          Int          @id @default(autoincrement())
   customerId  Int
-  customer    User         @relation(fields: [customerId], references: [id])
+  customer    User         @relation(fields: [customerId], references: [id],onDelete: Cascade)
   scheduleId  Int
-  schedule    Schedule     @relation(fields: [scheduleId], references: [id])
+  schedule    Schedule     @relation(fields: [scheduleId], references: [id],onDelete: Cascade)
   courseId    Int
   course      Course       @relation("CourseReservations", fields: [courseId], references: [id] ,onDelete: Cascade)
   status      Int
@@ -112,10 +112,10 @@ model Reservation {
 model MessageRoom {
   id         Int     @id @default(autoincrement())
   roomKey    String    @unique
-  courseId   Int
-  course     Course  @relation(fields: [courseId], references: [id])
+  courseId   Int?
+  course     Course?  @relation(fields: [courseId], references: [id],onDelete: SetNull)
   customerId Int
-  customer   User    @relation(fields: [customerId], references: [id])
+  customer   User    @relation(fields: [customerId], references: [id],onDelete: Cascade)
   messages   Message[]
   notifications Notification[]
   purchaseMessages  PurchaseMessage[]
@@ -126,8 +126,8 @@ model Message {
   id        Int         @id @default(autoincrement())
   roomId    Int
   room      MessageRoom @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
-  senderId  Int
-  sender    User        @relation(fields: [senderId], references: [id])
+  senderId  Int?
+  sender    User?        @relation(fields: [senderId], references: [id],onDelete: SetNull)
   content   String
   isRead    Boolean     @default(false)
   sentAt    DateTime    @default(now())
@@ -137,10 +137,10 @@ model PurchaseMessage {
   id        Int         @id @default(autoincrement())
   roomId    Int
   room      MessageRoom @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
-  senderId  Int
-  sender    User        @relation(fields: [senderId], references: [id])
-  scheduleId Int
-  schedule    Schedule     @relation(fields: [scheduleId], references: [id])
+  senderId  Int?
+  sender    User?        @relation(fields: [senderId], references: [id],onDelete: SetNull)
+  scheduleId Int?
+  schedule    Schedule?     @relation(fields: [scheduleId], references: [id],onDelete: SetNull)
   isRead    Boolean     @default(false)
   sentAt    DateTime    @default(now())
 }
@@ -151,7 +151,7 @@ model Payment {
   customerId  Int
   customer    User         @relation(fields: [customerId], references: [id] ,onDelete: Cascade)
   scheduleId    Int
-  schedule      Schedule       @relation(fields: [scheduleId], references: [id] )
+  schedule      Schedule       @relation(fields: [scheduleId], references: [id] ,onDelete: Cascade)
   amount      Int
   method      String
   status      Int
@@ -162,7 +162,7 @@ model Payment {
 model Review {
   id          Int          @id @default(autoincrement())
   customerId  Int
-  customer    User         @relation(fields: [customerId], references: [id])
+  customer    User         @relation(fields: [customerId], references: [id],onDelete: Cascade)
   courseId    Int
   course      Course       @relation(fields: [courseId], references: [id] ,onDelete: Cascade)
   rating      Int
@@ -194,7 +194,7 @@ model UserGame {
   userId      Int
   user        User         @relation(fields: [userId], references: [id] ,onDelete: Cascade)
   gameId       Int
-  game         Game          @relation(fields: [gameId], references: [id])
+  game         Game          @relation(fields: [gameId], references: [id],onDelete: Cascade)
 }
 
 model CourseAccess {
