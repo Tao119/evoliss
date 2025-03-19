@@ -237,7 +237,7 @@ const Page = () => {
             className="p-course-create__toggle-button"
             onClick={() => setShowNewGame((prev) => !prev)}
           >
-            {showNewGame ? "ゲーム一覧から選ぶ" : "新しいゲームを登録する"}
+            {showNewGame ? "選択" : "追加"}
           </Button>
         </div>
       </div>

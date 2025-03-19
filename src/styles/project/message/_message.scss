@@ -17,8 +17,21 @@
     width: 400px;
     transform: none;
     color: $white;
-
     gap: 10px;
+
+    @include mq(sp) {
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        border: none;
+    }
+
+    &__close {
+        align-self: flex-end;
+        width: 20px;
+        height: 20px;
+    }
 
     &__switcher {
         align-self: flex-start;
@@ -86,6 +99,9 @@
     &__latest {
         color: $gray;
         text-align: start;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     &__empty {
@@ -119,6 +135,20 @@
     overflow-y: scroll;
     transform: none;
     color: $white;
+
+    @include mq(sp) {
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        border: none;
+    }
+
+    &__close {
+        align-self: flex-end;
+        width: 20px;
+        height: 20px;
+    }
 
 
     &__list {

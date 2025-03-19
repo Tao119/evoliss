@@ -17,6 +17,7 @@ interface Prop {
   setShowNotificationPopup: Dispatch<SetStateAction<boolean>>;
   showMessagePopup: boolean;
   showNotificationPopup: boolean;
+  setShowSideBar: Dispatch<SetStateAction<boolean>>;
 }
 
 const Sidebar = ({
@@ -25,6 +26,7 @@ const Sidebar = ({
   setShowNotificationPopup,
   showMessagePopup,
   showNotificationPopup,
+  setShowSideBar,
 }: Prop) => {
   const { userData } = useContext(UserDataContext)!;
   const pathname = usePathname()!;
@@ -56,6 +58,11 @@ const Sidebar = ({
     },
   ];
 
+  const pushRoute = (path: string) => {
+    setShowSideBar(false);
+    router.push(path);
+  };
+
   return (
     <>
       <div className="p-side-bar">
@@ -71,8 +78,8 @@ const Sidebar = ({
 
         <ul className="p-side-bar__container -upper">
           {mainRoutes.map(({ path, text }) => (
-            <Link
-              href={`${path}`}
+            <div
+              onClick={() => pushRoute(path)}
               key={path}
               className={`p-side-bar__list ${
                 pathname.replace("/", "").split("/")[0] ==
@@ -93,7 +100,7 @@ const Sidebar = ({
                   {text}
                 </div>
               )}
-            </Link>
+            </div>
           ))}
         </ul>
         <ul className="p-side-bar__container -lower">
@@ -108,7 +115,10 @@ const Sidebar = ({
                       ? "-active"
                       : ""
                   }`}
-                  onClick={() => setShowMessagePopup(true)}
+                  onClick={() => {
+                    setShowSideBar(false);
+                    setShowMessagePopup(true);
+                  }}
                 >
                   <ImageBox
                     className="p-side-bar__page-icon"
@@ -138,7 +148,10 @@ const Sidebar = ({
                       ? "-active"
                       : ""
                   }`}
-                  onClick={() => setShowNotificationPopup(true)}
+                  onClick={() => {
+                    setShowSideBar(false);
+                    setShowNotificationPopup(true);
+                  }}
                 >
                   <ImageBox
                     className="p-side-bar__page-icon"
@@ -160,8 +173,8 @@ const Sidebar = ({
                   )}
                 </div>
               ) : (
-                <Link
-                  href={`${path}`}
+                <div
+                  onClick={() => pushRoute(path)}
                   key={path}
                   className={`p-side-bar__list ${
                     pathname.replace("/", "").split("/")[0] ==
@@ -188,7 +201,7 @@ const Sidebar = ({
                       {text}
                     </div>
                   )}
-                </Link>
+                </div>
               );
             })
           ) : (

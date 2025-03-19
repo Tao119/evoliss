@@ -10,13 +10,20 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { requestDB } from "@/services/axios";
-import { AnimationContext, UserDataContext } from "@/app/contextProvider";
+import {
+  AnimationContext,
+  BreakPointContext,
+  UserDataContext,
+} from "@/app/contextProvider";
 import { MessageRoom, Message, PurchaseMessage } from "@/type/models";
 import { ImageBox } from "@/components/imageBox";
 import rightIcon from "@/assets/image/arrow_right.svg";
 import defaultIcon from "@/assets/image/user_icon.svg";
 import dayjs from "dayjs";
 import { Switcher } from "@/components/switcher";
+import { IconButton } from "@/components/iconButton";
+
+import closeImage from "@/assets/image/cross.svg";
 
 interface Props {
   setShowMessagePopup: Dispatch<SetStateAction<boolean>>;
@@ -24,6 +31,7 @@ interface Props {
 
 const MessagePopup = ({ setShowMessagePopup }: Props) => {
   const { userData } = useContext(UserDataContext)!;
+  const { breakpoint, orLower } = useContext(BreakPointContext)!;
   const router = useRouter();
   const animation = useContext(AnimationContext)!;
   enum MessageBoxType {
@@ -70,6 +78,13 @@ const MessagePopup = ({ setShowMessagePopup }: Props) => {
 
   return (
     <div className="p-message">
+      {orLower("sp") && (
+        <IconButton
+          src={closeImage}
+          onClick={() => setShowMessagePopup(false)}
+          className="p-message__close"
+        />
+      )}
       <Switcher
         className="p-message__switcher"
         contents={[

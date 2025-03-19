@@ -10,11 +10,17 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { requestDB } from "@/services/axios";
-import { AnimationContext, UserDataContext } from "@/app/contextProvider";
+import {
+  AnimationContext,
+  BreakPointContext,
+  UserDataContext,
+} from "@/app/contextProvider";
 import { ImageBox } from "@/components/imageBox";
 import rightIcon from "@/assets/image/arrow_right.svg";
 import defaultIcon from "@/assets/image/user_icon.svg";
 
+import closeImage from "@/assets/image/cross.svg";
+import { IconButton } from "@/components/iconButton";
 interface Props {
   setShowNotificationPopup: Dispatch<SetStateAction<boolean>>;
 }
@@ -23,6 +29,7 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
   const { userData } = useContext(UserDataContext)!;
   const router = useRouter();
   const animation = useContext(AnimationContext)!;
+  const { breakpoint, orLower } = useContext(BreakPointContext)!;
   const [notifications, setNotifications] = useState(
     userData?.notification || []
   );
@@ -73,6 +80,13 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
 
   return (
     <div className="p-notification">
+      {orLower("sp") && (
+        <IconButton
+          src={closeImage}
+          onClick={() => setShowNotificationPopup(false)}
+          className="p-notification__close"
+        />
+      )}
       {notifications
         ?.sort(
           (a, b) =>

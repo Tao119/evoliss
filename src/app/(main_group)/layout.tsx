@@ -7,10 +7,15 @@ import { Course, Game, Message, User } from "@/type/models";
 import MessagePopup from "./messagePopup";
 import { OverLay } from "@/components/overlay";
 import { requestDB } from "@/services/axios";
+import logoIcon from "@/assets/image/logo.png";
 import { ImageBox } from "@/components/imageBox";
 import logoImage from "@/assets/image/logo.png";
 import Link from "next/link";
-import { SocketContext, UserDataContext } from "../contextProvider";
+import {
+  BreakPointContext,
+  SocketContext,
+  UserDataContext,
+} from "../contextProvider";
 import NotificationPopup from "./notificationPopup";
 
 export default function GuestLayout({
@@ -20,9 +25,11 @@ export default function GuestLayout({
 }) {
   const { fetchUserData, userData } = useContext(UserDataContext)!;
   const { socket } = useContext(SocketContext)!;
+  const { breakpoint, orLower } = useContext(BreakPointContext)!;
 
   const [joinedRooms, setJoinedRooms] = useState<string[]>([]);
   const [showMessagePopup, setShowMessagePopup] = useState(false);
+  const [showSideBar, setShowSideBar] = useState(false);
   const [showNotificationPopup, setShowNotificationPopup] = useState(false);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -171,13 +178,33 @@ export default function GuestLayout({
 
   return (
     <>
-      <Sidebar
-        newMessage={hasNewMessage}
-        setShowMessagePopup={setShowMessagePopup}
-        setShowNotificationPopup={setShowNotificationPopup}
-        showMessagePopup={showMessagePopup}
-        showNotificationPopup={showNotificationPopup}
-      />
+      {orLower("sp") ? (
+        showSideBar ? (
+          <>
+            <Sidebar
+              newMessage={hasNewMessage}
+              setShowMessagePopup={setShowMessagePopup}
+              setShowNotificationPopup={setShowNotificationPopup}
+              showMessagePopup={showMessagePopup}
+              showNotificationPopup={showNotificationPopup}
+              setShowSideBar={setShowSideBar}
+            />
+            <OverLay
+              className="l-sidebar-overlay"
+              onClick={() => setShowSideBar(false)}
+            />
+          </>
+        ) : null
+      ) : (
+        <Sidebar
+          newMessage={hasNewMessage}
+          setShowMessagePopup={setShowMessagePopup}
+          setShowNotificationPopup={setShowNotificationPopup}
+          showMessagePopup={showMessagePopup}
+          showNotificationPopup={showNotificationPopup}
+          setShowSideBar={setShowSideBar}
+        />
+      )}
       {showMessagePopup && (
         <>
           <OverLay
@@ -200,6 +227,12 @@ export default function GuestLayout({
       )}
       <div className="l-content">
         <div className="l-search-box__wrapper">
+          <ImageBox
+            src={logoIcon}
+            className="l-logo"
+            round
+            onClick={() => setShowSideBar(true)}
+          />
           <SearchBox name="Research" className="l-search-box" />
         </div>
         <div className="l-top">

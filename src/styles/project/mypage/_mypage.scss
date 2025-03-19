@@ -331,8 +331,8 @@
         &-edit {
             position: absolute;
             top: 50%;
-            left: calc(50% + 100px);
-            translate: -50% -50%;
+            right: 10px;
+            translate: 0 -50%;
             cursor: pointer;
             width: 30px;
             height: 30px;

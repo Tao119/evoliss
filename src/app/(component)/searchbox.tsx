@@ -8,8 +8,13 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
-import { AnimationContext, UserDataContext } from "@/app/contextProvider";
+import {
+  AnimationContext,
+  BreakPointContext,
+  UserDataContext,
+} from "@/app/contextProvider";
 import { ImageBox } from "@/components/imageBox";
+import { Button } from "@/components/button";
 
 interface Props {
   className?: string;
@@ -21,6 +26,7 @@ export const SearchBox = ({ name, className }: Props) => {
   const animation = useContext(AnimationContext)!;
   const router = useRouter();
   const history = userData?.searchHistories ?? [];
+  const { breakpoint, orLower } = useContext(BreakPointContext)!;
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [searchText, setSearchText] = useState("");
@@ -104,6 +110,21 @@ export const SearchBox = ({ name, className }: Props) => {
           onKeyDown={handleEnter}
           onFocus={() => setIsFocused(true)}
         />
+        {orLower("sp") && (
+          <Button
+            className="c-search-box__search-button"
+            onClick={() => {
+              if (searchText.trim() == "") return;
+              try {
+                search();
+              } catch (e) {
+                alert("検索に失敗しました");
+              }
+            }}
+          >
+            検索
+          </Button>
+        )}
       </div>
 
       {isFocused && history.length > 0 && (

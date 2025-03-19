@@ -19,6 +19,10 @@
         &.-customer {
             flex-direction: column;
         }
+
+        @include mq(tb) {
+            flex-direction: column;
+        }
     }
 
     &__calender {
@@ -33,6 +37,10 @@
         width: calc(100% - 210px);
 
         &.-customer {
+            width: 100%;
+        }
+
+        @include mq(tb) {
             width: 100%;
         }
     }
@@ -67,16 +75,21 @@
 
     &__grid {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
-
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        max-width: 280px;
+        gap: 0;
     }
 
     &__day {
         text-align: center;
         padding: 4px;
-        width: 50px;
-        height: 20px;
+        width: clamp(10px, 100%, 40px);
+        height: clamp(10px, 100%, 40px);
         border-bottom: 1px solid $white;
+        aspect-ratio: 1 / 1;
 
         &.-null {
             border: none;
@@ -86,8 +99,9 @@
     &__date {
         text-align: center;
         padding: 4px;
-        width: 50px;
-        height: 40px;
+        aspect-ratio: 1 / 1;
+        width: clamp(10px, 100%, 40px);
+        height: clamp(10px, 100%, 40px);
         display: flex;
         align-items: flex-start;
         justify-content: flex-start;
@@ -183,6 +197,14 @@
         height: 350px;
         gap: 10px;
         border-radius: 10px;
+
+        @include mq(tb) {
+            width: 100%;
+            flex-direction: row;
+            height: auto;
+            max-height: 300px;
+            overflow-y: scroll;
+        }
 
         &.-customer {
             width: 100%;

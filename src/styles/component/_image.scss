@@ -2,6 +2,7 @@
 
 .c-image-box {
     position: relative;
+    flex-shrink: 0;
 
     &__image {
         object-fit: contain;

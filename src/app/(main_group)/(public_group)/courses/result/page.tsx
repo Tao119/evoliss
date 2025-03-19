@@ -90,6 +90,11 @@ const Page = () => {
 
   return (
     <div className="p-courses l-page">
+      {courseData.length == 0 &&
+        coachData.length == 0 &&
+        gameData.length == 0 && (
+          <div className="p-courses__title">検索結果がありませんでした。</div>
+        )}
       {courseData.length > 0 && (
         <>
           <div className="p-courses__title">{`"${query}"でヒットした講座`}</div>

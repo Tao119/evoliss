@@ -27,6 +27,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+
+    @include mq(sp) {
+      flex-direction: column;
+      height: auto;
+    }
   }
 
   &__top-panel-left {
@@ -37,11 +42,16 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 30px;
+    gap: 10px;
   }
 
   &__top-panel-title {
     font-size: $fs-title;
     height: 50px;
+
+    @include mq(sp) {
+      font-size: $fs-medium;
+    }
   }
 
   &__top-panel-phrase-container {
@@ -50,6 +60,10 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+
+    @include mq(sp) {
+      font-size: $fs-large;
+    }
   }
 
   &__top-panel-button {
@@ -69,6 +83,11 @@
     padding: 10px;
     flex-grow: 1;
     height: 100%;
+
+    @include mq(sp) {
+      height: 300px;
+      width: 100%;
+    }
 
   }
 
