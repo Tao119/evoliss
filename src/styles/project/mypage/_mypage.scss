@@ -89,7 +89,7 @@
 
     &__profile {
         display: flex;
-        width: 50%;
+        width: 100%;
         align-items: center;
         height: 100%;
         flex-direction: column;
@@ -119,6 +119,10 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+
+            @include mq(sp) {
+                width: calc(100% - 50px);
+            }
         }
 
         &-edit {
