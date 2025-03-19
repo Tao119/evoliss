@@ -48,7 +48,7 @@ async function sendMessage({ userId, roomKey, content }: { userId: number; roomK
         select: { id: true, customerId: true, course: { select: { coachId: true } } },
     });
 
-    if (!room || (room.customerId !== userId && room.course.coachId !== userId)) {
+    if (!room || (room.customerId !== userId && room.course?.coachId !== userId)) {
         throw new Error("Unauthorized");
     }
 
