@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { Readable } from "stream";
+import { requestDB } from "@/services/axios";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -35,8 +36,6 @@ export async function POST(request: Request) {
         const rawBody = await getRawBody(request);
         console.log("📥 Raw Body Length:", rawBody.length);
         console.log("📥 Raw Body as String:", rawBody.toString());
-        console.log("STRIPE_WEBHOOK_SECRET", process.env.STRIPE_WEBHOOK_SECRET as string)
-        console.log("STRIPE_SECRET_KEY", process.env.STRIPE_SECRET_KEY as string)
 
         const event = stripe.webhooks.constructEvent(
             rawBody,
@@ -49,6 +48,54 @@ export async function POST(request: Request) {
         if (event.type === "checkout.session.completed") {
             const session = event.data.object as Stripe.Checkout.Session;
             console.log("💳 Checkout Session Completed:", JSON.stringify(session, null, 2));
+
+            const userId = session.metadata?.userId;
+            const scheduleId = session.metadata?.scheduleId;
+            const courseId = session.metadata?.courseId;
+            const paymentId = session.metadata?.paymentId;
+            const amount = session.amount_total;
+
+            if (!userId || !scheduleId || !courseId || !paymentId) {
+                console.error("🚨 Missing required metadata:", {
+                    userId,
+                    scheduleId,
+                    courseId,
+                    paymentId
+                });
+                return NextResponse.json({ message: "🚨 Missing metadata" }, { status: 400 });
+            }
+
+            const parsedUserId = parseInt(userId);
+            const parsedCourseId = parseInt(courseId);
+            const parsedScheduleId = parseInt(scheduleId);
+            const parsedPaymentId = parseInt(paymentId);
+
+            const courseRes = await requestDB("course", "readCourseById", {
+                id: parsedCourseId,
+            });
+            const course = courseRes.data;
+            const userRes = await requestDB("user", "readUserById", {
+                id: parsedUserId,
+            });
+            const user = userRes.data;
+
+            await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: 1 });
+            const room = await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId });
+            await requestDB("notification", "createNotification", {
+                userId: course.coachId,
+                content: `${user.name}さんがあなたの講座を購入しました。`,
+                senderId: parsedUserId
+            });
+            await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId, roomId: room.id });
+
+            console.log("📝 Reservations Created:", {
+                userId: parsedUserId,
+                courseId: parsedCourseId,
+                scheduleId: parsedScheduleId,
+                paymentId: parsedPaymentId,
+                roomId: room.id
+            });
+
 
             return NextResponse.json({ message: "✅ Success" }, { status: 200 });
         }
