@@ -29,7 +29,7 @@ async function confirmUser({ userId, roomKey }: { userId: number; roomKey: strin
         include: { course: true },
     });
 
-    if (!room || (room.customerId !== userId && room.course.coachId !== userId)) {
+    if (!room || (room.customerId !== userId && room.course?.coachId !== userId)) {
         return false;
     }
     return true;
