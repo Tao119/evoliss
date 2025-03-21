@@ -93,7 +93,7 @@ const Sidebar = ({
                 <div
                   className={`p-side-bar__page-text ${
                     pathname.replace("/", "").split("/")[0] ==
-                      `${path.replace("/", "")}` || showMessagePopup
+                    `${path.replace("/", "")}`
                       ? "-active"
                       : ""
                   }`}
