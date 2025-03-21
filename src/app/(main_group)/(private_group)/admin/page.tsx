@@ -119,13 +119,13 @@ const Page = () => {
                   <div className="p-admin__detail-email">{data.email}</div>
                 </div>
                 <div className="p-admin__detail-section">
-                  {data.paymentAccount.length > 0 ? (
+                  {data.paymentAccount ? (
                     <div className="p-admin__detail-payment-account">
-                      {data.paymentAccount[0].bankName}/{" "}
-                      {data.paymentAccount[0].branchName}/{" "}
-                      {AccountTypeString[data.paymentAccount[0].accountType]}/{" "}
-                      {data.paymentAccount[0].accountNumber}/{" "}
-                      {data.paymentAccount[0].accountHolder}
+                      {data.paymentAccount.bankName}/{" "}
+                      {data.paymentAccount.branchName}/{" "}
+                      {AccountTypeString[data.paymentAccount.accountType]}/{" "}
+                      {data.paymentAccount.accountNumber}/{" "}
+                      {data.paymentAccount.accountHolder}
                     </div>
                   ) : (
                     <div className="p-admin__detail-payment-account">
