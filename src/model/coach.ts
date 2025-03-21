@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { calculateScore } from "@/services/calcScore";
 
 export const coachFuncs: { [funcName: string]: Function } = {
     readCoachById,
     readCoaches,
+    readCoachesNum,
     readTopCoaches,
     readCoachesByQuery
 };
@@ -27,8 +27,32 @@ async function readCoachById({ id }: { id: number }) {
 }
 
 
-async function readCoaches() {
+async function readCoaches({ page, total }: { page: number; total: number }) {
+    const skip = (page - 1) * total;
     return prisma.user.findMany({
+        where: {
+            courses: {
+                some: {},
+            },
+        },
+        skip: skip,
+        take: total,
+        include: {
+            courses: {
+                include: {
+                    reviews: true,
+                },
+            },
+            userGames: {
+                include: {
+                    game: true,
+                },
+            },
+        },
+    });
+}
+async function readCoachesNum() {
+    const data = await prisma.user.findMany({
         where: {
             courses: {
                 some: {},
@@ -47,6 +71,7 @@ async function readCoaches() {
             },
         },
     });
+    return data.length
 }
 
 

@@ -1,0 +1,211 @@
+@use "../../foundation" as *;
+
+.p-admin {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+    padding: 30px;
+    gap: 10px;
+
+    &__user {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        align-items: flex-start;
+        justify-content: flex-start;
+        width: 100%;
+        height: 100%;
+        padding: 30px;
+        gap: 10px;
+
+        &-title {
+            font-size: $fs-small;
+        }
+
+        &-profile {
+            height: 72px;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 16px;
+            gap: 10px;
+            border-bottom: 1px solid $gray;
+
+        }
+
+        &-add {
+            height: 72px;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 16px;
+            gap: 10px;
+            cursor: pointer;
+
+        }
+
+        &-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        &-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 5px;
+            height: 100%;
+        }
+
+        &-name {
+            font-size: $fs-text;
+            color: $white;
+        }
+
+        &-email {
+            color: $dark-gray;
+            font-size: $fs-small;
+        }
+
+        &-detail {
+            font-size: $fs-text;
+            color: $white;
+            margin-left: auto;
+            font-size: $fs-small;
+            cursor: pointer;
+        }
+    }
+
+
+
+    &__detail {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        translate: -50% -50%;
+        border-radius: 10px;
+        width: 450px;
+        height: 500px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        background-color: $black;
+        border: 1px solid $theme;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        z-index: 11;
+        gap: 20px;
+        color: $white;
+
+        @include mq(sp) {
+            width: 80%;
+        }
+
+
+        &-close {
+            align-self: flex-end;
+            width: 24px;
+            height: 24px;
+        }
+
+        &-icon {
+            height: 72px;
+            width: 72px;
+        }
+
+        &-section {
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        &-label {
+            font-size: $fs-small;
+        }
+
+        &-real-name {
+            font-size: $fs-medium;
+            font-weight: $fw-bold;
+        }
+
+        &-position {
+            font-size: $fs-text;
+            font-weight: $fw-bold;
+        }
+
+        &-email {
+            font-size: $fs-text;
+        }
+
+        &-name {
+            font-size: $fs-text;
+        }
+
+        &-phone {
+            font-size: $fs-text;
+        }
+
+        &-access {
+            font-size: $fs-text;
+        }
+
+        &-input {
+            font-size: $fs-medium;
+            height: 40px;
+            width: 150px;
+            text-align: start;
+            padding: 0 10px;
+        }
+
+        &-icon-input {
+            display: none;
+        }
+
+        &-buttons {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+
+        }
+
+        &-cancel {
+            height: 40px;
+            width: 150px;
+            color: $black;
+            background-color: $white;
+            border-radius: 10px;
+            border: 1px solid $black;
+        }
+
+        &-submit {
+            height: 40px;
+            width: 150px;
+            color: $black;
+            background-color: $white;
+            border-radius: 10px;
+            border: 1px solid $black;
+        }
+
+        &-text {
+            font-size: $fs-small;
+        }
+
+        &-name {
+            font-size: $fs-text;
+        }
+    }
+}

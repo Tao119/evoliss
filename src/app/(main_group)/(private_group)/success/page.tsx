@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { requestDB } from "@/services/axios";
-import { Course, Payment } from "@/type/models";
+import { Course, Payment, paymentStatus } from "@/type/models";
 import { ImageBox } from "@/components/imageBox";
 import checkIcon from "@/assets/image/check.svg";
 import { Button } from "@/components/button";
@@ -33,7 +33,7 @@ const Page = () => {
           id: paymentId,
         });
         if (status != "loading") return;
-        const payment = response.data;
+        const payment: Payment = response.data;
 
         if (!payment) {
           setStatus("invalid");
@@ -41,15 +41,15 @@ const Page = () => {
           return;
         }
 
-        if (payment.status === 2) {
+        if (payment.status == paymentStatus.Confirmed) {
           router.push("/about");
-        } else if (payment.status === 0) {
+        } else if (payment.status == paymentStatus.Created) {
           setStatus("pending");
-        } else if (payment.status === 1) {
+        } else if (payment.status == paymentStatus.Paid) {
           setStatus("success");
           await requestDB("payment", "updatePayment", {
             id: paymentId,
-            status: 2,
+            status: paymentStatus.Confirmed,
           });
           const { data: course } = await requestDB(
             "course",
@@ -75,7 +75,7 @@ const Page = () => {
       }
     }, 3000);
 
-    return () => clearInterval(interval); // クリーンアップ
+    return () => clearInterval(interval);
   }, [paymentId, router, status]);
 
   const renderContent = () => {

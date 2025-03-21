@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { paymentStatus } from "@/type/models";
 
 export const paymentFuncs: { [funcName: string]: Function } = {
     readPaymentById,
@@ -63,7 +64,7 @@ async function createPayment({
                 scheduleId,
                 amount,
                 method,
-                status: 0,
+                status: paymentStatus.Created,
             },
         });
         console.log("✅ Payment created:", newPayment);
@@ -79,7 +80,7 @@ async function updatePayment({
     status,
 }: {
     id: number;
-    status: number;
+    status: paymentStatus;
 }) {
     try {
         const updatedPayment = await prisma.payment.update({

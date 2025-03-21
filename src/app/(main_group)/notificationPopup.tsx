@@ -87,30 +87,32 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
           className="p-notification__close"
         />
       )}
-      {notifications
-        ?.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
-        .map((n) => (
-          <div
-            key={n.id}
-            className={`p-notification__notification`}
-            onClick={() =>
-              n.room?.roomKey
-                ? router.push(`/messages/${n.room.roomKey}`)
-                : null
-            }
-          >
-            <ImageBox
-              className="p-notification__icon"
-              round
-              objectFit="cover"
-              src={n.sender?.icon ?? defaultIcon}
-            />
-            <div className="p-notification__content">{n.content}</div>
-          </div>
-        ))}
+      <div className="p-notification__list">
+        {notifications
+          ?.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+          .map((n) => (
+            <div
+              key={n.id}
+              className={`p-notification__notification`}
+              onClick={() =>
+                n.room?.roomKey
+                  ? router.push(`/messages/${n.room.roomKey}`)
+                  : null
+              }
+            >
+              <ImageBox
+                className="p-notification__icon"
+                round
+                objectFit="cover"
+                src={n.sender?.icon ?? defaultIcon}
+              />
+              <div className="p-notification__content">{n.content}</div>
+            </div>
+          ))}
+      </div>
     </div>
   );
 };

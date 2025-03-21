@@ -18,7 +18,6 @@ export async function POST(req: Request) {
         if (!amount || !userId) {
             return NextResponse.json({ message: "Invalid request data", ok: false }, { status: 400 });
         }
-        // StripeのCustomerオブジェクトを作成
         const customer = await stripe.customers.create({
             metadata: { userId: userId.toString() },
         });
@@ -44,8 +43,12 @@ export async function POST(req: Request) {
             }
         }
 
+        if (!payment) {
+            return NextResponse.json({ ok: false, message: "処理が完了しませんでした。\n購入済みのスケジュールである可能性があります。" });
+        }
+
         const session = await stripe.checkout.sessions.create({
-            customer: customer.id, // ここで作成したCustomerを指定
+            customer: customer.id,
             payment_method_types: ["card"],
             line_items: [
                 {

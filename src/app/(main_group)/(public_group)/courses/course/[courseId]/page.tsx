@@ -44,6 +44,14 @@ const Page = () => {
     }
   }, [onReady]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchCourse();
+    }, 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   const fetchCourse = async () => {
     try {
       const response = await requestDB("course", "readCourseById", {

@@ -120,7 +120,7 @@ const Page = () => {
         } else if (error == "UserNotConfirmedException") {
           setStep(1);
         } else {
-          setErr("認証中に問題が発生しました。");
+          setErr(error);
         }
       } else {
         router.push(callbackPath ?? "/");

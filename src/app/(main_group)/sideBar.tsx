@@ -10,6 +10,7 @@ import messageIcon from "@/assets/image/mail.svg";
 import defaultIcon from "@/assets/image/user_icon.svg";
 import { UserDataContext } from "../contextProvider";
 import loginIcon from "@/assets/image/login.svg";
+import chartIcon from "@/assets/image/chart.svg";
 
 interface Prop {
   newMessage: boolean;
@@ -104,6 +105,25 @@ const Sidebar = ({
           ))}
         </ul>
         <ul className="p-side-bar__container -lower">
+          {userData?.isAdmin && (
+            <Link href={`/admin`} className="p-side-bar__list">
+              <ImageBox
+                className="p-side-bar__page-icon"
+                src={chartIcon}
+                objectFit="cover"
+                round
+              />
+              <div
+                className={`p-side-bar__page-text ${
+                  pathname.replace("/", "").split("/")[0] == "admin"
+                    ? "-active"
+                    : ""
+                }`}
+              >
+                管理者ページ
+              </div>
+            </Link>
+          )}
           {userData ? (
             iconRoutes.map(({ path, icon, alt, text }) => {
               return path == "/message" ? (

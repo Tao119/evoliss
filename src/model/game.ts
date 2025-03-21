@@ -3,6 +3,8 @@ import { calculateScore } from "@/services/calcScore";
 
 export const gameFuncs: { [funcName: string]: Function } = {
     readGames,
+    readAllGames,
+    readGamesNum,
     readTopGames,
     readGameById,
     readGamesByQuery
@@ -28,8 +30,64 @@ async function readGameById({ id }: { id: number }) {
     })
 }
 
-async function readGames() {
-    return prisma.game.findMany({
+async function readAllGames() {
+
+    const data = await prisma.game.findMany({
+        where: {
+            courses: {
+                some: {},
+            },
+        },
+        include: {
+            courses: {
+                include: {
+                    coach: true,
+                    accesses: true,
+                },
+            },
+            userGames: {
+                include: {
+                    user: true,
+                },
+            },
+        },
+    });
+
+    return data;
+}
+
+
+async function readGames({ page, total }: { page: number; total: number }) {
+    const skip = (page - 1) * total;
+
+    const data = await prisma.game.findMany({
+        where: {
+            courses: {
+                some: {},
+            },
+        },
+        skip: skip,
+        take: total,
+        include: {
+            courses: {
+                include: {
+                    coach: true,
+                    accesses: true,
+                },
+            },
+            userGames: {
+                include: {
+                    user: true,
+                },
+            },
+        },
+    });
+
+    return data;
+}
+
+async function readGamesNum() {
+    const data = await prisma.game.findMany({
         where: {
             courses: {
                 some: {}
@@ -48,7 +106,9 @@ async function readGames() {
                 },
             },
         },
+
     });
+    return data.length
 }
 
 export async function readTopGames() {

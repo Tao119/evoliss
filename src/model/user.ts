@@ -9,7 +9,7 @@ export const userFuncs: { [funcName: string]: Function } = {
     deleteUser,
     readUserByEmail,
     readUserById,
-    updatePaymentAccount
+    updatePaymentAccount, savePayment
 };
 
 async function createUser({ email, name }: { email: string; name: string }) {
@@ -19,7 +19,26 @@ async function createUser({ email, name }: { email: string; name: string }) {
 }
 
 async function readUsers() {
-    return prisma.user.findMany();
+    return prisma.user.findMany({
+        include: {
+            courses: {
+                include: {
+                    coach: true,
+                    reviews: true,
+                    game: true,
+                    reservations: { include: { schedule: true, customer: true } }
+                }
+            },
+            userGames: {
+                include: {
+                    game: true,
+                },
+            },
+            paymentAccount: true,
+            refunds: true,
+            userPayment: true,
+        },
+    });
 }
 async function readUserById({ id }: { id: number }) {
     return prisma.user.findUnique({
@@ -98,7 +117,9 @@ async function readUserById({ id }: { id: number }) {
                 },
             },
             paymentAccount: true,
-            refunds: true
+            refunds: true,
+            userPayment: true,
+            reservations: { include: { course: { include: { coach: true } }, schedule: true } }
         },
     });
 }
@@ -231,4 +252,21 @@ async function updatePaymentAccount({
 
         });
     }
+}
+
+
+async function savePayment({
+    userId,
+    amount
+}: {
+    userId: number,
+    amount: number
+}) {
+    console.log(userId, amount)
+    return prisma.userPayment.create({
+        data: {
+            userId,
+            amount
+        },
+    });
 }

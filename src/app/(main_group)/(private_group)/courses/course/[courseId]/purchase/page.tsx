@@ -33,6 +33,14 @@ const Page = () => {
   }, []);
 
   useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchCourse();
+    }, 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
     if (onReady) {
       animation.endAnimation();
       if (!chosenSchedule) return;
@@ -89,7 +97,7 @@ const Page = () => {
     if (data.ok) {
       window.location.href = data.sessionUrl;
     } else {
-      alert("決済エラーが発生しました");
+      alert(`決済エラーが発生しました: ${data.message}`);
     }
   };
 

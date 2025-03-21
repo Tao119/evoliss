@@ -5,10 +5,12 @@ export const courseFuncs: { [funcName: string]: Function } = {
     readCourses,
     readTopCourses,
     readCoursesByGameId,
+    readCoursesNumByGameId,
     readCourseByPaymentId,
     readCourseById,
     createCourse,
     updateCourse,
+    readCoursesNumByCoachId,
     readCoursesByCoachId,
     readRecommendedCourses,
     readCoursesByQuery,
@@ -95,8 +97,27 @@ async function readTopCourses() {
 }
 
 
-async function readCoursesByCoachId({ coachId }: { coachId: number }) {
-    return prisma.course.findMany({
+async function readCoursesByCoachId({ coachId, page, total }: { coachId: number, page: number; total: number }) {
+    const skip = (page - 1) * total;
+    return await prisma.course.findMany({
+        where: { coachId },
+        include: {
+            coach: true,
+            reviews: true,
+            game: true,
+            accesses: true,
+        },
+        skip: skip,
+        take: total,
+        orderBy: {
+            accesses: {
+                _count: "desc",
+            },
+        },
+    });
+}
+async function readCoursesNumByCoachId({ coachId }: { coachId: number }) {
+    const data = await prisma.course.findMany({
         where: { coachId },
         include: {
             coach: true,
@@ -110,13 +131,37 @@ async function readCoursesByCoachId({ coachId }: { coachId: number }) {
             },
         },
     });
+    return data.length
 }
 
-async function readCoursesByGameId({ gameId }: { gameId: number }) {
-    return prisma.course.findMany({
+async function readCoursesNumByGameId({ gameId }: { gameId: number }) {
+    const data = await prisma.course.findMany({
         where: {
             gameId
         },
+        include: {
+            coach: true,
+            reviews: true,
+            game: true,
+            accesses: true,
+        },
+        orderBy: {
+            accesses: {
+                _count: "desc",
+            },
+        },
+    });
+    return data.length
+}
+
+async function readCoursesByGameId({ gameId, page, total }: { gameId: number, page: number; total: number }) {
+    const skip = (page - 1) * total;
+    return await prisma.course.findMany({
+        where: {
+            gameId
+        },
+        skip: skip,
+        take: total,
         include: {
             coach: true,
             reviews: true,

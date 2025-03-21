@@ -31,6 +31,16 @@ const Page = () => {
   }, []);
 
   useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchCourses();
+      fetchCoaches();
+      fetchGames();
+    }, 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
     if (onReady) {
       animation.endAnimation();
     }

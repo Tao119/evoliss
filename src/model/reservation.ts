@@ -1,12 +1,10 @@
-export enum ReservationStatus {
-    Reserved = 0,
-    Done = 1,
-    Canceled = 2
-}
+
 import { prisma } from "@/lib/prisma";
+import { RefundStatus } from "@/type/models";
 
 export const reservationFuncs: { [funcName: string]: Function } = {
     createReservation,
+    createRefund
 };
 
 async function createReservation({
@@ -20,14 +18,30 @@ async function createReservation({
     scheduleId: number
     roomId?: number
 }) {
-    console.log({ userId, courseId, scheduleId })
     return await prisma.reservation.create({
         data: {
             customerId: userId,
             scheduleId: scheduleId,
             courseId: courseId,
-            status: ReservationStatus.Reserved,
             roomId: roomId
+        }
+    });
+}
+async function createRefund({
+    reservationId,
+    customerId,
+    text
+}: {
+    reservationId: number;
+    customerId: number;
+    text: string
+}) {
+    return await prisma.refund.create({
+        data: {
+            reservationId,
+            customerId,
+            text,
+            status: RefundStatus.Created
         }
     });
 }

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import ArrowLeft from "@/assets/image/arrow_left.svg";
-import ArrowRight from "@/assets/image/arrow_right.svg";
+import ArrowLeft from "@/assets/image/arrow3_left.svg";
+import ArrowRight from "@/assets/image/arrow3_right.svg";
 
 interface Props {
   className?: string;

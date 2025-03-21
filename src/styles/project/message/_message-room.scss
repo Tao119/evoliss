@@ -204,6 +204,11 @@
         font-weight: $fw-bold;
     }
 
+    &__purchase-time {
+        font-size: $fs-input;
+        font-weight: $fw-bold;
+    }
+
     &__purchase-info {
         display: flex;
         flex-direction: row;

@@ -29,7 +29,7 @@
 }
 
 .c-pagination__nav-link {
-    color: $gray;
+    color: $soft-gray;
     padding: 8px;
     cursor: pointer;
     font-size: $fs-medium;
@@ -42,7 +42,7 @@
     }
 
     &.-far {
-        color: $light-gray;
+        color: $dark-gray;
     }
 
     &.-inactive {

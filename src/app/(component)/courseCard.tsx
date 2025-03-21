@@ -8,9 +8,10 @@ import { useRouter } from "next/navigation";
 
 interface Props {
   course: Course;
+  children?: React.ReactNode;
 }
 
-export const CourseCard: React.FC<Props> = ({ course }) => {
+export const CourseCard: React.FC<Props> = ({ course, children }) => {
   const router = useRouter();
   const averageRating =
     course.reviews && course.reviews.length > 0
@@ -65,6 +66,7 @@ export const CourseCard: React.FC<Props> = ({ course }) => {
           <div className="p-about__course-value">価格　￥{course.price}</div>
         </div>
       </div>
+      {children}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { Readable } from "stream";
 import { requestDB } from "@/services/axios";
+import { paymentStatus } from "@/type/models";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
             });
             const user = userRes.data;
 
-            await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: 1 });
+            await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: paymentStatus.Paid });
             const { data: room } = await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId });
             await requestDB("notification", "createNotification", {
                 userId: course.coachId,

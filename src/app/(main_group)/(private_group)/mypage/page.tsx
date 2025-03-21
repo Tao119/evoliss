@@ -81,14 +81,18 @@ const Page = () => {
         <>
           <div className="p-mypage__bio-courses">
             {(userData.courses ?? []).map((c, i) => (
-              <div className="p-mypage__bio-course-container" key={i}>
-                <CourseCard course={c} />
-                <ImageBox
-                  src={editIcon}
-                  className="p-mypage__bio-course-edit"
-                  onClick={() => router.push(`/courses/course/${c.id}/edit`)}
-                />
-              </div>
+              <>
+                <CourseCard course={c} key={i}>
+                  <ImageBox
+                    src={editIcon}
+                    className="p-mypage__bio-course-edit"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/courses/course/${c.id}/edit`);
+                    }}
+                  />
+                </CourseCard>
+              </>
             ))}
           </div>
           <div className="p-mypage__bio-courses-add">

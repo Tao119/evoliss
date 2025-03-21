@@ -260,6 +260,11 @@ const MessageRoomPage = () => {
                 <div className="p-message-room__purchase-title">
                   {message?.schedule.course.title}
                 </div>
+                <div className="p-message-room__purchase-time">
+                  {dayjs(message?.schedule.startTime).format(
+                    "YYYY年M月D日　HH:mm~"
+                  )}
+                </div>
                 <div className="p-message-room__purchase-info">
                   <div className="p-message-room__purchase-coach">
                     {message?.schedule.course.coach.name}

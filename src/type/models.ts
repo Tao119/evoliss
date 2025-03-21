@@ -6,6 +6,7 @@ export interface User {
     icon: string | null;
     header: string | null;
     bio: string | null;
+    isAdmin: boolean
     createdAt: Date;
     updatedAt: Date;
 
@@ -22,6 +23,7 @@ export interface User {
     purchaseMessages: PurchaseMessage[];
     refunds: Refund[]
     paymentAccount: PaymentAccount[]
+    userPayment: UserPayment[]
 }
 export interface PaymentAccount {
     id: number
@@ -34,6 +36,14 @@ export interface PaymentAccount {
     accountHolder: string
     createdAt: Date
     updatedAt: Date
+}
+
+export interface UserPayment {
+    id: number
+    userId: number
+    user: User
+    amount: number
+    createdAt: Date
 }
 
 export enum AccountType {
@@ -92,7 +102,6 @@ export interface Reservation {
     customerId: number;
     scheduleId: number;
     courseId: number;
-    status: number;
     createdAt: Date;
     updatedAt: Date;
 
@@ -103,13 +112,19 @@ export interface Reservation {
     roomId: number
     room: MessageRoom
 }
+
+export enum RefundStatus {
+    Created,
+    Accepted,
+    Denied
+}
 export interface Refund {
     id: number
     customerId: number
     customer: User
     reservationId: number
     reservation: Reservation
-    status: number
+    status: RefundStatus
     text: string
 }
 
@@ -154,12 +169,18 @@ export interface Payment {
     scheduleId: number;
     amount: number;
     method: string;
-    status: number;
+    status: paymentStatus
     createdAt: Date;
     updatedAt: Date;
 
     customer: User;
     schedule: Schedule;
+}
+
+export enum paymentStatus {
+    Created,
+    Paid,
+    Confirmed
 }
 
 // CourseReview型

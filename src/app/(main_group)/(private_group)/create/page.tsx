@@ -51,7 +51,7 @@ const Page = () => {
 
   const fetchGames = async () => {
     try {
-      const response = await requestDB("game", "readGames");
+      const response = await requestDB("game", "readAllGames");
       if (response.success) {
         setGameData(response.data);
       } else {
@@ -73,6 +73,10 @@ const Page = () => {
 
     if (price.trim() == "") {
       alert("価格を入力してください");
+      return;
+    }
+    if (parseInt(price, 10) < 1500) {
+      alert("価格は1500円以上に設定して下さい");
       return;
     }
 

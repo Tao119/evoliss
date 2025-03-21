@@ -13,6 +13,7 @@ model User {
   email             String    @unique
   icon              String?
   header            String?
+  isAdmin           Boolean   @default(false)
   bio               String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -31,6 +32,7 @@ model User {
   notification    Notification[] @relation("receicvedNotification")
   sentNotification    Notification[] @relation("sentNotification")
   paymentAccount    PaymentAccount[]
+  userPayment    UserPayment[]
   refunds    Refund[]
 }
 
@@ -45,6 +47,14 @@ model PaymentAccount {
   accountHolder String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+model UserPayment{
+  id            Int       @id @default(autoincrement())
+  userId        Int      
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount        Int
+  createdAt     DateTime  @default(now())
 }
 
 
@@ -97,11 +107,10 @@ model Reservation {
   id          Int          @id @default(autoincrement())
   customerId  Int
   customer    User         @relation(fields: [customerId], references: [id],onDelete: Cascade)
-  scheduleId  Int
+  scheduleId  Int          @unique
   schedule    Schedule     @relation(fields: [scheduleId], references: [id],onDelete: Cascade)
   courseId    Int
   course      Course       @relation("CourseReservations", fields: [courseId], references: [id] ,onDelete: Cascade)
-  status      Int
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   roomId    Int?    @unique 
@@ -150,7 +159,7 @@ model Payment {
   id          Int          @id @default(autoincrement())
   customerId  Int
   customer    User         @relation(fields: [customerId], references: [id] ,onDelete: Cascade)
-  scheduleId    Int
+  scheduleId    Int       @unique
   schedule      Schedule       @relation(fields: [scheduleId], references: [id] ,onDelete: Cascade)
   amount      Int
   method      String
