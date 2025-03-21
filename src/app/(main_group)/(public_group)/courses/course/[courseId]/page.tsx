@@ -222,7 +222,7 @@ const Page = () => {
                 // )
                 .map((s) => ({
                   startTime: new Date(s.startTime),
-                  hasReservation: s.reservations.length > 0,
+                  hasReservation: s.reservations && s.reservations.length > 0,
                 }))}
               target={CalendarTarget.viewer}
               setChosenSchedule={updateChosenSchedule}

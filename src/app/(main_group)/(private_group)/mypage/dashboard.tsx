@@ -39,12 +39,9 @@ const Dashboard = () => {
   }, [onReady]);
 
   useEffect(() => {
+    console.log(userData?.paymentAccount);
     if (userData) {
-      setPaymentAccount(
-        userData?.paymentAccount.length > 0
-          ? userData?.paymentAccount[0]
-          : undefined
-      );
+      setPaymentAccount(userData?.paymentAccount);
     }
   }, [userData]);
 

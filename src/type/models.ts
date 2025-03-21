@@ -22,7 +22,7 @@ export interface User {
     sentNotification: Notification[]
     purchaseMessages: PurchaseMessage[];
     refunds: Refund[]
-    paymentAccount: PaymentAccount[]
+    paymentAccount: PaymentAccount
     userPayment: UserPayment[]
 }
 export interface PaymentAccount {

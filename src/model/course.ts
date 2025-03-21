@@ -59,6 +59,7 @@ async function readCourseById({ id }: { id: number }) {
                     reservations: true
                 },
             },
+            reservations: true
         },
     });
 }
@@ -193,43 +194,38 @@ async function createCourse({
     image?: string;
     tag: string;
 }) {
-    try {
-        const games = await prisma.game.findMany({
-            where: { name: tag }
-        });
+    const games = await prisma.game.findMany({
+        where: { name: tag }
+    });
 
-        let game = games.find((g) => g.name === tag);
-        if (!game) {
-            game = await prisma.game.create({ data: { name: tag } });
-        }
-
-        const newCourse = await prisma.course.create({
-            data: {
-                title,
-                description,
-                price,
-                coachId,
-                image,
-                gameId: game.id
-            },
-        });
-
-
-        await prisma.schedule.createMany({
-            data: schedules
-                .filter((schedule) => schedule != null)
-                .map((schedule) => {
-                    return {
-                        courseId: newCourse.id,
-                        startTime: new Date(schedule),
-                    }
-                }),
-        });
-        return newCourse;
-    } catch (error) {
-        console.error("❌ Error creating course:", error);
-        return { success: false, message: "講座の作成に失敗しました。" };
+    let game = games.find((g) => g.name === tag);
+    if (!game) {
+        game = await prisma.game.create({ data: { name: tag } });
     }
+
+    const newCourse = await prisma.course.create({
+        data: {
+            title,
+            description,
+            price,
+            coachId,
+            image,
+            gameId: game.id
+        },
+    });
+
+
+    await prisma.schedule.createMany({
+        data: schedules
+            .filter((schedule) => schedule != null)
+            .map((schedule) => {
+                return {
+                    courseId: newCourse.id,
+                    startTime: new Date(schedule),
+                }
+            }),
+    });
+    return newCourse;
 }
 
 
@@ -251,76 +247,71 @@ async function updateCourse({
     image?: string;
     tag?: string;
 }) {
-    try {
-        let gameId: number | undefined;
+    let gameId: number | undefined;
 
-        if (tag) {
-            const games = await prisma.game.findMany({
-                where: { name: tag }
+    if (tag) {
+        const games = await prisma.game.findMany({
+            where: { name: tag }
+        });
+        let game = games.find((g) => g.name === tag)
+
+        if (!game) {
+            game = await prisma.game.create({
+                data: { name: tag }
             });
-            let game = games.find((g) => g.name === tag)
-
-            if (!game) {
-                game = await prisma.game.create({
-                    data: { name: tag }
-                });
-            }
-
-            gameId = game.id;
         }
 
-        if (schedules && schedules.length > 0) {
-            const existingSchedules = await prisma.schedule.findMany({
-                where: { courseId: id },
-                select: {
-                    id: true,
-                    startTime: true,
-                },
-            });
+        gameId = game.id;
+    }
 
-            const schedulesToDelete = existingSchedules.filter(
-                (existing) =>
-                    !schedules.some(
-                        (newSchedule) =>
-                            new Date(existing.startTime).getTime() === new Date(newSchedule).getTime()
-                    )
-            );
-
-            const schedulesToAdd = schedules.filter(
-                (newSchedule) =>
-                    !existingSchedules.some(
-                        (existing) =>
-                            new Date(existing.startTime).getTime() === new Date(newSchedule).getTime()
-                    )
-            );
-
-            if (schedulesToDelete.length > 0) {
-                await prisma.schedule.deleteMany({
-                    where: {
-                        id: { in: schedulesToDelete.map((s) => s.id) },
-                    },
-                });
-            }
-
-            if (schedulesToAdd.length > 0) {
-                await prisma.schedule.createMany({
-                    data: schedulesToAdd.map((schedule) => ({
-                        courseId: id,
-                        startTime: schedule,
-                    })),
-                });
-            }
-        }
-
-        return prisma.course.update({
-            where: { id },
-            data: { title, description, price, image, gameId },
+    if (schedules && schedules.length > 0) {
+        const existingSchedules = await prisma.schedule.findMany({
+            where: { courseId: id },
+            select: {
+                id: true,
+                startTime: true,
+            },
         });
 
-    } catch (error) {
-        console.error("Error editing course:", error);
-        return { success: false, message: "講座の作成に失敗しました。" };
+        const schedulesToDelete = existingSchedules.filter(
+            (existing) =>
+                !schedules.some(
+                    (newSchedule) =>
+                        new Date(existing.startTime).getTime() === new Date(newSchedule).getTime()
+                )
+        );
+
+        const schedulesToAdd = schedules.filter(
+            (newSchedule) =>
+                !existingSchedules.some(
+                    (existing) =>
+                        new Date(existing.startTime).getTime() === new Date(newSchedule).getTime()
+                )
+        );
+
+        if (schedulesToDelete.length > 0) {
+            await prisma.schedule.deleteMany({
+                where: {
+                    id: { in: schedulesToDelete.map((s) => s.id) },
+                },
+            });
+        }
+
+        if (schedulesToAdd.length > 0) {
+            await prisma.schedule.createMany({
+                data: schedulesToAdd.map((schedule) => ({
+                    courseId: id,
+                    startTime: schedule,
+                })),
+            });
+        }
     }
+
+    return prisma.course.update({
+        where: { id },
+        data: { title, description, price, image, gameId },
+    });
+
 }
 
 
@@ -384,7 +375,6 @@ async function readRecommendedCourses({ userId, courseId }: { userId: number; co
             .map((c) => c.course);
     } catch (error) {
         console.error("Error recommend course:", error);
-        return { success: false, message: "講座の作成に失敗しました。" };
     }
 }
 

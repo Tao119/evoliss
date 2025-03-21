@@ -49,6 +49,12 @@ const Page = () => {
     }
   }, [onReady]);
 
+  useEffect(() => {
+    if (gameData && gameData.length > 0) {
+      setSelectedGame(gameData[0]);
+    }
+  }, [gameData]);
+
   const fetchGames = async () => {
     try {
       const response = await requestDB("game", "readAllGames");
@@ -62,6 +68,7 @@ const Page = () => {
       console.error("Error fetching games:", error);
     }
   };
+
   if (!onReady) {
     return <>Loading...</>;
   }
@@ -89,6 +96,10 @@ const Page = () => {
         return;
       }
       const tag = !showNewGame ? selectedGame?.name : newGame;
+      if (!tag || tag.trim() == "") {
+        alert("タグを選択してください");
+        return;
+      }
       const response = await requestDB("course", "createCourse", {
         title,
         description,
