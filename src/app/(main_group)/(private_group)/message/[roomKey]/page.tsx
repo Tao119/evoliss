@@ -71,18 +71,7 @@ const MessageRoomPage = () => {
     const messageHandler = (newMessage: Message) => {
       console.log(`📨 Received newMessage in ${roomKey}`, newMessage);
 
-      setRoomData((prevRoomData) => {
-        if (
-          prevRoomData &&
-          !prevRoomData.messages.some((msg) => msg.id === newMessage.id)
-        ) {
-          return {
-            ...prevRoomData,
-            messages: [...prevRoomData.messages, newMessage],
-          };
-        }
-        return prevRoomData;
-      });
+      fetchRoomData();
 
       markMessagesAsRead();
 
