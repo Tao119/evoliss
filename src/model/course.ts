@@ -436,7 +436,7 @@ async function readCourseByPaymentId({ paymentId }: { paymentId: number }) {
             schedules: {
                 some: {
                     payments: {
-                        some: {
+                        is: {
                             id: paymentId,
                         },
                     },
