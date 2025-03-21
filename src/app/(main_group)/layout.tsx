@@ -132,10 +132,6 @@ export default function GuestLayout({
   }, [socket, userData]);
 
   useEffect(() => {
-    console.log(hasNewMessageRef);
-  }, [hasNewMessageRef]);
-
-  useEffect(() => {
     if (!socket) return;
 
     const messageHandler = () => {

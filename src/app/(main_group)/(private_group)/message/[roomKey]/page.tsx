@@ -57,31 +57,24 @@ const MessageRoomPage = () => {
     animation.startAnimation();
     fetchRoomData();
   }, [userData]);
-
+  const markMessagesAsRead = () => {
+    socket.emit("markAsRead", { userId: userData.id, roomKey });
+    console.log(`📨 Marked messages as read in ${roomKey}`);
+  };
   useEffect(() => {
     if (!socket || !roomKey || !userData) return;
-
-    const markMessagesAsRead = () => {
-      socket.emit("markAsRead", { userId: userData.id, roomKey });
-      console.log(`📨 Marked messages as read in ${roomKey}`);
-    };
-
-    markMessagesAsRead();
 
     const messageHandler = (newMessage: Message) => {
       console.log(`📨 Received newMessage in ${roomKey}`, newMessage);
 
       fetchRoomData();
 
-      markMessagesAsRead();
-
-      // ✅ `hasFetchedUserRef` を使って過剰な `fetchUserData()` の呼び出しを防ぐ
       if (!hasFetchedUserRef.current) {
         hasFetchedUserRef.current = true;
         setTimeout(() => {
           fetchUserData();
           hasFetchedUserRef.current = false;
-        }, 1000); // ✅ 1秒遅延で `fetchUserData()` を呼び出し、連続リクエストを抑制
+        }, 1000);
       }
     };
 
@@ -116,6 +109,7 @@ const MessageRoomPage = () => {
         }
         return prevRoomData;
       });
+      markMessagesAsRead();
       animation.endAnimation();
     }
   };
