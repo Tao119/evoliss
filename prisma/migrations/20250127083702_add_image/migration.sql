@@ -1,5 +1,0 @@
--- AlterTable
-ALTER TABLE `Game` ADD COLUMN `image` VARCHAR(191) NULL;
-
--- AlterTable
-ALTER TABLE `User` ADD COLUMN `image` VARCHAR(191) NULL;

@@ -1,230 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URI")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id                Int       @id @default(autoincrement())
-  name              String?
-  email             String    @unique
-  icon              String?
-  header            String?
-  isAdmin           Boolean   @default(false)
-  bio               String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  // 関連フィールド
-  sentMessages      Message[]
-  purchaseMessages   PurchaseMessage[]
-  messageRooms      MessageRoom[] 
-  courses           Course[] 
-  reservations      Reservation[]
-  payments          Payment[]
-  reviews           Review[]
-  searchHistories   SearchHistory[]
-  userGames         UserGame[]
-  accesses    CourseAccess[]
-  notification    Notification[] @relation("receicvedNotification")
-  sentNotification    Notification[] @relation("sentNotification")
-  paymentAccount    PaymentAccount[]
-  userPayment    UserPayment[]
-  refunds    Refund[]
+  id               Int               @id @default(autoincrement())
+  name             String?
+  email            String            @unique
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  bio              String?
+  header           String?
+  icon             String?
+  isAdmin          Boolean           @default(false)
+  courses          Course[]
+  accesses         CourseAccess[]
+  sentMessages     Message[]
+  messageRooms     MessageRoom[]
+  sentNotification Notification[]    @relation("sentNotification")
+  notification     Notification[]    @relation("receicvedNotification")
+  payments         Payment[]
+  paymentAccount   PaymentAccount?
+  purchaseMessages PurchaseMessage[]
+  refunds          Refund[]
+  reservations     Reservation[]
+  reviews          Review[]
+  searchHistories  SearchHistory[]
+  userGames        UserGame[]
 }
 
 model PaymentAccount {
-  id            Int       @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   userId        Int      @unique
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bankName      String
   branchName    String
   accountType   Int
-  accountNumber String    
+  accountNumber String
   accountHolder String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model UserPayment{
-  id            Int       @id @default(autoincrement())
-  userId        Int      
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount        Int
-  createdAt     DateTime  @default(now())
+model UserPayment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  amount    Int
+  createdAt DateTime @default(now())
 }
-
 
 model Course {
-  id          Int          @id @default(autoincrement())
-  title       String
-  description String
-  price       Int
-  duration    Int        @default(30)
-  image       String?
-  coachId     Int
-  coach       User         @relation(fields: [coachId], references: [id],onDelete: Cascade)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id           Int            @id @default(autoincrement())
+  title        String
+  description  String
+  price        Int
+  image        String?
+  coachId      Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   gameId       Int?
-  game         Game?          @relation(fields: [gameId], references: [id],onDelete: SetNull)
+  duration     Int            @default(30)
+  coach        User           @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  game         Game?          @relation(fields: [gameId], references: [id])
+  accesses     CourseAccess[]
+  messageRooms MessageRoom[]
+  reservations Reservation[]  @relation("CourseReservations")
+  reviews      Review[]
+  schedules    Schedule[]
 
-  schedules   Schedule[]
-  reservations Reservation[] @relation("CourseReservations") 
-  reviews     Review[]
-  messageRooms    MessageRoom[]
-  accesses    CourseAccess[]
+  @@index([coachId], map: "Course_coachId_fkey")
+  @@index([gameId], map: "Course_gameId_fkey")
 }
 
 model Schedule {
-  id          Int          @id @default(autoincrement())
-  courseId    Int
-  course      Course       @relation(fields: [courseId], references: [id] ,onDelete: Cascade)
-  startTime   DateTime
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id               Int               @id @default(autoincrement())
+  courseId         Int
+  startTime        DateTime
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  payments         Payment?
+  purchaseMessages PurchaseMessage[]
+  reservations     Reservation?
+  course           Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  reservations Reservation[]
-  payments    Payment[]
-  purchaseMessages   PurchaseMessage[]
-  
+  @@index([courseId], map: "Schedule_courseId_fkey")
 }
 
-model Refund{
-  id          Int          @id @default(autoincrement())
-  customerId  Int?
-  customer    User?         @relation(fields: [customerId], references: [id],onDelete: SetNull)
-  reservationId  Int?
-  reservation    Reservation?     @relation(fields: [reservationId], references: [id],onDelete: SetNull)
-  status      Int
-  text        String
+model Refund {
+  id            Int          @id @default(autoincrement())
+  customerId    Int?
+  reservationId Int?
+  status        Int
+  text          String
+  customer      User?        @relation(fields: [customerId], references: [id])
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+
+  @@index([customerId], map: "Refund_customerId_fkey")
+  @@index([reservationId], map: "Refund_reservationId_fkey")
 }
 
 model Reservation {
-  id          Int          @id @default(autoincrement())
-  customerId  Int
-  customer    User         @relation(fields: [customerId], references: [id],onDelete: Cascade)
-  scheduleId  Int          @unique
-  schedule    Schedule     @relation(fields: [scheduleId], references: [id],onDelete: Cascade)
-  courseId    Int
-  course      Course       @relation("CourseReservations", fields: [courseId], references: [id] ,onDelete: Cascade)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  roomId    Int?    @unique 
-  room      MessageRoom? @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
+  id         Int          @id @default(autoincrement())
+  customerId Int
+  scheduleId Int          @unique
+  courseId   Int
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  roomId     Int?         @unique
   refunds    Refund[]
+  course     Course       @relation("CourseReservations", fields: [courseId], references: [id], onDelete: Cascade)
+  customer   User         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  room       MessageRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  schedule   Schedule     @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([courseId], map: "Reservation_courseId_fkey")
+  @@index([customerId], map: "Reservation_customerId_fkey")
 }
 
 model MessageRoom {
-  id         Int     @id @default(autoincrement())
-  roomKey    String    @unique
-  courseId   Int?
-  course     Course?  @relation(fields: [courseId], references: [id],onDelete: SetNull)
-  customerId Int
-  customer   User    @relation(fields: [customerId], references: [id],onDelete: Cascade)
-  messages   Message[]
-  notifications Notification[]
-  purchaseMessages  PurchaseMessage[]
-  reservation  Reservation[]
+  id               Int               @id @default(autoincrement())
+  courseId         Int?
+  customerId       Int
+  roomKey          String            @unique
+  messages         Message[]
+  course           Course?           @relation(fields: [courseId], references: [id])
+  customer         User              @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  notifications    Notification[]
+  purchaseMessages PurchaseMessage[]
+  reservation      Reservation?
+
+  @@index([courseId], map: "MessageRoom_courseId_fkey")
+  @@index([customerId], map: "MessageRoom_customerId_fkey")
 }
 
 model Message {
-  id        Int         @id @default(autoincrement())
-  roomId    Int
-  room      MessageRoom @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
-  senderId  Int?
-  sender    User?        @relation(fields: [senderId], references: [id],onDelete: SetNull)
-  content   String
-  isRead    Boolean     @default(false)
-  sentAt    DateTime    @default(now())
+  id       Int         @id @default(autoincrement())
+  senderId Int?
+  content  String
+  sentAt   DateTime    @default(now())
+  isRead   Boolean     @default(false)
+  roomId   Int
+  room     MessageRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender   User?       @relation(fields: [senderId], references: [id])
+
+  @@index([roomId], map: "Message_roomId_fkey")
+  @@index([senderId], map: "Message_senderId_fkey")
 }
 
 model PurchaseMessage {
-  id        Int         @id @default(autoincrement())
-  roomId    Int
-  room      MessageRoom @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
-  senderId  Int?
-  sender    User?        @relation(fields: [senderId], references: [id],onDelete: SetNull)
+  id         Int         @id @default(autoincrement())
+  roomId     Int
+  senderId   Int?
   scheduleId Int?
-  schedule    Schedule?     @relation(fields: [scheduleId], references: [id],onDelete: SetNull)
-  isRead    Boolean     @default(false)
-  sentAt    DateTime    @default(now())
+  isRead     Boolean     @default(false)
+  sentAt     DateTime    @default(now())
+  room       MessageRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  schedule   Schedule?   @relation(fields: [scheduleId], references: [id])
+  sender     User?       @relation(fields: [senderId], references: [id])
+
+  @@index([roomId], map: "PurchaseMessage_roomId_fkey")
+  @@index([scheduleId], map: "PurchaseMessage_scheduleId_fkey")
+  @@index([senderId], map: "PurchaseMessage_senderId_fkey")
 }
 
-
 model Payment {
-  id          Int          @id @default(autoincrement())
-  customerId  Int
-  customer    User         @relation(fields: [customerId], references: [id] ,onDelete: Cascade)
-  scheduleId    Int       @unique
-  schedule      Schedule       @relation(fields: [scheduleId], references: [id] ,onDelete: Cascade)
-  amount      Int
-  method      String
-  status      Int
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  amount     Int
+  method     String
+  status     Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  scheduleId Int      @unique
+  customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([customerId], map: "Payment_customerId_fkey")
 }
 
 model Review {
-  id          Int          @id @default(autoincrement())
-  customerId  Int
-  customer    User         @relation(fields: [customerId], references: [id],onDelete: Cascade)
-  courseId    Int
-  course      Course       @relation(fields: [courseId], references: [id] ,onDelete: Cascade)
-  rating      Int
-  comment     String?
-  createdAt   DateTime     @default(now())
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  courseId   Int
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([courseId], map: "Review_courseId_fkey")
+  @@index([customerId], map: "Review_customerId_fkey")
 }
 
 model SearchHistory {
-  id          Int          @id @default(autoincrement())
-  userId      Int
-  user        User         @relation(fields: [userId], references: [id] ,onDelete: Cascade)
-  query       String
-  show        Boolean      @default(true)
-  searchedAt  DateTime     @default(now())
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  query      String
+  searchedAt DateTime @default(now())
+  show       Boolean  @default(true)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "SearchHistory_userId_fkey")
 }
 
 model Game {
-  id          Int          @id @default(autoincrement())
-  name        String      
-  image       String?
-  createdAt   DateTime     @default(now())
-
-  courses      Course[]
-  userGames    UserGame[]
+  id        Int        @id @default(autoincrement())
+  name      String
+  createdAt DateTime   @default(now())
+  image     String?
+  courses   Course[]
+  userGames UserGame[]
 }
 
 model UserGame {
-  id          Int          @id @default(autoincrement())
-  userId      Int
-  user        User         @relation(fields: [userId], references: [id] ,onDelete: Cascade)
-  gameId       Int
-  game         Game          @relation(fields: [gameId], references: [id],onDelete: Cascade)
+  id     Int  @id @default(autoincrement())
+  userId Int
+  gameId Int
+  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([gameId], map: "UserGame_gameId_fkey")
+  @@index([userId], map: "UserGame_userId_fkey")
 }
 
 model CourseAccess {
-  id          Int          @id @default(autoincrement())
-  courseId      Int
-  course        Course        @relation(fields: [courseId], references: [id] ,onDelete: Cascade)
-  userId       Int?
-  user         User?          @relation(fields: [userId], references: [id] ,onDelete: SetNull)
-  createdAt   DateTime     @default(now())
+  id        Int      @id @default(autoincrement())
+  courseId  Int
+  userId    Int?
+  createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([courseId], map: "CourseAccess_courseId_fkey")
+  @@index([userId], map: "CourseAccess_userId_fkey")
 }
 
-
 model Notification {
-  id          Int          @id @default(autoincrement())
-  userId       Int
-  user         User          @relation(fields: [userId], references: [id] ,onDelete: Cascade,name:"receicvedNotification")
-  senderId       Int?
-  sender         User?          @relation(fields: [senderId], references: [id] ,onDelete: Cascade,name:"sentNotification")
-  content     String
-  createdAt   DateTime     @default(now())
-  isRead      Boolean  @default(false)
+  id        Int          @id @default(autoincrement())
+  userId    Int
+  content   String
+  createdAt DateTime     @default(now())
+  isRead    Boolean      @default(false)
+  senderId  Int?
   roomId    Int?
-  room      MessageRoom? @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
+  room      MessageRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender    User?        @relation("sentNotification", fields: [senderId], references: [id], onDelete: Cascade)
+  user      User         @relation("receicvedNotification", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId], map: "Notification_roomId_fkey")
+  @@index([senderId], map: "Notification_senderId_fkey")
+  @@index([userId], map: "Notification_userId_fkey")
 }
