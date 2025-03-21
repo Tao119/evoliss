@@ -140,11 +140,15 @@ const MessageRoomPage = () => {
       console.log("⚠️ Cannot send message. Socket is not connected.");
       return;
     }
-
-    socket.emit("sendMessage", {
+    const response = await requestDB("message", "sendMessage", {
       userId: userData.id,
       roomKey: roomKey as string,
       content,
+    });
+
+    socket.emit("sendMessage", {
+      data: response.data,
+      roomKey: roomKey as string,
     });
 
     const course = roomData.course;

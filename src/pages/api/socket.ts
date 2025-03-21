@@ -38,33 +38,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
             console.log(`📢 User ${socket.id} joined room: room-${roomKey}`);
             socket.join(`room-${roomKey}`);
 
-            // 確認: ルームに現在いる全ユーザーを取得
             io.in(`room-${roomKey}`).fetchSockets().then(sockets => {
                 console.log(`👥 Users in room ${roomKey}:`, sockets.map(s => s.id));
             });
         });
 
-        socket.on("sendMessage", async ({ userId, roomKey, content }) => {
-            console.log(`✉️ Sending message in room: room-${roomKey}`);
-            console.log("send message", { userId, roomKey, content });
+        socket.on("sendMessage", async ({ data, roomKey }) => {
 
             try {
-                const response = await requestDB("message", "sendMessage", {
-                    userId,
-                    roomKey,
-                    content,
+
+                // 確認: `emit` される前に `roomKey` の接続情報を取得
+                io.in(`room-${roomKey}`).fetchSockets().then(sockets => {
+                    console.log(`👀 Broadcasting newMessage to:`, sockets.map(s => s.id));
                 });
 
-                if (response.success) {
-                    console.log(`📩 Message sent successfully to room ${roomKey}`);
+                io.to(`room-${roomKey}`).emit("newMessage", data);
 
-                    // 確認: `emit` される前に `roomKey` の接続情報を取得
-                    io.in(`room-${roomKey}`).fetchSockets().then(sockets => {
-                        console.log(`👀 Broadcasting newMessage to:`, sockets.map(s => s.id));
-                    });
-
-                    io.to(`room-${roomKey}`).emit("newMessage", response.data);
-                }
             } catch (error) {
                 console.error("❌ Error sending message:", error);
             }

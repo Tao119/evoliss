@@ -170,6 +170,8 @@ async function sendFirstMessage({ userId, courseId, content }: { userId: number;
     return newRoom
 }
 
+
+
 export async function markMessagesAsRead({ userId, roomKey }: { userId: number; roomKey: string }) {
     await prisma.message.updateMany({
         where: {

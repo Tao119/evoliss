@@ -138,7 +138,7 @@ export default function GuestLayout({
   useEffect(() => {
     if (!socket) return;
 
-    const messageHandler = (newMessage: Message) => {
+    const messageHandler = () => {
       console.log("new message!!");
       if (!hasNewMessageRef.current) {
         console.log("new message and update");
