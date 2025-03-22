@@ -57,7 +57,9 @@ const MessageRoomPage = () => {
     animation.startAnimation();
     fetchRoomData();
   }, [userData]);
+
   const markMessagesAsRead = () => {
+    if (!socket || !roomKey || !userData) return;
     socket.emit("markAsRead", { userId: userData.id, roomKey });
     console.log(`📨 Marked messages as read in ${roomKey}`);
   };
