@@ -10,6 +10,16 @@
     height: 100%;
     padding: 30px;
     gap: 10px;
+    color: $white;
+
+    &__title {
+        font-size: $fs-title;
+        font-weight: $fw-bold;
+    }
+
+    &__sub-title {
+        font-size: $fs-medium;
+    }
 
     &__user {
         display: flex;

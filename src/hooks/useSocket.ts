@@ -16,7 +16,7 @@ const socketSingleton = (() => {
             if (!instance) {
                 console.log("🌐 Creating new WebSocket instance...");
 
-                instance = io(process.env.NEXT_PUBLIC_SOCKET_URL ?? "http://localhost:3000", {
+                instance = io(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000", {
                     path: "/api/socket",
                     transports: ["websocket", "polling"],
                     reconnection: true,
