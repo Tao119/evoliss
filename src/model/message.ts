@@ -12,7 +12,6 @@ export const messageFuncs: { [funcName: string]: Function } = {
 };
 
 
-// 🔹 メッセージルームの取得（特定のユーザーとコースに関連）
 async function readRoomByUserAndCourseId({ userId, courseId }: { userId: number; courseId: number }) {
     return await prisma.messageRoom.findFirst({
         where: {
@@ -22,7 +21,6 @@ async function readRoomByUserAndCourseId({ userId, courseId }: { userId: number;
     });
 }
 
-// 🔹 ルームのユーザー確認
 async function confirmUser({ userId, roomKey }: { userId: number; roomKey: string }) {
     const room = await prisma.messageRoom.findUnique({
         where: { roomKey },
@@ -38,7 +36,7 @@ async function confirmUser({ userId, roomKey }: { userId: number; roomKey: strin
 async function readRoomByKey({ roomKey }: { roomKey: string }) {
     return await prisma.messageRoom.findUnique({
         where: { roomKey },
-        select: { id: true, customerId: true, course: { include: { coach: { include: { courses: true } } } }, messages: { include: { sender: true } }, purchaseMessages: { include: { sender: true, schedule: { include: { course: { include: { coach: true } } } } } } },
+        select: { id: true, customerId: true, customer: true, course: { include: { coach: { include: { courses: true } } } }, messages: { include: { sender: true } }, purchaseMessages: { include: { sender: true, schedule: { include: { course: { include: { coach: true } } } } } } },
     });
 }
 
@@ -129,13 +127,14 @@ async function sendFirstMessage({ userId, courseId, content }: { userId: number;
 
 
     if (existingRoom) {
-        return await prisma.message.create({
+        await prisma.message.create({
             data: {
                 roomId: existingRoom.id,
                 senderId: userId,
                 content,
             },
         });
+        return existingRoom
     }
     let roomKey: string = "";
     let isUnique = false;

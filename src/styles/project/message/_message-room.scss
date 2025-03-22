@@ -11,6 +11,12 @@
 
     color: $white;
 
+    &__name {
+        align-self: flex-start;
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+    }
+
     &__content {
         display: flex;
         flex-direction: column;

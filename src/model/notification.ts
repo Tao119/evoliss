@@ -16,17 +16,20 @@ export async function getNotificationsByUserId({ userId }: { userId: number }) {
 async function createNotification({
     userId,
     content,
-    senderId
+    senderId,
+    roomId
 }: {
     userId: number;
     senderId?: number;
     content: string
+    roomId?: number
 }) {
     return await prisma.notification.create({
         data: {
             userId,
             content,
-            senderId
+            senderId,
+            roomId
         }
     })
 }

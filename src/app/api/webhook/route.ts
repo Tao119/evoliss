@@ -85,7 +85,8 @@ export async function POST(request: Request) {
             await requestDB("notification", "createNotification", {
                 userId: course.coachId,
                 content: `${user.name}さんがあなたの講座を購入しました。`,
-                senderId: parsedUserId
+                senderId: parsedUserId,
+                roomId: room.id
             });
             await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId, roomId: room.id });
 

@@ -96,6 +96,7 @@ const CourseMessagePage = () => {
 「${content}」
         `,
         senderId: userData.id,
+        roomId: response.data.id,
       });
 
       if (response.success) {
@@ -140,7 +141,9 @@ const CourseMessagePage = () => {
 
   return (
     <div className="p-message-room l-page -fixed">
-      <div className="p-message-room__title">メッセージ</div>
+      <div className="p-message-room__title">
+        {course.coach.name} さんとのメッセージ
+      </div>
       <div className="p-message-room__coach">
         <ImageBox
           className="p-message-room__coach-icon"

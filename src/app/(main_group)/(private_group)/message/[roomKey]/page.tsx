@@ -145,6 +145,7 @@ const MessageRoomPage = () => {
 「${content}」
         `,
       senderId: userData.id,
+      roomId: roomData.id,
     });
 
     setTimeout(() => {
@@ -184,7 +185,17 @@ const MessageRoomPage = () => {
 
   return (
     <div className="p-message-room l-page -fixed">
-      <div className="p-message-room__title">メッセージ</div>
+      <div className="p-message-room__title">
+        {roomData.customerId == userData.id
+          ? roomData.course.coach.name?.trim() != ""
+            ? roomData.course.coach.name
+            : "NO NAME"
+          : roomData.customer.name?.trim() != ""
+          ? roomData.customer.name
+          : "NO NAME"}{" "}
+        さんとのメッセージ
+      </div>
+
       <div
         className="p-message-room__coach"
         onClick={() => router.push(`/courses/course/${roomData.course.id}`)}
