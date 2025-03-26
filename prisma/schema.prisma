@@ -113,11 +113,12 @@ model Reservation {
   courseId   Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  roomId     Int?
+  roomId     Int
   refunds    Refund[]
   course     Course   @relation("CourseReservations", fields: [courseId], references: [id], onDelete: Cascade)
   customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
   schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  room       MessageRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([courseId], map: "Reservation_courseId_fkey")
   @@index([customerId], map: "Reservation_customerId_fkey")
@@ -133,6 +134,7 @@ model MessageRoom {
   customer         User              @relation(fields: [customerId], references: [id], onDelete: Cascade)
   notifications    Notification[]
   purchaseMessages PurchaseMessage[]
+  reservations     Reservation[]
 
   @@index([courseId], map: "MessageRoom_courseId_fkey")
   @@index([customerId], map: "MessageRoom_customerId_fkey")
