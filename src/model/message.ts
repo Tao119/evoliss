@@ -175,7 +175,7 @@ export async function markMessagesAsRead({ userId, roomKey }: { userId: number; 
     await prisma.message.updateMany({
         where: {
             room: { roomKey },
-            senderId: { not: userId }, // 自分が送ったものは関係なし
+            senderId: { not: userId },
             isRead: false,
         },
         data: { isRead: true },

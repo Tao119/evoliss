@@ -7,9 +7,39 @@
     width: 100%;
     height: 100%;
     position: relative;
+    gap: 10px;
 
     @include mq(sp) {
         position: inherit;
+    }
+
+    &__switcher-wrapper {
+        width: auto;
+        align-self: flex-start;
+    }
+
+    &__switcher {
+        width: auto;
+
+    }
+
+    &__course-pay-text {
+        font-size: $fs-text;
+    }
+
+    &__switcher-text {
+        width: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: $fs-text;
+        padding: 5px 10px;
+        border-radius: 0;
+        height: auto;
+        background-color: transparent;
+        box-shadow: none;
+        color: $theme;
+        border-bottom: 1px solid $theme;
     }
 
     &__courses-panel {
@@ -19,6 +49,12 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+    }
+
+    &__courses-title {
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+        padding: 10px;
     }
 
     &__course-sub-title {
@@ -81,7 +117,7 @@
         display: flex;
         flex-direction: row;
         width: 100%;
-        height: 100px;
+        height: 30px;
         flex-shrink: 0;
         align-items: flex-start;
         justify-content: flex-start;

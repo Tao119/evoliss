@@ -94,7 +94,7 @@ const Page = () => {
 
   return (
     <div className="p-about l-page">
-      <div className="p-about__top-panel">
+      {/* <div className="p-about__top-panel">
         <div className="p-about__top-panel-left">
           <div className="p-about__top-panel-title">EVOLISSとは</div>
           <div className="p-about__top-panel-phrase-container">
@@ -106,7 +106,7 @@ const Page = () => {
           </div>
         </div>
         <ImageBox className="p-about__top-panel-right" src={profileIcon} />
-      </div>
+      </div> */}
 
       <div className="p-about__coach-panel">
         <div className="p-about__section-title">コーチから探す</div>

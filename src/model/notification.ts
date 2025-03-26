@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 export const notificationFuncs: { [funcName: string]: Function } = {
     createNotification,
-    readNotification,
+    markNotificationAsRead,
     getNotificationsByUserId
 };
 
@@ -34,9 +34,9 @@ async function createNotification({
     })
 }
 
-export async function readNotification({ id }: { id: number }) {
+export async function markNotificationAsRead({ userId }: { userId: number }) {
     return await prisma.notification.updateMany({
-        where: { id },
+        where: { userId },
         data: { isRead: true },
     });
 }

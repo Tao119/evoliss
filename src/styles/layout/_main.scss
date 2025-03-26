@@ -160,8 +160,8 @@
     }
 
     &__icon-img {
-        height: 50px;
-        width: 50px
+        height: 60px;
+        width: 60px
     }
 
     &__column-title {
@@ -176,6 +176,7 @@
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        text-align: start;
 
     }
 }

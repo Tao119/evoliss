@@ -12,6 +12,7 @@ import { AccountType, PaymentAccount } from "@/type/models";
 import { requestDB } from "@/services/axios";
 import dayjs from "dayjs";
 import { MultilineInput } from "@/components/multilineInput";
+import { Switcher } from "@/components/switcher";
 
 export const AccountTypeString = ["普通預金", "当座預金"];
 
@@ -22,6 +23,7 @@ const Dashboard = () => {
   const [showEditAccount, setShowPaymentAccount] = useState(false);
   const [showRefund, setShowRefund] = useState<number>();
   const [refundMessage, setRefundMessage] = useState("");
+  const [currentTab, setTab] = useState<number>();
   const [editingPaymentAccount, setEditingPaymentAccount] =
     useState<PaymentAccount>();
   const [paymentAccount, setPaymentAccount] = useState<PaymentAccount>();
@@ -48,6 +50,18 @@ const Dashboard = () => {
   if (!onReady) {
     return <>Loading...</>;
   }
+
+  const dashboardTabs: { label: string; value: number }[] = [
+    { label: "コーチ", value: 1 },
+    ...(userData.reservations.length > 0
+      ? [{ label: "受講者", value: 0 }]
+      : []),
+  ];
+  useEffect(() => {
+    if (currentTab == undefined) {
+      setTab(dashboardTabs[0].value);
+    }
+  }, [dashboardTabs]);
 
   const handleSubmit = async () => {
     if (
@@ -103,182 +117,376 @@ const Dashboard = () => {
 
   return (
     <div className="p-coach">
-      {paymentAccount ? (
-        <div className="p-coach__payment-account">
-          <div className="p-coach__payment-account-title">口座情報</div>
-
-          <div className="p-coach__payment-account-info">
-            {paymentAccount.bankName}/ {paymentAccount.branchName}/{" "}
-            {AccountTypeString[paymentAccount.accountType]}/{" "}
-            {paymentAccount.accountNumber}/ {paymentAccount.accountHolder}
+      <div className="p-coach__switcher-wrapper">
+        {dashboardTabs.length > 1 ? (
+          <Switcher
+            contents={dashboardTabs}
+            onChange={(e) => setTab(e)}
+            className="p-coach__switcher"
+            type2
+          />
+        ) : (
+          <div className="p-coach__switcher-text">{dashboardTabs[0].label}</div>
+        )}
+      </div>
+      {currentTab == 0 ? (
+        <>
+          {userData.reservations.filter(
+            (reservation) =>
+              new Date(reservation.schedule.startTime).getTime() >=
+              new Date().getTime()
+          ).length > 0 && (
+            <div className="p-coach__courses-panel">
+              <div className="p-coach__courses-title">受講予定講座一覧</div>
+              <div className="p-coach__course-list -high">
+                {userData.reservations
+                  .filter(
+                    (reservation) =>
+                      new Date(reservation.schedule.startTime).getTime() >=
+                      new Date().getTime()
+                  )
+                  .sort((a, b) =>
+                    new Date(a.schedule.startTime).getTime() <=
+                    new Date(b.schedule.startTime).getTime()
+                      ? 1
+                      : -1
+                  )
+                  .map((reservation) => (
+                    <div
+                      key={reservation.id}
+                      className="p-coach__course-item -high"
+                      onClick={() =>
+                        reservation.room.roomKey
+                          ? router.push(`/message/${reservation.room.roomKey}`)
+                          : null
+                      }
+                    >
+                      <div className="p-coach__course-title">
+                        タイトル: {reservation.course.title}
+                      </div>
+                      <div className="p-coach__course-title">
+                        開始時間:{" "}
+                        {dayjs(reservation.schedule.startTime).format(
+                          "YYYY年M月D日 hh:mm~"
+                        )}
+                      </div>
+                      <div className="p-coach__course-title">
+                        コーチ: {reservation.course.coach.name}
+                      </div>
+                      <Button
+                        className="p-coach__course-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowRefund(reservation.id);
+                        }}
+                      >
+                        キャンセル申請
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+          {userData.reservations.filter(
+            (reservation) =>
+              new Date(reservation.schedule.startTime).getTime() <
+              new Date().getTime()
+          ).length > 0 && (
+            <div className="p-coach__courses-panel">
+              <div className="p-coach__courses-title">受講済み講座一覧</div>
+              <div className="p-coach__course-list -high">
+                {userData.reservations
+                  .filter(
+                    (reservation) =>
+                      new Date(reservation.schedule.startTime).getTime() <
+                      new Date().getTime()
+                  )
+                  .sort((a, b) =>
+                    new Date(a.schedule.startTime).getTime() <=
+                    new Date(b.schedule.startTime).getTime()
+                      ? 1
+                      : -1
+                  )
+                  .map((reservation) => (
+                    <div
+                      key={reservation.id}
+                      className="p-coach__course-item -high"
+                      onClick={() =>
+                        reservation.room.roomKey
+                          ? router.push(`/message/${reservation.room.roomKey}`)
+                          : null
+                      }
+                    >
+                      <div className="p-coach__course-title">
+                        タイトル: {reservation.course.title}
+                      </div>
+                      <div className="p-coach__course-title">
+                        開始時間:{" "}
+                        {dayjs(reservation.schedule.startTime).format(
+                          "YYYY年M月D日 hh:mm~"
+                        )}
+                      </div>
+                      <div className="p-coach__course-title">
+                        コーチ: {reservation.course.coach.name}
+                      </div>
+                      <Button
+                        className="p-coach__course-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowRefund(reservation.id);
+                        }}
+                      >
+                        返金申請
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : currentTab == 1 ? (
+        <>
+          {paymentAccount ? (
+            <div className="p-coach__payment-account">
+              <div className="p-coach__payment-account-title">出金口座</div>
+              <div className="p-coach__payment-account-info">
+                {paymentAccount.bankName}/ {paymentAccount.branchName}/{" "}
+                {AccountTypeString[paymentAccount.accountType]}/{" "}
+                {paymentAccount.accountNumber}/ {paymentAccount.accountHolder}
+              </div>
+              <Button
+                className="p-coach__payment-account-button"
+                onClick={() => {
+                  setShowPaymentAccount(true);
+                  setEditingPaymentAccount(paymentAccount);
+                }}
+              >
+                編集
+              </Button>
+            </div>
+          ) : (
+            <div className="p-coach__payment-account">
+              <Button
+                className="p-coach__payment-account-button"
+                onClick={() => setShowPaymentAccount(true)}
+              >
+                口座情報を登録する
+              </Button>
+            </div>
+          )}
+          <div className="p-coach__course-sub-title">
+            売上残高:
+            {Math.floor(
+              userData.courses
+                .flatMap((course) =>
+                  course.reservations.map((reservation) => course.price)
+                )
+                .reduce((sum, price) => sum + price, 0) * 0.9
+            ) -
+              userData.userPayment.reduce(
+                (sum, payment) => sum + payment.amount,
+                0
+              )}
+            円
           </div>
-          <Button
-            className="p-coach__payment-account-button"
-            onClick={() => {
-              setShowPaymentAccount(true);
-              setEditingPaymentAccount(paymentAccount);
-            }}
-          >
-            編集
-          </Button>
-        </div>
-      ) : (
-        <div className="p-coach__payment-account">
-          <Button onClick={() => setShowPaymentAccount(true)}>
-            口座情報を登録する
-          </Button>
-        </div>
-      )}
-      <div className="p-coach__courses-panel">
-        <div className="p-coach__courses-title">受講予定講座一覧</div>
-        <div className="p-coach__course-list -high">
-          {userData.reservations
-            .filter(
+          <div className="p-coach__course-pay-text">
+            {(() => {
+              const now = new Date();
+
+              const thisMonth20End = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                20,
+                23,
+                59,
+                59
+              );
+              const isAfter20th = now > thisMonth20End;
+
+              const start = new Date(
+                now.getFullYear(),
+                now.getMonth() - 1,
+                21,
+                0,
+                0,
+                0
+              );
+              const end = thisMonth20End;
+
+              const paymentDate = new Date(
+                now.getFullYear(),
+                now.getMonth() + 1,
+                0
+              );
+
+              const amount = Math.floor(
+                userData.courses
+                  .flatMap((course) =>
+                    course.reservations
+                      .filter((reservation) => {
+                        const heldAt = new Date(reservation.schedule.startTime);
+                        return heldAt >= start && heldAt <= end;
+                      })
+                      .map(() => course.price)
+                  )
+                  .reduce((sum, price) => sum + price, 0) * 0.9
+              );
+
+              return `（${paymentDate.getFullYear()}/${
+                paymentDate.getMonth() + 1
+              }/${paymentDate.getDate()} 入金${
+                isAfter20th ? "確定" : "予定"
+              }: ${amount.toLocaleString("ja-JP")}円）`;
+            })()}
+          </div>
+          <div className="p-coach__course-pay-text">
+            {(() => {
+              const now = new Date();
+
+              const start = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                21,
+                0,
+                0,
+                0
+              );
+              const end = now;
+
+              const paymentDate = new Date(
+                now.getFullYear(),
+                now.getMonth() + 2,
+                0
+              );
+
+              const amount = Math.floor(
+                userData.courses
+                  .flatMap((course) =>
+                    course.reservations
+                      .filter((reservation) => {
+                        const heldAt = new Date(reservation.schedule.startTime);
+                        return heldAt >= start && heldAt <= end;
+                      })
+                      .map(() => course.price)
+                  )
+                  .reduce((sum, price) => sum + price, 0) * 0.9
+              );
+
+              return `（${paymentDate.getFullYear()}/${
+                paymentDate.getMonth() + 1
+              }/${paymentDate.getDate()} 入金予定: ${amount.toLocaleString(
+                "ja-JP"
+              )}円）`;
+            })()}
+          </div>
+          {userData.courses.flatMap((course) =>
+            course.reservations.filter(
               (reservation) =>
-                new Date(reservation.schedule.startTime).getTime() >=
+                new Date(reservation.schedule.startTime).getTime() >
                 new Date().getTime()
             )
-            .sort((a, b) =>
-              new Date(a.schedule.startTime).getTime() <=
-              new Date(b.schedule.startTime).getTime()
-                ? 1
-                : -1
-            )
-            .map((reservation) => (
-              <div
-                key={reservation.id}
-                className="p-coach__course-item -high"
-                onClick={() =>
-                  reservation.roomId
-                    ? router.push(`/message/${reservation.roomId}`)
-                    : null
-                }
-              >
-                <div className="p-coach__course-title">
-                  タイトル: {reservation.course.title}
-                </div>
-                <div className="p-coach__course-title">
-                  開始時間:{" "}
-                  {dayjs(new Date(reservation.schedule.startTime)).format(
-                    "YYYY年M月D日 hh:mm~"
-                  )}
-                </div>
-                <div className="p-coach__course-title">
-                  コーチ: {reservation.course.coach.name}
-                </div>
-                <Button
-                  className="p-coach__course-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowRefund(reservation.id);
-                  }}
-                >
-                  キャンセル申請
-                </Button>
+          ).length > 0 && (
+            <div className="p-coach__courses-panel">
+              <div className="p-coach__courses-title">開催予定講座一覧</div>
+              <div className="p-coach__course-list">
+                {userData.courses.flatMap((course) =>
+                  course.reservations
+                    .filter(
+                      (reservation) =>
+                        new Date(reservation.schedule.startTime).getTime() >
+                        new Date().getTime()
+                    )
+                    .sort((a, b) =>
+                      new Date(a.schedule.startTime).getTime() >=
+                      new Date(b.schedule.startTime).getTime()
+                        ? 1
+                        : -1
+                    )
+                    .map((reservation) => (
+                      <div
+                        key={reservation.id}
+                        className="p-coach__course-item"
+                        onClick={() =>
+                          reservation.room.roomKey
+                            ? router.push(
+                                `/message/${reservation.room.roomKey}`
+                              )
+                            : null
+                        }
+                      >
+                        <div className="p-coach__course-title">
+                          タイトル: {course.title}
+                        </div>
+                        <div className="p-coach__course-title">
+                          開始時間:{" "}
+                          {dayjs(reservation.schedule.startTime).format(
+                            "YYYY年M月D日 hh:mm~"
+                          )}
+                        </div>
+                        <div className="p-coach__course-title">
+                          予約者名: {reservation.customer.name}
+                        </div>
+                      </div>
+                    ))
+                )}
               </div>
-            ))}
-        </div>
-      </div>
-      <div className="p-coach__course-sub-title">
-        売上金額:
-        {userData.courses
-          .flatMap((course) =>
-            course.reservations.map((reservation) => course.price)
-          )
-          .reduce((sum, price) => sum + price, 0) -
-          userData.userPayment.reduce(
-            (sum, payment) => sum + payment.amount,
-            0
-          )}
-        円
-      </div>
-      <div className="p-coach__courses-panel">
-        <div className="p-coach__courses-title">開催予定講座一覧</div>
-        <div className="p-coach__course-list">
+            </div>
+          )}{" "}
           {userData.courses.flatMap((course) =>
-            course.reservations
-              .filter(
-                (reservation) =>
-                  new Date(reservation.schedule.startTime).getTime() >
-                  new Date().getTime()
-              )
-              .sort((a, b) =>
-                new Date(a.schedule.startTime).getTime() >=
-                new Date(b.schedule.startTime).getTime()
-                  ? 1
-                  : -1
-              )
-              .map((reservation) => (
-                <div
-                  key={reservation.id}
-                  className="p-coach__course-item"
-                  onClick={() =>
-                    reservation.roomId
-                      ? router.push(`/message/${reservation.roomId}`)
-                      : null
-                  }
-                >
-                  <div className="p-coach__course-title">
-                    タイトル: {course.title}
-                  </div>
-                  <div className="p-coach__course-title">
-                    開始時間:{" "}
-                    {dayjs(new Date(reservation.schedule.startTime)).format(
-                      "YYYY年M月D日 hh:mm~"
-                    )}
-                  </div>
-                  <div className="p-coach__course-title">
-                    予約者名: {reservation.customer.name}
-                  </div>
-                </div>
-              ))
+            course.reservations.filter(
+              (reservation) =>
+                new Date(reservation.schedule.startTime).getTime() <=
+                new Date().getTime()
+            )
+          ).length > 0 && (
+            <div className="p-coach__courses-panel">
+              <div className="p-coach__courses-title">開催済み講座一覧</div>
+              <div className="p-coach__course-list">
+                {userData.courses.flatMap((course) =>
+                  course.reservations
+                    .filter(
+                      (reservation) =>
+                        new Date(reservation.schedule.startTime).getTime() <=
+                        new Date().getTime()
+                    )
+                    .sort((a, b) =>
+                      new Date(a.schedule.startTime).getTime() <=
+                      new Date(b.schedule.startTime).getTime()
+                        ? 1
+                        : -1
+                    )
+                    .map((reservation) => (
+                      <div
+                        key={reservation.id}
+                        className="p-coach__course-item"
+                        onClick={() =>
+                          reservation.room.roomKey
+                            ? router.push(
+                                `/message/${reservation.room.roomKey}`
+                              )
+                            : null
+                        }
+                      >
+                        <div className="p-coach__course-title">
+                          タイトル: {course.title}
+                        </div>
+                        <div className="p-coach__course-title">
+                          開始時間:{" "}
+                          {dayjs(reservation.schedule.startTime).format(
+                            "YYYY年M月D日 hh:mm~"
+                          )}
+                        </div>
+                        <div className="p-coach__course-title">
+                          予約者名: {reservation.customer.name}
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+            </div>
           )}
-        </div>
-      </div>
-      <div className="p-coach__courses-panel">
-        <div className="p-coach__courses-title">開催済み講座一覧</div>
-        <div className="p-coach__course-list">
-          {userData.courses.flatMap((course) =>
-            course.reservations
-              .filter(
-                (reservation) =>
-                  new Date(reservation.schedule.startTime).getTime() <=
-                  new Date().getTime()
-              )
-              .sort((a, b) =>
-                new Date(a.schedule.startTime).getTime() <=
-                new Date(b.schedule.startTime).getTime()
-                  ? 1
-                  : -1
-              )
-              .map((reservation) => (
-                <div
-                  key={reservation.id}
-                  className="p-coach__course-item"
-                  onClick={() =>
-                    reservation.roomId
-                      ? router.push(`/message/${reservation.roomId}`)
-                      : null
-                  }
-                >
-                  <div className="p-coach__course-title">
-                    タイトル: {course.title}
-                  </div>
-                  <div className="p-coach__course-title">
-                    開始時間:{" "}
-                    {dayjs(new Date(reservation.schedule.startTime)).format(
-                      "YYYY年M月D日 hh:mm~"
-                    )}
-                  </div>
-                  <div className="p-coach__course-title">
-                    予約者名: {reservation.customer.name}
-                  </div>
-                </div>
-              ))
-          )}
-        </div>
-      </div>
-
+        </>
+      ) : null}
       {showEditAccount && (
         <div className="p-coach__edit-payment-account">
           <IconButton
@@ -391,9 +599,7 @@ const Dashboard = () => {
             <div>コーチ:{data.course.coach.name}</div>
             <div>
               開始時間:{" "}
-              {dayjs(new Date(data.schedule.startTime)).format(
-                "YYYY年M月D日 hh:mm~"
-              )}
+              {dayjs(data.schedule.startTime).format("YYYY年M月D日 hh:mm~")}
             </div>
             <MultilineInput
               value={refundMessage}

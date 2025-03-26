@@ -13,6 +13,7 @@ import { requestDB } from "@/services/axios";
 import {
   AnimationContext,
   BreakPointContext,
+  SocketContext,
   UserDataContext,
 } from "@/app/contextProvider";
 import { ImageBox } from "@/components/imageBox";
@@ -26,8 +27,9 @@ interface Props {
 }
 
 const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
-  const { userData } = useContext(UserDataContext)!;
+  const { userData, fetchUserData } = useContext(UserDataContext)!;
   const router = useRouter();
+  const { socket } = useContext(SocketContext)!;
   const animation = useContext(AnimationContext)!;
   const { breakpoint, orLower } = useContext(BreakPointContext)!;
   const [notifications, setNotifications] = useState(
@@ -49,6 +51,7 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
   useEffect(() => {
     if (userData) {
       animation.endAnimation();
+      markNotificationsAsRead();
     }
   }, [userData]);
 
@@ -74,6 +77,16 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
     }
   };
 
+  const markNotificationsAsRead = async () => {
+    if (!userData) return;
+
+    await requestDB("notification", "markNotificationAsRead", {
+      userId: userData.id,
+    });
+
+    console.log(`📨 Marked notifications as read in ${userData.id}`);
+  };
+
   if (!userData) {
     return <div>Loading...</div>;
   }
@@ -83,7 +96,10 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
       {orLower("sp") && (
         <IconButton
           src={closeImage}
-          onClick={() => setShowNotificationPopup(false)}
+          onClick={() => {
+            setShowNotificationPopup(false);
+            fetchUserData();
+          }}
           className="p-notification__close"
         />
       )}
@@ -97,11 +113,12 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
             <div
               key={n.id}
               className={`p-notification__notification`}
-              onClick={() =>
+              onClick={() => {
+                fetchUserData();
                 n.room?.roomKey
                   ? router.push(`/messages/${n.room.roomKey}`)
-                  : null
-              }
+                  : null;
+              }}
             >
               <ImageBox
                 className="p-notification__icon"
@@ -110,6 +127,7 @@ const NotificationPopup = ({ setShowNotificationPopup }: Props) => {
                 src={n.sender?.icon ?? defaultIcon}
               />
               <div className="p-notification__content">{n.content}</div>
+              {!n.isRead && <div className="p-notification__unread"></div>}
             </div>
           ))}
       </div>

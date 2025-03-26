@@ -88,6 +88,7 @@ export async function POST(request: Request) {
                 senderId: parsedUserId,
                 roomId: room.id
             });
+
             await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId, roomId: room.id });
 
             console.log("📝 Reservations Created:", {

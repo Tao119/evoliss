@@ -176,14 +176,18 @@
         text-align: start;
         gap: 10px;
 
-        m &:hover {
+        &:hover {
             background: $dark-gray;
         }
+    }
 
-        &.-unread {
-            background-color: rgb(from $gray r g b / 0.2);
-
-        }
+    &__unread {
+        width: 12px;
+        height: 12px;
+        background-color: red;
+        border-radius: 50%;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        margin-left: auto;
     }
 
 

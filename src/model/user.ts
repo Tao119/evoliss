@@ -35,7 +35,7 @@ async function readUsers() {
                 },
             },
             paymentAccount: true,
-            refunds: true,
+            refunds: { include: { reservation: { include: { course: { include: { coach: true } } } } } },
             userPayment: true,
         },
     });
@@ -74,7 +74,7 @@ async function readUserById({ id }: { id: number }) {
                             reservation: true
                         },
                     },
-                    reservations: { include: { schedule: true, customer: true } }
+                    reservations: { include: { schedule: true, customer: true, room: true } }
                 }
             },
             userGames: {
@@ -117,9 +117,10 @@ async function readUserById({ id }: { id: number }) {
                 },
             },
             paymentAccount: true,
-            refunds: true,
+            refunds: { include: { reservation: { include: { course: { include: { coach: true } } } } } },
             userPayment: true,
-            reservations: { include: { course: { include: { coach: true } }, schedule: true } }
+            reservations: { include: { course: { include: { coach: true } }, schedule: true, room: true } },
+            notification: true
         },
     });
 }

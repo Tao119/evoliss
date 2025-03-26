@@ -23,7 +23,7 @@ const Page = () => {
 
   useEffect(() => {
     if (!paymentId) {
-      router.push("/about");
+      router.push("/");
       return;
     }
 
@@ -42,7 +42,7 @@ const Page = () => {
         }
 
         if (payment.status == paymentStatus.Confirmed) {
-          router.push("/about");
+          router.push("/");
         } else if (payment.status == paymentStatus.Created) {
           setStatus("pending");
         } else if (payment.status == paymentStatus.Paid) {

@@ -133,25 +133,25 @@ const Page = () => {
 
   return (
     <div className="p-sign-in">
-      <BackButton
-        className="p-sign-in__back"
-        back={() => {
-          if (callbackPath) {
-            const callback = callbackPath.startsWith("/")
-              ? callbackPath.replace("/", "")
-              : callbackPath;
-
-            router.push(
-              `/${callback
-                .split("/")
-                .slice(0, callbackPath.split("/").length - 2)
-                .join("/")}`
-            );
-          }
-        }}
-      />
       {step == 0 ? (
         <>
+          <BackButton
+            className="p-sign-in__back"
+            back={() => {
+              if (callbackPath) {
+                const callback = callbackPath.startsWith("/")
+                  ? callbackPath.replace("/", "")
+                  : callbackPath;
+
+                router.push(
+                  `/${callback
+                    .split("/")
+                    .slice(0, callbackPath.split("/").length - 2)
+                    .join("/")}`
+                );
+              }
+            }}
+          />
           <span className="p-sign-in__title">Sign Up</span>
           <span className="p-sign-in__err">{err}</span>
           <div className="p-sign-in__item">

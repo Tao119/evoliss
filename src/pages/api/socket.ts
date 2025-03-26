@@ -34,9 +34,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
     io.on("connection", (socket) => {
         console.log(`✅ A user connected: ${socket.id}`);
 
-        socket.on("joinRoom", ({ roomKey }) => {
+        socket.on("joinRoom", ({ roomKey, userId }) => {
             console.log(`📢 User ${socket.id} joined room: room-${roomKey}`);
             socket.join(`room-${roomKey}`);
+            socket.join(`user-${userId}`);
 
             io.in(`room-${roomKey}`).fetchSockets().then(sockets => {
                 console.log(`👥 Users in room ${roomKey}:`, sockets.map(s => s.id));
@@ -46,8 +47,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
         socket.on("sendMessage", async ({ data, roomKey }) => {
 
             try {
-
-                // 確認: `emit` される前に `roomKey` の接続情報を取得
                 io.in(`room-${roomKey}`).fetchSockets().then(sockets => {
                     console.log(`👀 Broadcasting newMessage to:`, sockets.map(s => s.id));
                 });
@@ -76,6 +75,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
             }
         });
 
+        socket.on("sendNotification", async ({ data, userId }) => {
+            try {
+                console.log(`🔔 Sending notification to user ${userId}`);
+
+                io.to(`user-${userId}`).emit("newNotification", data);
+            } catch (error) {
+                console.error("❌ Error sending notification:", error);
+            }
+        });
 
         socket.on("disconnect", () => {
             console.log(`⚡ Client disconnected: ${socket.id}`);

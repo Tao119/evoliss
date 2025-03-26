@@ -126,6 +126,8 @@ export interface Refund {
     reservation: Reservation
     status: RefundStatus
     text: string
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface MessageRoom {
@@ -238,6 +240,7 @@ export interface Notification {
     senderId: number;
     sender: User;
     content: string;
+    isRead: boolean
     createdAt: Date;
     roomId?: number;
     room?: MessageRoom

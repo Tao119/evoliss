@@ -4,16 +4,17 @@ import React, { Dispatch, SetStateAction, useContext, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ImageBox } from "@/components/imageBox";
-import profileIcon from "@/assets/image/logo.png";
 import notificationIcon from "@/assets/image/notification.svg";
 import messageIcon from "@/assets/image/mail.svg";
 import defaultIcon from "@/assets/image/user_icon.svg";
 import { UserDataContext } from "../contextProvider";
 import loginIcon from "@/assets/image/login.svg";
 import chartIcon from "@/assets/image/chart.svg";
+import logoImage from "@/assets/image/logo_long.png";
 
 interface Prop {
   newMessage: boolean;
+  newNotification: boolean;
   setShowMessagePopup: Dispatch<SetStateAction<boolean>>;
   setShowNotificationPopup: Dispatch<SetStateAction<boolean>>;
   showMessagePopup: boolean;
@@ -23,6 +24,7 @@ interface Prop {
 
 const Sidebar = ({
   newMessage,
+  newNotification,
   setShowMessagePopup,
   setShowNotificationPopup,
   showMessagePopup,
@@ -34,7 +36,7 @@ const Sidebar = ({
   const router = useRouter();
 
   const mainRoutes = [
-    { path: "/", text: "EVOLISSとは" },
+    { path: "/", text: "トップページ" },
     { path: "/courses", text: "講座を探す" },
     { path: "/create", text: "コーチをしてみる" },
   ];
@@ -69,12 +71,11 @@ const Sidebar = ({
       <div className="p-side-bar">
         <div className="p-side-bar__icon" onClick={() => router.push("/")}>
           <ImageBox
-            src={profileIcon}
+            src={logoImage}
             alt="Profile"
             className="p-side-bar__logo-icon"
             round
           />
-          <div className="p-side-bar__logo-text">EVOLISS</div>
         </div>
 
         <ul className="p-side-bar__container -upper">
@@ -163,6 +164,8 @@ const Sidebar = ({
                 <div
                   key={path}
                   className={`p-side-bar__list ${
+                    newNotification ? "-new" : ""
+                  } ${
                     pathname.replace("/", "").split("/")[0] ==
                       `${path.replace("/", "")}` || showMessagePopup
                       ? "-active"

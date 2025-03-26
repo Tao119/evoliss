@@ -22,5 +22,6 @@ export default function GuestLayout({
     }
   }, [userDataStatus]);
 
+  if (userDataStatus != UserDataStatus.Authorized) return null;
   return <>{children}</>;
 }

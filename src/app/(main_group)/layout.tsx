@@ -9,7 +9,6 @@ import { OverLay } from "@/components/overlay";
 import { requestDB } from "@/services/axios";
 import logoIcon from "@/assets/image/logo.png";
 import { ImageBox } from "@/components/imageBox";
-import logoImage from "@/assets/image/logo.png";
 import Link from "next/link";
 import {
   BreakPointContext,
@@ -33,6 +32,21 @@ export default function GuestLayout({
   const [showNotificationPopup, setShowNotificationPopup] = useState(false);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [games, setGames] = useState<Game[]>();
+  const [coaches, setCoaches] = useState<User[]>();
+
+  const onReady = games && coaches && userData;
+
+  useEffect(() => {
+    fetchGames();
+    fetchCoaches();
+  }, []);
+
+  useEffect(() => {
+    if (onReady) {
+    }
+  }, [onReady]);
 
   const hasNewMessage = useMemo(() => {
     return Boolean(
@@ -60,24 +74,23 @@ export default function GuestLayout({
   }, [userData]);
 
   const hasNewMessageRef = useRef(hasNewMessage);
-
-  const [games, setGames] = useState<Game[]>();
-  const [coaches, setCoaches] = useState<User[]>();
-
-  const onReady = games && coaches && userData;
-
-  useEffect(() => {
-    fetchGames();
-    fetchCoaches();
-  }, []);
-
-  useEffect(() => {
-    if (onReady) {
-    }
-  }, [onReady]);
   useEffect(() => {
     hasNewMessageRef.current = hasNewMessage;
   }, [hasNewMessage]);
+
+  const hasNewNotification = useMemo(() => {
+    return Boolean(
+      userData?.notification.some((n) => {
+        return !n.isRead;
+      })
+    );
+  }, [userData]);
+
+  const hasNewNotificationRef = useRef(hasNewNotification);
+  useEffect(() => {
+    console.log(`hasNewNotification:${hasNewNotification}`);
+    hasNewNotificationRef.current = hasNewNotification;
+  }, [hasNewNotification]);
 
   const fetchGames = async () => {
     try {
@@ -113,7 +126,7 @@ export default function GuestLayout({
     userData.messageRooms?.forEach((room) => {
       if (!newRooms.has(room.roomKey)) {
         console.log(`🔗 Joining room: ${room.roomKey}`);
-        socket.emit("joinRoom", { roomKey: room.roomKey });
+        socket.emit("joinRoom", { roomKey: room.roomKey, userId: userData.id });
         newRooms.add(room.roomKey);
       }
     });
@@ -122,7 +135,10 @@ export default function GuestLayout({
       course.messageRooms?.forEach((room) => {
         if (!newRooms.has(room.roomKey)) {
           console.log(`🔗 Joining room: ${room.roomKey}`);
-          socket.emit("joinRoom", { roomKey: room.roomKey });
+          socket.emit("joinRoom", {
+            roomKey: room.roomKey,
+            userId: userData.id,
+          });
           newRooms.add(room.roomKey);
         }
       });
@@ -142,11 +158,21 @@ export default function GuestLayout({
         fetchUserData();
       }
     };
+    const notificationHandler = () => {
+      console.log("new notification!!");
+      if (!hasNewNotificationRef.current) {
+        console.log("new notification and update");
+        hasNewNotificationRef.current = true;
+        fetchUserData();
+      }
+    };
 
     socket.on("newMessage", messageHandler);
+    socket.on("newNotification", notificationHandler);
 
     return () => {
       socket.off("newMessage", messageHandler);
+      socket.off("newNotification", notificationHandler);
     };
   }, [socket]);
 
@@ -154,8 +180,9 @@ export default function GuestLayout({
     if (!socket) return;
 
     const handleMessagesRead = ({ roomKey }: { roomKey: string }) => {
-      console.log("updating..........!!!!!");
+      console.log("update start...", hasNewMessage);
       if (hasNewMessageRef.current) {
+        console.log("updating..........!!!!!");
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
           hasNewMessageRef.current = false;
@@ -179,6 +206,7 @@ export default function GuestLayout({
           <>
             <Sidebar
               newMessage={hasNewMessage}
+              newNotification={hasNewNotification}
               setShowMessagePopup={setShowMessagePopup}
               setShowNotificationPopup={setShowNotificationPopup}
               showMessagePopup={showMessagePopup}
@@ -194,6 +222,7 @@ export default function GuestLayout({
       ) : (
         <Sidebar
           newMessage={hasNewMessage}
+          newNotification={hasNewNotification}
           setShowMessagePopup={setShowMessagePopup}
           setShowNotificationPopup={setShowNotificationPopup}
           showMessagePopup={showMessagePopup}
@@ -214,7 +243,10 @@ export default function GuestLayout({
         <>
           <OverLay
             className="l-message-overlay u-tr"
-            onClick={() => setShowNotificationPopup(false)}
+            onClick={() => {
+              setShowNotificationPopup(false);
+              fetchUserData();
+            }}
           />
           <NotificationPopup
             setShowNotificationPopup={setShowNotificationPopup}
@@ -239,7 +271,7 @@ export default function GuestLayout({
               <div className="l-footer__column">
                 <div className="l-footer__column-title">ホーム</div>
                 <Link className="l-footer__column-item" href="/about">
-                  EVOLISSとは
+                  トップページ
                 </Link>
                 <Link className="l-footer__column-item" href="/courses">
                   講座を探す
@@ -279,7 +311,7 @@ export default function GuestLayout({
                   round
                   objectFit="cover"
                   className="l-footer__icon-img"
-                  src={logoImage}
+                  src={logoIcon}
                 />
               </div>
             </div>

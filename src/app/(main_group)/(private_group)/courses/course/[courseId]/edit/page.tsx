@@ -119,8 +119,8 @@ const Page = () => {
       return;
     }
 
-    if (parseInt(price, 10) < 1500) {
-      alert("価格は1500円以上に設定して下さい");
+    if (parseInt(price, 10) < 50) {
+      alert("価格は50円以上に設定して下さい");
       return;
     }
 

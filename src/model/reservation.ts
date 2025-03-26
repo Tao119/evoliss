@@ -4,7 +4,8 @@ import { RefundStatus } from "@/type/models";
 
 export const reservationFuncs: { [funcName: string]: Function } = {
     createReservation,
-    createRefund
+    createRefund,
+    updateRefund
 };
 
 async function createReservation({
@@ -42,6 +43,21 @@ async function createRefund({
             customerId,
             text,
             status: RefundStatus.Created
+        }
+    });
+}
+
+async function updateRefund({
+    refundId,
+    accept
+}: {
+    refundId: number;
+    accept: boolean
+}) {
+    return await prisma.refund.update({
+        where: { id: refundId },
+        data: {
+            status: accept ? RefundStatus.Accepted : RefundStatus.Denied
         }
     });
 }

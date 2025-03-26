@@ -7,25 +7,40 @@
     height: 32px;
     background-color: $light-gray;
     border-radius: 4px;
+    gap: 5px;
+
+    &.-type2 {
+        background-color: transparent;
+    }
 
     &.-mb24 {
-        margin-bottom: 24px;    
+        margin-bottom: 24px;
     }
 }
 
 .c-switcher__item {
-    width: 80px;
+    width: auto;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: $fs-text;
     color: $dark-gray;
     cursor: pointer;
+    padding: 5px 10px;
     transition: color 0.5s;
 
-    &:hover{
+    &.-type2 {
+        border-bottom: 1px solid $gray;
+        color: $light-gray;
+    }
+
+    &:hover {
         color: $black;
         transition: color 0.5s;
+
+        &.-type2 {
+            color: $gray;
+        }
     }
 
     &.-active {
@@ -36,7 +51,17 @@
         transition: 0.1s;
         color: $black;
         font-weight: $fw-bold;
+
+        &.-type2 {
+            border-radius: 0;
+            height: auto;
+            background-color: transparent;
+            box-shadow: none;
+            color: $theme;
+            border-bottom: 1px solid $theme;
+        }
     }
+
     &.-w102 {
         width: 102px;
     }
