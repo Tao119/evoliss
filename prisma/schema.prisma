@@ -31,6 +31,7 @@ model User {
   searchHistories  SearchHistory[]
   userGames        UserGame[]
   userPayment      UserPayment[]
+  reviews          Review[]
 }
 
 model PaymentAccount {
@@ -193,6 +194,7 @@ model Review {
   comment    String?
   createdAt  DateTime @default(now())
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  customer   User   @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([courseId], map: "Review_courseId_fkey")
   @@index([customerId], map: "Review_customerId_fkey")
