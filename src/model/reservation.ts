@@ -17,7 +17,7 @@ async function createReservation({
     userId: number;
     courseId: number;
     scheduleId: number
-    roomId?: number
+    roomId: number
 }) {
     return await prisma.reservation.create({
         data: {

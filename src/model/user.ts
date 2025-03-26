@@ -71,7 +71,7 @@ async function readUserById({ id }: { id: number }) {
                                 }
                             },
                             customer: true,
-                            reservation: true
+                            reservations: true
                         },
                     },
                     reservations: { include: { schedule: true, customer: true, room: true } }
