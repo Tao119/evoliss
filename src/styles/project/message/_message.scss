@@ -39,6 +39,14 @@
         height: 30px;
     }
 
+    &__user-icon {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        translate: -150% -50%;
+        width: 30px;
+        height: 30px;
+    }
 
 
     &__list {
@@ -50,26 +58,10 @@
         overflow-y: scroll;
     }
 
-    &__room {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
+    &__message-room {
+
         width: 100%;
-        height: 60px;
-        padding: 5px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background 0.2s;
 
-        &:hover {
-            background: $dark-gray;
-        }
-
-        &.-unread {
-            background-color: rgb(from $gray r g b / 0.2);
-
-        }
     }
 
     &__icon {
@@ -95,8 +87,6 @@
         white-space: nowrap;
     }
 
-
-
     &__latest {
         color: $gray;
         text-align: start;
@@ -116,89 +106,248 @@
         height: 50px;
         align-self: flex-end;
     }
-}
 
-.p-notification {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    &__course {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        height: auto;
+    }
 
-    padding: 30px;
-    position: absolute;
-    bottom: 100px;
-    left: 250px;
-    z-index: 11;
-    background-color: $black;
-    border: 1px solid $theme;
-    border-radius: 10px;
-    height: 500px;
-    width: 400px;
-    overflow-y: scroll;
-    transform: none;
-    color: $white;
+    &__course-title {
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+    }
 
-    @include mq(sp) {
+    &__course-button {
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
+        margin-top: 40px;
+    }
+
+    &__course-container {
+        position: relative;
+        overflow: hidden;
+        height: 300px;
+        width: 420px;
+    }
+
+    &__course-slide {
+        position: absolute;
         top: 0;
         left: 0;
-        height: 100%;
         width: 100%;
-        border: none;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+
+        &.-active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
     }
 
-    &__close {
-        align-self: flex-end;
-        width: 20px;
-        height: 20px;
-        flex-shrink: 0;
-    }
-
-
-    &__list {
+    &__input-area {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        align-items: center;
+        gap: 20px;
         width: 100%;
-        height: 100%;
     }
 
-    &__notification {
+    &__input {
+        width: 100%;
+        height: 100%;
+        cursor: text;
+        border-radius: 9px;
+        background-color: $white;
+        border: none;
+        font-size: $fs-text;
+        position: relative;
+    }
+
+    &__input-outline {
+        background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
+        width: 100%;
+        cursor: text;
+        border-radius: 10px;
+        padding: 1px;
+        height: auto;
+    }
+
+    &__send-button {
+        margin-top: auto;
+        border-radius: 30px;
+    }
+
+
+    &__messages {
+        margin-top: 50px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+    }
+
+    &__message {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    &__message-content {
+        margin-top: 30px;
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-radius: 10px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        padding: 20px;
+        background-color: $white;
+        text-align: left;
+        font-size: $fs-text;
+        white-space: pre-wrap;
+    }
+
+    &__message-time {
+
+        text-align: right;
+        font-size: $fs-small;
+    }
+
+    &__message-user {
+        flex-shrink: 0;
+        position: absolute;
+        top: -35px;
+        left: -5px;
+        z-index: 20;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
-        width: 100%;
-        min-height: 80px;
-        padding: 10px;
-        cursor: pointer;
-        transition: background 0.2s;
-        border-bottom: 1px solid $theme;
-        white-space: pre-wrap;
-        text-align: start;
-        gap: 10px;
 
-        &:hover {
-            background: $dark-gray;
-        }
     }
 
-    &__unread {
-        width: 12px;
-        height: 12px;
-        background-color: red;
+    &__message-icon {
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        margin-left: auto;
-    }
-
-
-    &__icon {
-        width: 50px;
-        height: 50px;
+        margin-right: 10px;
         flex-shrink: 0;
     }
 
-    &__content {
+    &__message-name {
+        text-align: right;
         font-size: $fs-text;
+        font-weight: $fw-bold;
+    }
+}
+
+.p-message-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    height: auto;
+    padding: 20px;
+    gap: 10px;
+    position: relative;
+    margin-top: 40px;
+    cursor: pointer;
+
+    &__header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        height: 50px;
+        width: 100%;
+        gap: 10px;
+        padding-bottom: 10px;
+        position: absolute;
+        top: 10px;
+        left: calc(50% + 20px);
+        translate: -50% -50%;
+        z-index: 2;
+
     }
 
+    &__icon {
+        width: 40px;
+        height: 40px;
+
+        position: relative;
+
+
+        &.-unread {
+            &::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                // translate: -50% -50%;
+                height: 8px;
+                width: 8px;
+                background-color: $red;
+                border-radius: 50%;
+                z-index: 1;
+            }
+        }
+    }
+
+    &__name {
+        font-size: $fs-text;
+        font-weight: bold;
+    }
+
+    &__content {
+        width: 100%;
+        min-height: 100px;
+        border-radius: 10px;
+        background-color: $white;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        padding: 24px 20px;
+        text-align: start;
+        font-size: $fs-text;
+        position: relative;
+        padding-right: 60px;
+    }
+
+    &__message {
+        width: 100%;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.5;
+    }
+
+    &__more {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        top: 50%;
+        right: 10px;
+        translate: -50% -50%;
+    }
+
+    &__socket-status {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 8px 16px;
+        background-color: rgba($black, 0.8);
+        color: $white;
+        border-radius: 20px;
+        font-size: $fs-small;
+        z-index: 100;
+        border: 1px solid $gray;
+    }
 }

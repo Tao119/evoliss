@@ -1,349 +1,378 @@
 @use "../../foundation" as *;
 
 .p-mypage {
-    width: 100%;
-    height: 100%;
-    padding: 20px;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    flex-direction: row;
     align-items: flex-start;
-    overflow-y: scroll;
+    justify-content: space-between;
+    width: 100%;
+    height: auto;
+    padding: 50px;
+    color: $black;
+    position: relative;
+
+    gap: 30px;
+
+    @include mq(sp) {
+        flex-direction: column;
+    }
+
+    &__back {
+        height: 30px;
+        width: 30px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        cursor: pointer;
+        align-self: flex-start;
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        width: calc(100% - 400px);
+        padding: 50px;
+        flex-shrink: 0;
+        height: auto;
+        background-color: $soft-gray;
+        position: relative;
+        gap: 30px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
+    }
+
+    &__game {
+        width: 132px;
+        text-align: center;
+        height: 32px;
+        padding: 10px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        font-weight: $fw-bold;
+        white-space: nowrap;
+        flex-shrink: 0;
+        border: 1px solid $gray;
+        color: $gray;
+        font-size: $fs-small;
+        background-color: $white;
+
+    }
+
+    &__section {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    &__subtitle {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: flex-start;
+        font-size: $fs-input;
+        margin-bottom: 10px;
+    }
+
+    &__description {
+        font-size: $fs-input;
+        width: 100%;
+        height: auto;
+
+        white-space: wrap;
+        text-align: start;
+    }
+
+    &__image {
+        width: 100%;
+        aspect-ratio: 5/4;
+
+        @include mq(sp) {
+            width: 100%;
+        }
+    }
 
     &__title {
-        flex-shrink: 0;
-        font-size: $fs-title;
-        width: 100%;
-        height: 20px;
-        margin-bottom: 20px;
-        color: $white;
-    }
-
-    &__header {
-        flex-shrink: 0;
+        font-size: $fs-input;
+        font-weight: $fw-bold;
+        white-space: wrap;
         position: relative;
-        width: 100%;
-        height: 150px;
-
-        &-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        &-edit {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: $soft-gray;
-        }
-
-        &-upload {
-            display: none;
-        }
     }
 
-    &__icon {
-        position: absolute;
-        bottom: -20px;
-        left: 10px;
-        translate: 0 50%;
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        object-fit: cover;
-
-        &__edit-wrapper {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        &-image {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        &-edit {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: $soft-gray;
-            padding: 5px;
-        }
-
-        &-upload {
-            display: none;
-        }
-    }
-
-    &__profile {
+    &__tags {
         display: flex;
         width: 100%;
+        flex-wrap: wrap;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 10px;
+        width: 100%;
+    }
+
+    &__tag {
+        background-color: $white;
+        font-size: $fs-small;
+        border: 1px solid $mid-gray;
+        color: $mid-gray;
+        width: auto;
+        height: 36px;
+        padding: 0 30px;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        font-weight: $fw-bold;
+        border-radius: 20px;
+    }
+
+    &__tag-text {
+        max-width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    &__info {
+        display: flex;
+
+        flex-direction: column;
+        width: 400px;
+        gap: 10px;
+        position: sticky;
+        top: 20px;
+        align-self: flex-start;
+        padding-bottom: 20px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
+    }
+
+    &__info-price {
+        display: flex;
+        border-radius: 10px;
+
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        border: 1px solid $white;
+        padding: 20px;
+        gap: 10px;
+    }
+
+    &__price {
+        font-size: $fs-input;
+        font-weight: $fw-bold;
+    }
+
+    &__info-button {
+        width: auto;
+        padding: 0 36px;
+        align-self: center;
+
+        &.-disabled {
+            background-color: rgb(from $black r g b / 0.5);
+        }
+    }
+
+
+    &__coach-item {
+        width: 100%;
+        flex-shrink: 0;
+        border-radius: 10px;
+        margin-right: 30px;
+        border: 1px solid $white;
+        height: auto;
+        color: $white;
+        padding: 0 20px;
+        cursor: pointer;
+    }
+
+    &__coach-upper {
+        display: flex;
+        flex-direction: row;
+        height: 90px;
+        align-items: center;
+    }
+
+    &__coach-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-right: 20px;
+        flex-shrink: 0;
+    }
+
+    &__coach-details {
+        width: calc(100% - 80px);
+        display: flex;
+        flex-direction: row;
         align-items: center;
         height: 100%;
-        flex-direction: column;
-        padding: 10px 20px;
-
-        &-container {
-            flex-shrink: 0;
-            width: calc(100% - 170px);
-            margin-left: auto;
-            height: 100px;
-            display: flex;
-            flex-direction: row;
-            margin-bottom: 20px;
-        }
-
-        &-info {
-            width: 100%;
-            height: 50%;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-        }
-
-        &-name {
-            font-size: $fs-medium ;
-            color: $white;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-
-            @include mq(sp) {
-                width: calc(100% - 50px);
-            }
-        }
-
-        &-edit {
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: $soft-gray;
-            padding: 5px;
-            margin-left: 10px;
-        }
-
-        &-input {
-            display: none;
-        }
-
-        &-submit {
-            cursor: pointer;
-            width: 100px;
-            height: 30px;
-            background-color: transparent;
-            border-radius: 0;
-            border: 1px solid $gray;
-            padding: 5px;
-            margin-left: 10px;
-        }
-
-        &-cansel {
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            background-color: transparent;
-            margin-left: 10px;
-        }
-
-        &-rating {
-            width: 100%;
-            height: 50%;
-            color: $white;
-
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-        }
-
-        &-stars {
-            width: 100px;
-        }
-
-        &-rating-text {
-            margin-left: 10px;
-            font-size: $fs-text;
-        }
-
-        &-buttons {
-            width: 50%;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-        }
-
-        &-button {
-            background: none;
-            border: 1px solid $white;
-            border-radius: 0;
-            width: 200px;
-            height: 30px;
-            font-size: $fs-text;
-            margin: 0 10px;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
+        justify-content: space-around;
     }
 
-    &__bio {
+    &__coach-name {
+        font-size: $fs-medium;
+        color: $white;
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
         text-align: start;
-
-        &-switcher {
-            flex-shrink: 0;
-            height: 40px;
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-        }
-
-        &-switcher-item {
-            height: 100%;
-            width: 50%;
-            border-bottom: 1px solid $white;
-            font-size: $fs-text;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
-
-            &.-active {
-                border-top: 1px solid $white;
-                border-left: 1px solid $white;
-                border-right: 1px solid $white;
-                border-bottom: none;
-                cursor: default;
-            }
-        }
-
-        &-area {
-            width: 100%;
-            height: 100%;
-            color: $white;
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100% - 470px);
-        }
-
-        &-textarea {
-            width: 100%;
-            height: 100%;
-            padding: 10px;
-            font-size: $fs-text;
-            padding: 5px;
-        }
-
-        &-content {
-            padding: 30px 20px;
-            font-size: $fs-text;
-            border-bottom: 1px solid $white;
-            border-left: 1px solid $white;
-            border-right: 1px solid $white;
-            white-space: pre-wrap;
-            text-align: start;
-            height: calc(100% - 40px);
-            overflow-x: scroll;
-        }
-
-        &-title {
-            font-size: $fs-medium;
-
-            margin-bottom: 20px;
-            text-align: start;
-            color: $white;
-        }
-
-        &-games {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            width: 100%;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        &-game {
-            border: 1px solid $white;
-            height: 20px;
-            width: auto;
-            padding: 0 5px;
-            display: flex;
-            align-items: center;
-            justify-items: center;
-            margin: 2px;
-            max-width: 150px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: pointer;
-        }
-
-        &-courses {
-            height: 240px;
-            width: 100%;
-            overflow-x: scroll;
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-
-            @include mq(sp) {
-                width: auto;
-                height: 300px;
-            }
-        }
-
-
-        &-course-edit {
-            position: absolute;
-            bottom: 0px;
-            right: 0px;
-            translate: 50% 50%;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: $soft-gray;
-            z-index: 2;
-        }
-
-        &-courses-add {
-            flex-grow: 1;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        &-courses-add-button {
-            height: 50px;
-            width: 50px;
-        }
-
-        &-edit {
-            position: absolute;
-            top: 50%;
-            right: 10px;
-            translate: 0 -50%;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: $soft-gray;
-            padding: 5px;
-        }
     }
 
+    &__coach-rating {
+        margin-left: auto;
+
+        width: 200px;
+        color: $white;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__coach-stars {
+        width: 100px;
+    }
+
+    &__coach-rating-text {
+        font-size: $fs-text;
+    }
+
+    &__coach-tag-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 6px;
+    }
+
+    &__coach-games {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 60px;
+        padding: 2px;
+    }
+
+    &__coach-game-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    &__coach-game {
+        border: 1px solid $white;
+        height: 20px;
+        width: auto;
+        padding: 0 5px;
+        display: flex;
+        align-items: center;
+        justify-items: center;
+        margin: 2px;
+        max-width: 100px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__coach-bio {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 10px;
+    }
+
+    &__coach-bio-title {
+        font-size: $fs-text;
+        margin-bottom: 10px;
+    }
+
+    &__coach-bio-content {
+        font-size: $fs-smaller;
+        text-align: start;
+        white-space: pre-wrap;
+        text-align: start;
+    }
+}
+
+.p-mypage-menu {
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 30px;
+    align-items: center;
+
+    &__icon {
+        width: 200px;
+        height: 200px;
+    }
+
+    &__name {
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+    }
+
+    &__label {
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+        align-self: flex-start;
+    }
+
+    &__menu-outline {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
+        border-radius: 10px;
+        padding: 1px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    &__courses-list {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin-top: 24px;
+    }
+
+    &__menu {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        text-align: start;
+        flex-direction: column;
+        background-color: $soft-gray;
+        padding: 20px;
+        border-radius: 9px;
+        width: 100%;
+        height: 100%;
+        font-size: $fs-text;
+    }
+
+    &__menu-item {
+        width: 100%;
+        font-size: $fs-text;
+        padding: 10px;
+        text-align: center;
+        font-weight: $fw-bold;
+        cursor: pointer;
+
+        &.-active {
+            background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
+            color: $white
+        }
+    }
 }

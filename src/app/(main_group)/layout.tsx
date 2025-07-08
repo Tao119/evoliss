@@ -1,245 +1,225 @@
 "use client";
 
-import { useContext, useEffect, useState, useRef, useMemo } from "react";
-import Sidebar from "./sideBar";
-import { SearchBox } from "@/app/(component)/searchbox";
-import { Course, Game, Message, User } from "@/type/models";
-import MessagePopup from "./messagePopup";
-import { OverLay } from "@/components/overlay";
-import { requestDB } from "@/services/axios";
+import footerImage from "@/assets/image/footer.png";
 import logoIcon from "@/assets/image/logo.png";
 import { ImageBox } from "@/components/imageBox";
+import { OverLay } from "@/components/overlay";
+import useAnimation from "@/hooks/useAnimation";
+import { requestDB } from "@/services/axios";
+import { Course, type Game, Message, type User } from "@/type/models";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
-  BreakPointContext,
-  SocketContext,
-  UserDataContext,
+	BreakPointContext,
+	SocketContext,
+	UserDataContext,
 } from "../contextProvider";
-import NotificationPopup from "./notificationPopup";
+// import NotificationPopup from "./notificationPopup";
+import Header from "./header";
+import MessagePopup from "./messagePopup";
+import Sidebar from "./sideBar";
 
 export default function GuestLayout({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  const { fetchUserData, userData } = useContext(UserDataContext)!;
-  const { socket } = useContext(SocketContext)!;
-  const { breakpoint, orLower } = useContext(BreakPointContext)!;
+	const { fetchUserData, userData, userDataStatus } =
+		useContext(UserDataContext)!;
+	const { socket } = useContext(SocketContext)!;
+	const { breakpoint, orLower } = useContext(BreakPointContext)!;
 
-  const [joinedRooms, setJoinedRooms] = useState<string[]>([]);
-  const [showMessagePopup, setShowMessagePopup] = useState(false);
-  const [showSideBar, setShowSideBar] = useState(false);
-  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
+	const [joinedRooms, setJoinedRooms] = useState<string[]>([]);
+	const [showMessagePopup, setShowMessagePopup] = useState(false);
+	const [showSideBar, setShowSideBar] = useState(false);
+	// const [showNotificationPopup, setShowNotificationPopup] = useState(false);
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [games, setGames] = useState<Game[]>();
-  const [coaches, setCoaches] = useState<User[]>();
+	const [games, setGames] = useState<Game[]>();
+	const [coaches, setCoaches] = useState<User[]>();
 
-  const onReady = games && coaches && userData;
+	const onReady = games && coaches && userData;
 
-  useEffect(() => {
-    fetchGames();
-    fetchCoaches();
-  }, []);
+	const router = useRouter();
+	const path = usePathname();
+	const animation = useAnimation();
 
-  useEffect(() => {
-    if (onReady) {
-    }
-  }, [onReady]);
+	useEffect(() => {
+		fetchGames();
+		fetchCoaches();
+	}, []);
 
-  const hasNewMessage = useMemo(() => {
-    return Boolean(
-      userData?.messageRooms?.some((r) =>
-        r?.messages?.some((m) => !m.isRead && m.senderId != userData.id)
-      ) ||
-        userData?.courses?.some((c) =>
-          c?.messageRooms?.some((r) =>
-            r?.messages?.some((m) => !m.isRead && m.senderId != userData.id)
-          )
-        ) ||
-        userData?.messageRooms?.some((r) =>
-          r?.purchaseMessages?.some(
-            (m) => !m.isRead && m.senderId != userData.id
-          )
-        ) ||
-        userData?.courses?.some((c) =>
-          c?.messageRooms?.some((r) =>
-            r?.purchaseMessages?.some(
-              (m) => !m.isRead && m.senderId != userData.id
-            )
-          )
-        )
-    );
-  }, [userData]);
+	useEffect(() => {
+		if (onReady) {
+		}
+	}, [onReady]);
 
-  const hasNewMessageRef = useRef(hasNewMessage);
-  useEffect(() => {
-    hasNewMessageRef.current = hasNewMessage;
-  }, [hasNewMessage]);
+	useEffect(() => {
+		if (userData && !userData?.isInitialized && path != "/initialize") {
+			animation.endAnimation();
+			router.push(`/initialize?callback=${path}`);
+		}
+	}, [userData, path]);
 
-  const hasNewNotification = useMemo(() => {
-    return Boolean(
-      userData?.notification.some((n) => {
-        return !n.isRead;
-      })
-    );
-  }, [userData]);
+	const hasNewMessage = useMemo(() => {
+		return Boolean(
+			userData?.customerMessageRooms?.some((r) =>
+				r?.messages?.some((m) => !m.isRead && m.senderId != userData.id),
+			) ||
+				userData?.coachMessageRooms?.some((r) =>
+					r?.messages?.some((m) => !m.isRead && m.senderId != userData.id),
+				),
+		);
+	}, [userData]);
 
-  const hasNewNotificationRef = useRef(hasNewNotification);
-  useEffect(() => {
-    console.log(`hasNewNotification:${hasNewNotification}`);
-    hasNewNotificationRef.current = hasNewNotification;
-  }, [hasNewNotification]);
+	const hasNewMessageRef = useRef(hasNewMessage);
+	useEffect(() => {
+		hasNewMessageRef.current = hasNewMessage;
+	}, [hasNewMessage]);
 
-  const fetchGames = async () => {
-    try {
-      const response = await requestDB("game", "readTopGames");
-      if (response.success) {
-        setGames(response.data);
-      } else {
-        alert("ゲーム情報の取得中にエラーが発生しました");
-      }
-    } catch (error) {
-      console.error("Error fetching games:", error);
-    }
-  };
+	// const hasNewNotification = useMemo(() => {
+	//   return Boolean(
+	//     userData?.notification.some((n) => {
+	//       return !n.isRead;
+	//     })
+	//   );
+	// }, [userData]);
 
-  const fetchCoaches = async () => {
-    try {
-      const response = await requestDB("coach", "readTopCoaches");
-      if (response.success) {
-        setCoaches(response.data);
-      } else {
-        alert("コーチ情報の取得中にエラーが発生しました");
-      }
-    } catch (error) {
-      console.error("Error fetching coaches:", error);
-    }
-  };
+	// const hasNewNotificationRef = useRef(hasNewNotification);
+	// useEffect(() => {
+	//   console.log(`hasNewNotification:${hasNewNotification}`);
+	//   hasNewNotificationRef.current = hasNewNotification;
+	// }, [hasNewNotification]);
 
-  useEffect(() => {
-    if (!socket || !userData) return;
+	const fetchGames = async () => {
+		try {
+			const response = await requestDB("game", "readTopGames");
+			if (response.success) {
+				setGames(response.data);
+			} else {
+				alert("ゲーム情報の取得中にエラーが発生しました");
+			}
+		} catch (error) {
+			console.error("Error fetching games:", error);
+		}
+	};
 
-    const newRooms = new Set(joinedRooms);
+	const fetchCoaches = async () => {
+		try {
+			const response = await requestDB("coach", "readTopCoaches");
+			if (response.success) {
+				setCoaches(response.data);
+			} else {
+				alert("コーチ情報の取得中にエラーが発生しました");
+			}
+		} catch (error) {
+			console.error("Error fetching coaches:", error);
+		}
+	};
 
-    userData.messageRooms?.forEach((room) => {
-      if (!newRooms.has(room.roomKey)) {
-        console.log(`🔗 Joining room: ${room.roomKey}`);
-        socket.emit("joinRoom", { roomKey: room.roomKey, userId: userData.id });
-        newRooms.add(room.roomKey);
-      }
-    });
+	useEffect(() => {
+		if (!socket || !userData) return;
 
-    userData.courses?.forEach((course) => {
-      course.messageRooms?.forEach((room) => {
-        if (!newRooms.has(room.roomKey)) {
-          console.log(`🔗 Joining room: ${room.roomKey}`);
-          socket.emit("joinRoom", {
-            roomKey: room.roomKey,
-            userId: userData.id,
-          });
-          newRooms.add(room.roomKey);
-        }
-      });
-    });
+		const newRooms = new Set(joinedRooms);
 
-    setJoinedRooms(Array.from(newRooms));
-  }, [socket, userData]);
+		userData.customerMessageRooms?.forEach((room) => {
+			if (!newRooms.has(room.roomKey)) {
+				console.log(`🔗 Joining room: ${room.roomKey}`);
+				socket.emit("joinRoom", { roomKey: room.roomKey, userId: userData.id });
+				newRooms.add(room.roomKey);
+			}
+		});
 
-  useEffect(() => {
-    if (!socket) return;
+		userData.coachMessageRooms?.forEach((room) => {
+			if (!newRooms.has(room.roomKey)) {
+				console.log(`🔗 Joining room: ${room.roomKey}`);
+				socket.emit("joinRoom", {
+					roomKey: room.roomKey,
+					userId: userData.id,
+				});
+				newRooms.add(room.roomKey);
+			}
+		});
 
-    const messageHandler = () => {
-      console.log("new message!!");
-      if (!hasNewMessageRef.current) {
-        console.log("new message and update");
-        hasNewMessageRef.current = true;
-        fetchUserData();
-      }
-    };
-    const notificationHandler = () => {
-      console.log("new notification!!");
-      if (!hasNewNotificationRef.current) {
-        console.log("new notification and update");
-        hasNewNotificationRef.current = true;
-        fetchUserData();
-      }
-    };
+		setJoinedRooms(Array.from(newRooms));
+	}, [socket, userData]);
 
-    socket.on("newMessage", messageHandler);
-    socket.on("newNotification", notificationHandler);
+	useEffect(() => {
+		if (!socket) return;
 
-    return () => {
-      socket.off("newMessage", messageHandler);
-      socket.off("newNotification", notificationHandler);
-    };
-  }, [socket]);
+		const messageHandler = () => {
+			console.log("new message!!");
+			if (!hasNewMessageRef.current) {
+				console.log("new message and update");
+				hasNewMessageRef.current = true;
+				fetchUserData();
+			}
+		};
+		// const notificationHandler = () => {
+		//   console.log("new notification!!");
+		//   if (!hasNewNotificationRef.current) {
+		//     console.log("new notification and update");
+		//     hasNewNotificationRef.current = true;
+		//     fetchUserData();
+		//   }
+		// };
 
-  useEffect(() => {
-    if (!socket) return;
+		socket.on("newMessage", messageHandler);
+		// socket.on("newNotification", notificationHandler);
 
-    const handleMessagesRead = ({ roomKey }: { roomKey: string }) => {
-      console.log("update start...", hasNewMessage);
-      if (hasNewMessageRef.current) {
-        console.log("updating..........!!!!!");
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        timeoutRef.current = setTimeout(() => {
-          hasNewMessageRef.current = false;
-          console.log("updating..........");
-          fetchUserData();
-        }, 500);
-      }
-    };
+		return () => {
+			socket.off("newMessage", messageHandler);
+			// socket.off("newNotification", notificationHandler);
+		};
+	}, [socket]);
 
-    socket.on("messagesRead", handleMessagesRead);
+	useEffect(() => {
+		if (!socket) return;
 
-    return () => {
-      socket.off("messagesRead", handleMessagesRead);
-    };
-  }, [socket, userData]);
+		const handleMessagesRead = ({ roomKey }: { roomKey: string }) => {
+			console.log("update start...", hasNewMessage);
+			if (hasNewMessageRef.current) {
+				console.log("updating..........!!!!!");
+				if (timeoutRef.current) clearTimeout(timeoutRef.current);
+				timeoutRef.current = setTimeout(() => {
+					hasNewMessageRef.current = false;
+					console.log("updating..........");
+					fetchUserData();
+				}, 500);
+			}
+		};
 
-  return (
-    <>
-      {orLower("sp") ? (
-        showSideBar ? (
-          <>
-            <Sidebar
-              newMessage={hasNewMessage}
-              newNotification={hasNewNotification}
-              setShowMessagePopup={setShowMessagePopup}
-              setShowNotificationPopup={setShowNotificationPopup}
-              showMessagePopup={showMessagePopup}
-              showNotificationPopup={showNotificationPopup}
-              setShowSideBar={setShowSideBar}
-            />
-            <OverLay
-              className="l-sidebar-overlay"
-              onClick={() => setShowSideBar(false)}
-            />
-          </>
-        ) : null
-      ) : (
-        <Sidebar
-          newMessage={hasNewMessage}
-          newNotification={hasNewNotification}
-          setShowMessagePopup={setShowMessagePopup}
-          setShowNotificationPopup={setShowNotificationPopup}
-          showMessagePopup={showMessagePopup}
-          showNotificationPopup={showNotificationPopup}
-          setShowSideBar={setShowSideBar}
-        />
-      )}
-      {showMessagePopup && (
-        <>
-          <OverLay
-            className="l-message-overlay u-tr"
-            onClick={() => setShowMessagePopup(false)}
-          />
-          <MessagePopup setShowMessagePopup={setShowMessagePopup} />
-        </>
-      )}
-      {showNotificationPopup && (
+		socket.on("messagesRead", handleMessagesRead);
+
+		return () => {
+			socket.off("messagesRead", handleMessagesRead);
+		};
+	}, [socket, userData]);
+
+	return (
+		<>
+			{showSideBar ? (
+				<>
+					<Sidebar setShowSideBar={setShowSideBar} />
+					<OverLay
+						className="l-sidebar-overlay"
+						onClick={() => setShowSideBar(false)}
+					/>
+				</>
+			) : null}
+			<Header setShowSideBar={setShowSideBar} />
+			{showMessagePopup && (
+				<>
+					<OverLay
+						className="l-message-overlay u-tr"
+						onClick={() => setShowMessagePopup(false)}
+					/>
+					<MessagePopup setShowMessagePopup={setShowMessagePopup} />
+				</>
+			)}
+			{/* {showNotificationPopup && (
         <>
           <OverLay
             className="l-message-overlay u-tr"
@@ -252,72 +232,65 @@ export default function GuestLayout({
             setShowNotificationPopup={setShowNotificationPopup}
           />
         </>
-      )}
-      <div className="l-content">
-        <div className="l-search-box__wrapper">
-          <ImageBox
-            src={logoIcon}
-            className="l-logo"
-            round
-            onClick={() => setShowSideBar(true)}
-          />
-          <SearchBox name="Research" className="l-search-box" />
-        </div>
-        <div className="l-top">
-          {children}
-          <div className="l-footer">
-            <div className="l-footer__title">@EVOLISS</div>
-            <div className="l-footer__content">
-              <div className="l-footer__column">
-                <div className="l-footer__column-title">ホーム</div>
-                <Link className="l-footer__column-item" href="/about">
-                  トップページ
-                </Link>
-                <Link className="l-footer__column-item" href="/courses">
-                  講座を探す
-                </Link>
-                <Link className="l-footer__column-item" href="/create">
-                  コーチをしてみる
-                </Link>
-              </div>
-              <div className="l-footer__column">
-                <div className="l-footer__column-title">検索</div>
-                <div className="l-footer__column-item">ゲーム一覧</div>
-                {games?.slice(0, 3).map((g, i) => (
-                  <Link
-                    className="l-footer__column-item"
-                    key={i}
-                    href={`/courses/game/${g.id}`}
-                  >
-                    ・{g.name}
-                  </Link>
-                ))}
-              </div>
-              <div className="l-footer__column">
-                <div className="l-footer__column-title"></div>
-                <div className="l-footer__column-item">コーチ一覧</div>
-                {coaches?.slice(0, 3).map((c, i) => (
-                  <Link
-                    className="l-footer__column-item"
-                    key={i}
-                    href={`/courses/coach/${c.id}`}
-                  >
-                    ・{c.name}
-                  </Link>
-                ))}
-              </div>
-              <div className="l-footer__icon">
-                <ImageBox
-                  round
-                  objectFit="cover"
-                  className="l-footer__icon-img"
-                  src={logoIcon}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+      )} */}
+			<div className="l-content">
+				<div className="l-top">
+					{children}
+					<div className="l-footer">
+						<ImageBox
+							className="l-footer__image"
+							src={footerImage}
+							objectFit="cover"
+						/>
+						<div className="l-footer__content">
+							<div className="l-footer__links">
+								<div className="l-footer__column">
+									<Link className="l-footer__link" href="/">
+										TOP
+									</Link>
+									<div className="l-footer__separator"></div>
+									<Link className="l-footer__link" href="/courses/coach">
+										コーチから選ぶ
+									</Link>
+									<div className="l-footer__separator"></div>
+									<Link className="l-footer__link" href="/courses">
+										講座を探す
+									</Link>
+								</div>
+								<div className="l-footer__column">
+									{userData ? (
+										<Link className="l-footer__link" href="/mypage">
+											マイページ
+										</Link>
+									) : (
+										<>
+											<Link className="l-footer__link" href="/sign-in">
+												ログイン
+											</Link>
+											<div className="l-footer__separator"></div>
+											<Link className="l-footer__link" href="/sign-up">
+												新規会員登録
+											</Link>
+										</>
+									)}
+								</div>
+								<div className="l-footer__column">
+									<Link className="l-footer__link" href="/terms">
+										利用規約
+									</Link>
+									<div className="l-footer__separator"></div>
+									<Link className="l-footer__link" href="/policy">
+										プライバシーポリシー
+									</Link>
+								</div>
+							</div>
+							<div className="l-footer__copyright">
+								© はるnチャンネル managed by EVOLISS
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</>
+	);
 }

@@ -24,12 +24,14 @@
 @use "component/switcher";
 @use "component/star-rating";
 @use "component/calender";
+@use "component/border";
+@use "component/booking-slot";
 
 //project
 @use "project/notfound";
 @use "project/sign-in";
-@use "project/sign-up";
 @use "project/side-bar";
+@use "project/header";
 @use "project/top";
 @use "project/about";
 @use "project/tour";
@@ -39,6 +41,8 @@
 @use "project/success";
 @use "project/coach";
 @use "project/admin";
+@use "project/components";
+@use "project/course-card-mypage";
 
 //utility
 @use "utility/align";

@@ -1,28 +1,28 @@
 "use client";
 
-import { Suspense, useContext, useEffect } from "react";
-import { UserDataContext } from "./contextProvider";
+import { UserDataStatus } from "@/hooks/useUserData";
 import { requestDB } from "@/services/axios";
 import { useSession } from "next-auth/react";
-import { UserDataStatus } from "@/hooks/useUserData";
+import { Suspense, useContext, useEffect } from "react";
+import { UserDataContext } from "./contextProvider";
 
 export default function GuestTemplate({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  const { userData, fetchUserData } = useContext(UserDataContext)!;
-  const session = useSession();
+	const { userData, fetchUserData } = useContext(UserDataContext)!;
+	const session = useSession();
 
-  useEffect(() => {
-    if (!userData && session) {
-      fetchUserData();
-    }
-  }, [userData, session]);
+	useEffect(() => {
+		if (!userData && session) {
+			fetchUserData();
+		}
+	}, [userData, session]);
 
-  return (
-    <>
-      <Suspense>{children}</Suspense>
-    </>
-  );
+	return (
+		<>
+			<Suspense>{children}</Suspense>
+		</>
+	);
 }

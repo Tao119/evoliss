@@ -1,96 +1,73 @@
 import { prisma } from "@/lib/prisma";
-import { paymentStatus } from "@/type/models";
+import { safeTransaction } from "@/lib/transaction";
 
 export const paymentFuncs: { [funcName: string]: Function } = {
-    readPaymentById,
-    createPayment,
-    updatePayment,
-    readPaymentByCustomerAndSchedule
+	readPaymentById,
+	createPayment,
+	readPaymentByCustomerAndSchedule,
 };
 
-async function readPaymentById({ id
+async function readPaymentById({
+	id,
 }: {
-    id: number;
+	id: number;
 }) {
-    try {
-        return await prisma.payment.findUnique({
-            where: {
-                id
-            },
-            include: {
-                schedule: {
-                    select: {
-                        course: { select: { coach: true } }
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error("🚨 Error reading payment:", error);
-        return null;
-    }
-} async function readPaymentByCustomerAndSchedule({ customerId, scheduleId
+	try {
+		return await prisma.payment.findUnique({
+			where: {
+				id,
+			},
+			include: {
+				reservation: true,
+			},
+		});
+	} catch (error) {
+		console.error("🚨 Error reading payment:", error);
+		return null;
+	}
+}
+
+async function readPaymentByCustomerAndSchedule({
+	customerId,
+	reservationId,
 }: {
-    customerId: number;
-    scheduleId: number;
+	customerId: number;
+	reservationId: number;
 }) {
-    try {
-        return await prisma.payment.findFirst({
-            where: {
-                customerId, scheduleId
-            }
-        });
-    } catch (error) {
-        console.error("🚨 Error reading payment:", error);
-        return null;
-    }
+	try {
+		return await prisma.payment.findFirst({
+			where: {
+				customerId,
+				reservationId,
+			},
+		});
+	} catch (error) {
+		console.error("🚨 Error reading payment:", error);
+		return null;
+	}
 }
 
 async function createPayment({
-    customerId,
-    scheduleId,
-    amount,
-    method,
+	customerId,
+	reservationId,
+	amount,
+	method,
 }: {
-    customerId: number;
-    scheduleId: number;
-    amount: number;
-    method: string;
+	customerId: number;
+	reservationId: number;
+	amount: number;
+	method: string;
 }) {
-    try {
-        const newPayment = await prisma.payment.create({
-            data: {
-                customerId,
-                scheduleId,
-                amount,
-                method,
-                status: paymentStatus.Created,
-            },
-        });
-        console.log("✅ Payment created:", newPayment);
-        return newPayment;
-    } catch (error) {
-        console.error("🚨 Error creating payment:", error);
-        return null;
-    }
-}
-
-async function updatePayment({
-    id,
-    status,
-}: {
-    id: number;
-    status: paymentStatus;
-}) {
-    try {
-        const updatedPayment = await prisma.payment.update({
-            where: { id },
-            data: { status },
-        });
-        console.log("✅ Payment updated:", updatedPayment);
-        return updatedPayment;
-    } catch (error) {
-        console.error("🚨 Error updating payment:", error);
-        return null;
-    }
+	return safeTransaction(async (tx) => {
+		const newPayment = await tx.payment.create({
+			data: {
+				customerId,
+				reservationId,
+				amount,
+				method,
+			},
+		});
+		console.log("✅ Payment created:", newPayment);
+		return newPayment;
+	});
 }

@@ -1,8 +1,14 @@
 /** @type {import('next').NextConfig} */
+const withVideos = require('next-videos');
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["user-icon-bucket.s3.ap-northeast-1.amazonaws.com"], // S3バケットのホスト名を追加
+    domains: ["user-icon-bucket.s3.ap-northeast-1.amazonaws.com"],
+  },
+  // パフォーマンス最適化
+  experimental: {
+    optimizeCss: true,
   },
   async headers() {
     return [
@@ -27,5 +33,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
-
+module.exports = withVideos(nextConfig);

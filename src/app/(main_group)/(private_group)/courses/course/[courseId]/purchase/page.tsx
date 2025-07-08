@@ -1,145 +1,183 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";
-import defaultImage from "@/assets/image/picture-icon.svg"; // 差し替え
-import { ImageBox } from "@/components/imageBox";
 import { Button } from "@/components/button";
-import { Axios, requestDB } from "@/services/axios";
-import tagImage from "@/assets/image/tag.svg"; // 差し替え
-import { useParams, useRouter } from "next/navigation";
-import { Course, Game, Schedule } from "@/type/models";
+import { requestDB } from "@/services/axios";
+import type { Course } from "@/type/models";
 import dayjs from "dayjs";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
 
 const Page = () => {
-  const { userData, fetchUserData } = useContext(UserDataContext)!;
-  const [courseData, setCourseData] = useState<Course>();
-  const animation = useContext(AnimationContext)!;
-  const router = useRouter();
-  const { gameId, courseId } = useParams()!;
-  const courseIdNumber = parseInt(courseId as string);
-  const [chosenSchedule, setChosenSchedule] = useState<Date | null>(null);
-  const [chosenScheduleData, setChosenScheduleData] = useState<Schedule>();
+	const { userData, fetchUserData } = useContext(UserDataContext)!;
+	const [courseData, setCourseData] = useState<Course>();
+	const animation = useContext(AnimationContext)!;
+	const router = useRouter();
+	const { gameId, courseId } = useParams()!;
+	const searchParams = useSearchParams()!;
 
-  const onReady = userData && courseData;
+	const dateTimeParam = searchParams.get("dateTime"); // "YYYY-MM-DD HH:mm" format
+	const durationParam = searchParams.get("duration");
 
-  useEffect(() => {
-    fetchCourse();
-    animation.startAnimation();
-    const scheduleStr = sessionStorage.getItem("chosenSchedule");
-    if (scheduleStr) {
-      setChosenSchedule(new Date(scheduleStr));
-    }
-  }, []);
+	const courseIdNumber = Number.parseInt(courseId as string);
+	const duration = durationParam ? Number.parseInt(durationParam) : 0;
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      fetchCourse();
-    }, 60 * 1000);
+	const onReady = userData && courseData && dateTimeParam && duration;
 
-    return () => clearInterval(intervalId);
-  }, []);
+	useEffect(() => {
+		fetchCourse();
+		animation.startAnimation();
+	}, []);
 
-  useEffect(() => {
-    if (onReady) {
-      animation.endAnimation();
-      if (!chosenSchedule) return;
+	useEffect(() => {
+		if (onReady) {
+			animation.endAnimation();
+		}
+	}, [onReady]);
 
-      const tmpSchedule = courseData.schedules.find((s) =>
-        dayjs(s.startTime).isSame(dayjs(chosenSchedule), "minutes")
-      );
-      if (tmpSchedule?.reservations && tmpSchedule?.reservations.length > 0) {
-        alert("すでに予約が入っている時間です");
-        router.push(`/courses/course/${courseId}`);
-        return;
-      }
+	useEffect(() => {
+		if (onReady) {
+			const availableSlots = courseData.coach.timeSlots.filter((slot) => {
+				const slotDate = slot.dateTime.split(" ")[0];
+				const selectedDate = dateTimeParam.split(" ")[0];
+				return (
+					slotDate === selectedDate && dayjs(slot.dateTime).isAfter(dayjs())
+				);
+			});
 
-      setChosenScheduleData(tmpSchedule);
-    }
-  }, [onReady, chosenSchedule]);
+			const requiredSlots = duration / 30;
+			const selectedStartTime = dayjs(dateTimeParam);
 
-  const fetchCourse = async () => {
-    try {
-      const response = await requestDB("course", "readCourseById", {
-        id: courseIdNumber,
-      });
-      if (response.success) {
-        setCourseData(response.data);
-      } else {
-        animation.endAnimation();
-        alert("コース情報の取得中にエラーが発生しました");
-      }
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-    }
-  };
+			let isValidSchedule = true;
+			for (let i = 0; i < requiredSlots; i++) {
+				const checkTime = selectedStartTime.add(i * 30, "minute");
+				const hasSlot = availableSlots.some(
+					(slot) =>
+						dayjs(slot.dateTime).isSame(checkTime, "minute") &&
+						!slot.reservation,
+				);
+				if (!hasSlot) {
+					isValidSchedule = false;
+					break;
+				}
+			}
 
-  if (!onReady) {
-    return <div>Loading...</div>;
-  }
+			if (!isValidSchedule) {
+				alert("選択された時間は既に予約済みか利用できません");
+				router.push(`/courses/course/${courseId}`);
+				return;
+			}
+		}
+	}, [onReady, dateTimeParam, duration]);
 
-  const coach = courseData?.coach;
+	const fetchCourse = async () => {
+		try {
+			const response = await requestDB("course", "readCourseById", {
+				id: courseIdNumber,
+			});
+			if (response.success) {
+				setCourseData(response.data);
+			} else {
+				animation.endAnimation();
+				alert("コース情報の取得中にエラーが発生しました");
+			}
+		} catch (error) {
+			console.error("Error fetching courses:", error);
+			animation.endAnimation();
+			alert("コース情報の取得中にエラーが発生しました");
+		}
+	};
 
-  const handlePurchase = async () => {
-    const response = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: courseData.price,
-        userId: userData.id,
-        scheduleId: chosenScheduleData?.id,
-        courseId,
-        courseName: courseData.title,
-      }),
-    });
+	if (!onReady) {
+		return <div></div>;
+	}
 
-    const data = await response.json();
-    if (data.ok) {
-      window.location.href = data.sessionUrl;
-    } else {
-      alert(`決済エラーが発生しました: ${data.message}`);
-    }
-  };
+	const handlePurchase = async () => {
+		if (!dateTimeParam || !duration) {
+			alert("必要な情報が不足しています");
+			return;
+		}
 
-  return (
-    <div className="p-courses-purchase l-page">
-      {chosenScheduleData ? (
-        <>
-          <div className="p-courses-purchase__title">選択した講座</div>
-          <div className="p-courses-purchase__course">
-            <div className="p-courses-purchase__info">
-              <div className="p-courses-purchase__info-title">
-                {courseData.title}
-              </div>
-              <div className="p-courses-purchase__info-coach">
-                {courseData.coach.name}
-              </div>
-            </div>
-            <div className="p-courses-purchase__info-duration">
-              {courseData.duration}分
-            </div>
-            <div className="p-courses-purchase__info-price">
-              ￥{courseData.price.toLocaleString("ja-JP")}
-            </div>
-          </div>
+		try {
+			const response = await fetch("/api/create-checkout-session", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					amount: courseData.price,
+					userId: userData.id,
+					courseId: courseIdNumber,
+					courseName: courseData.title,
+					startDateTime: dateTimeParam,
+					duration: duration,
+					coachId: courseData.coachId,
+				}),
+			});
 
-          <div className="p-courses-purchase__title">受講する日程</div>
-          <div className="p-courses-purchase__time">
-            {dayjs(chosenScheduleData.startTime).format("YYYY年M月D日　HH:mm~")}
-          </div>
+			const data = await response.json();
+			if (data.ok) {
+				window.location.href = data.sessionUrl;
+			} else {
+				alert(`決済エラーが発生しました: ${data.message}`);
+			}
+		} catch (error) {
+			console.error("Purchase error:", error);
+			alert("決済処理中にエラーが発生しました");
+		}
+	};
 
-          <Button
-            className="p-courses-purchase__submit"
-            onClick={handlePurchase}
-          >
-            確定
-          </Button>
-        </>
-      ) : (
-        <div>受講日程が選択されていません</div>
-      )}
-    </div>
-  );
+	const handleBack = () => {
+		router.push(`/courses/course/${courseId}`);
+	};
+
+	const endDateTime = dayjs(dateTimeParam).add(duration, "minute");
+
+	return (
+		<div className="p-courses-purchase l-page">
+			<div className="p-courses-purchase__title">選択した講座</div>
+			<div className="p-courses-purchase__course">
+				<div className="p-courses-purchase__info">
+					<div className="p-courses-purchase__info-title">
+						{courseData.title}
+					</div>
+					<div className="p-courses-purchase__info-coach">
+						講師: {courseData.coach.name}
+					</div>
+					<div className="p-courses-purchase__info-game">
+						ゲーム: {courseData.game.name}
+					</div>
+				</div>
+				<div className="p-courses-purchase__details">
+					<div className="p-courses-purchase__info-duration">{duration}分</div>
+					<div className="p-courses-purchase__info-price">
+						￥{courseData.price.toLocaleString("ja-JP")}
+					</div>
+				</div>
+			</div>
+
+			<div className="p-courses-purchase__title">受講する日程</div>
+			<div className="p-courses-purchase__schedule">
+				<div className="p-courses-purchase__date">
+					{dayjs(dateTimeParam).format("YYYY年M月D日")}
+				</div>
+				<div className="p-courses-purchase__time">
+					{dayjs(dateTimeParam).format("HH:mm")} ～{" "}
+					{endDateTime.format("HH:mm")}
+				</div>
+			</div>
+
+			<div className="p-courses-purchase__actions">
+				<Button
+					className="p-courses-purchase__back-button"
+					onClick={handleBack}
+				>
+					戻る
+				</Button>
+				<Button className="p-courses-purchase__submit" onClick={handlePurchase}>
+					購入を確定する
+				</Button>
+			</div>
+		</div>
+	);
 };
 
 export default Page;

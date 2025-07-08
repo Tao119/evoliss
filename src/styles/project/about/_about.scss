@@ -6,26 +6,21 @@
   align-items: center;
   width: 100%;
   height: auto;
-  padding: 30px;
+  // padding: 30px;
 
   &__more {
-    width: 50px;
+    width: 250px;
     height: 50px;
     align-self: center;
-    transition: all .5s;
-
-    &:hover {
-      translate: 0 -5px;
-    }
+    font-size: $fs-input;
   }
 
   &__top-panel {
+    position: relative;
     width: 100%;
-    height: 300px;
+    height: 600px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     margin-bottom: 30px;
 
     @include mq(sp) {
@@ -34,67 +29,110 @@
     }
   }
 
-  &__top-panel-left {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    color: $white;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 30px;
-    gap: 10px;
+  &__top-panel-background {
+    width: 100%;
+    height: 600px;
+    position: absolute;
+    z-index: -100;
+    object-fit: cover;
   }
 
-  &__top-panel-title {
-    font-size: $fs-title;
-    height: 50px;
 
-    @include mq(sp) {
-      font-size: $fs-medium;
-    }
-  }
 
   &__top-panel-phrase-container {
-    font-size: $fs-x-large;
-    font-family: 'Noto Serif JP', serif;
+    margin-top: 20%;
+    margin-left: 20%;
+    font-size: $fs-medium;
+    // background-color: $green;
+    color: $white;
+    font-weight: $fw-bold;
     display: flex;
     flex-direction: column;
+    // padding: 0 30px;
     align-items: flex-start;
-
-    @include mq(sp) {
-      font-size: $fs-large;
-    }
-  }
-
-  &__top-panel-button {
-    border-radius: 999px;
-    width: 200px;
-    height: 50px;
-    font-size: $fs-text;
-    background-color: $green;
-    color: $black;
-    display: flex;
-    padding: 0 30px;
-    align-items: center;
     justify-content: flex-start;
   }
 
-  &__top-panel-right {
-    padding: 10px;
-    flex-grow: 1;
-    height: 100%;
+  &__top-panel-support-container {
+    margin-top: 10px;
+    margin-left: 20%;
+    font-size: $fs-small;
+    color: $white;
+    font-weight: $fw-bold;
+    display: flex;
+    // padding: 0 30px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
 
-    @include mq(sp) {
-      height: 300px;
-      width: 100%;
-    }
+  &__top-panel-support-logo {
+    width: 20px;
+    height: 20px;
+  }
 
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    padding: 30px;
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+
+  &__login-panel {
+    height: 200px;
+    width: 80%;
+    background-color: rgb(from $white r g b / 0.5);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px;
+  }
+
+  &__login-panel-title {
+    font-size: $fs-medium;
+    font-weight: $fw-bold;
+  }
+
+  &__login-panel-text {
+    font-size: $fs-text;
+    font-weight: $fw-bold;
+  }
+
+  &__login-panel-button {
+    font-size: $fs-medium;
+    width: 300px;
   }
 
   &__section-title {
-    color: $white;
-    font-size: $fs-medium;
-    height: 50px;
+    color: $black;
+    font-size: $fs-sub-title;
+    font-weight: $fw-bold;
+    margin-bottom: 15px;
+  }
+
+  &__section-sub-title {
+    color: $black;
+    font-size: $fs-sub-title;
+    font-weight: $fw-bold;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  &__section-icon {
+    height: 30px;
+    width: 30px;
   }
 
   &__game-panel {
@@ -125,54 +163,29 @@
     }
   }
 
-  &__game-item {
-    width: 150px;
-    height: 180px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    background-color: $gray;
-    overflow: hidden;
-    cursor: pointer;
 
-    @include mq(sp) {
-      width: 45%;
-    }
-  }
 
-  &__game-image {
-    width: 150px;
-    height: 120px;
-    border-radius: 10px;
-  }
-
-  &__game-name {
-    font-size: $fs-text;
-    color: $black;
-
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  &__coach-panel {
+  &__panel {
     width: 100%;
-    margin-bottom: 30px;
+    margin-bottom: 100px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 
   &__coach-list {
-    height: 180px;
     width: 100%;
+    max-width: 1000px;
+    height: auto;
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     white-space: nowrap;
     overflow-x: scroll;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    gap: 30px;
+    gap: 60px 30px;
+    padding: 50px 0;
 
     &::-webkit-scrollbar {
       display: none;
@@ -181,129 +194,6 @@
     @include mq(sp) {
       height: auto;
     }
-  }
-
-  &__coach-item {
-    width: 250px;
-    height: 150px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    background-color: rgb(from $soft-gray r g b / 0.5);
-    overflow: hidden;
-    color: $white;
-    padding: 0 20px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-
-    @include mq(sp) {
-      width: 45%;
-      height: auto;
-      padding: 10px;
-      gap: 10px;
-    }
-  }
-
-  &__coach-upper {
-    display: flex;
-    flex-direction: row;
-    height: 90px;
-    align-items: center;
-
-    @include mq(sp) {
-      flex-direction: column;
-      height: auto;
-    }
-  }
-
-  &__coach-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    margin-right: 20px;
-    flex-shrink: 0;
-  }
-
-  &__coach-details {
-    width: calc(100% - 80px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    justify-content: space-around;
-
-    @include mq(sp) {
-      width: 100%;
-    }
-  }
-
-  &__coach-name {
-    font-size: $fs-medium;
-    color: $white;
-    width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    text-align: start;
-  }
-
-  &__coach-rating {
-    width: 100%;
-    color: $white;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__coach-stars {
-    width: 100px;
-  }
-
-  &__coach-rating-text {
-    font-size: $fs-text;
-  }
-
-  &__coach-tag-icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 6px;
-  }
-
-  &__coach-games {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    height: 60px;
-    padding: 2px;
-
-    @include mq(sp) {
-      height: auto;
-    }
-  }
-
-  &__coach-game-list {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 100%;
-    overflow: hidden;
-  }
-
-  &__coach-game {
-    border: 1px solid $white;
-    height: 20px;
-    width: auto;
-    padding: 0 5px;
-    display: flex;
-    align-items: center;
-    justify-items: center;
-    margin: 2px;
-    max-width: 100px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   &__course-panel {
@@ -328,162 +218,17 @@
     }
   }
 
-  &__course-item {
-    width: 220px;
-    height: 220px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    color: $white;
-    cursor: pointer;
-    position: relative;
-
-    @include mq(sp) {
-      width: 45%;
-      height: 300px;
-    }
+  &__become-text {
+    font-size: $fs-input;
+    font-weight: $fw-bold;
+    height: 100px;
+    padding: 20px;
   }
 
-  &__course-image-container {
-    width: 220px;
-    height: 120px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    overflow: hidden;
-
-    @include mq(sp) {
-      width: 100%;
-    }
-  }
-
-  &__course-image {
-    width: 220px;
-    height: 120px;
-    border-radius: 10px;
-
-    @include mq(sp) {
-      width: 100%;
-    }
-  }
-
-  &__course-title {
-    font-size: $fs-text;
-    color: $white;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-  }
-
-  &__course-details {
-    height: 60px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-
-    @include mq(sp) {
-      flex-direction: column;
-      height: auto;
-      gap: 10px;
-    }
-  }
-
-  &__course-details-left {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 120px;
-
-
-  }
-
-  &__course-details-upper {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    padding-left: 10px;
-    margin-bottom: 10px;
-  }
-
-  &__course-user-icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 6px;
-    flex-shrink: 0;
-  }
-
-  &__course-user-name {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  &__course-rating {
-    width: 100%;
-    color: $white;
-    padding: 0 5px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__course-stars {
-    width: 100px;
-    margin-right: 10px;
-  }
-
-  &__course-rating-text {
-    font-size: $fs-text;
-  }
-
-  &__course-games {
-    border: 1px solid $white;
-    display: flex;
-    flex-direction: column;
-    height: 60px;
-    width: 100px;
-    padding: 5px;
-
-    @include mq(sp) {
-      width: 100%;
-    }
-  }
-
-  &__course-tag {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    height: 45px;
-    width: 100%;
-  }
-
-  &__course-tag-icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 6px;
-  }
-
-  &__course-game {
-    width: 100%;
-    text-align: start;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: $fs-small;
-  }
-
-  &__course-value {
-    height: 45px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    font-size: $fs-small;
+  &__become-button {
+    width: 250px;
+    height: 50px;
+    align-self: center;
+    font-size: $fs-input;
   }
 }

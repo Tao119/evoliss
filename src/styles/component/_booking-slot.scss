@@ -1,0 +1,74 @@
+@use '../foundation' as *;
+
+.p-booking-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &__timeline {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__time-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: $fs-small;
+        color: rgb(from $black r g b / 0.6);
+        margin-bottom: 4px;
+    }
+
+    &__bar {
+        display: flex;
+        height: 40px;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid $gray;
+        position: relative;
+    }
+
+    &__segment {
+        height: 100%;
+        transition: all 0.2s ease;
+
+        &.-unavailable {
+            background-color: $dark-gray;
+        }
+
+        &.-available {
+            background-color: $gray;
+        }
+
+        &.-selected {
+            background-color: #ffa500 !important; // オレンジ色
+        }
+    }
+
+    &__selected-label {
+        position: absolute;
+        bottom: -30px;
+        transform: translateX(-50%);
+        background-color: $black;
+        color: $white;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: $fs-small;
+        white-space: nowrap;
+        transition: all .5s;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 4px solid $black;
+        }
+    }
+}

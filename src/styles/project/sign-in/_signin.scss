@@ -1,21 +1,16 @@
 @use "../../foundation" as *;
 
 .p-sign-in {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    border-radius: 10px;
-    width: 450px;
-    height: 450px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    background-color: rgb(from $soft-gray r g b / 0.3);
-    color: $white;
+    justify-content: flex-start;
+    width: 100%;
+    height: auto;
     padding: 30px;
+    color: $black;
+    gap: 10px;
+    margin-bottom: 30px;
 
     @include mq(sp) {
         width: 300px;
@@ -24,18 +19,24 @@
 
 
     &__title {
-        font-size: $fs-title;
+        font-size: $fs-medium;
         width: 250px;
         text-align: center;
         margin-bottom: 10px;
+        font-weight: $fw-bold;
     }
 
     &__item {
         position: relative;
         display: flex;
         flex-direction: column;
-        margin-bottom: 20px;
-        width: 80%;
+        justify-content: center;
+        align-items: center;
+        width: 500px;
+        height: 50px;
+        background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
+        border-radius: 10px;
+        padding: 1px;
     }
 
     &__input {
@@ -43,12 +44,20 @@
         justify-content: flex-start;
         align-items: center;
         text-align: start;
-        padding-left: 40px;
         flex-direction: row;
-        border-radius: 0;
-        border: 1px solid $gray;
+        background-color: $soft-gray;
+        padding-left: 20px;
+        border-radius: 9px;
+
+        &.-with-icon {
+            padding-left: 40px;
+        }
+
+
+
+
         width: 100%;
-        height: 36px;
+        height: 100%;
         font-size: $fs-text;
 
         &::placeholder {
@@ -58,10 +67,11 @@
 
         &.-focused {
             border: 1px solid $theme;
-
-
         }
+
+
     }
+
 
     &__input-icon {
         position: absolute;
@@ -80,33 +90,40 @@
         translate: -50% -50%;
         height: 20px;
         width: 20px;
+
+        &.-show {
+            filter: opacity(30%);
+        }
     }
 
-    &__back {
-        align-self: flex-start;
-    }
 
     &__submit {
-        font-size: $fs-text;
-        width: 80%;
-        height: 45px;
-        color: $black;
-        background-color: $theme;
-        margin-top: 20px;
-        border-radius: 0;
+        width: 250px;
+        height: 50px;
+        align-self: center;
+        font-size: $fs-input;
+        flex-shrink: 0;
 
         &.-disabled {
-            color: $black;
-            background-color: rgb(from $theme r g b / 0.3);
+            background-color: rgb(from $black r g b / 0.5);
         }
     }
 
     &__link {
         cursor: pointer;
-        margin-top: 40px;
+        font-size: $fs-input;
+        margin: 30px 0;
+        color: $blue;
+        text-decoration: underline;
+        font-weight: $fw-bold;
+    }
+
+    &__text {
+        margin: 20px 0;
         font-size: $fs-text;
         height: 20px;
-        color: $white;
+        color: $black;
+        font-weight: $fw-bold;
     }
 
     &__forgot {
@@ -123,5 +140,111 @@
         font-size: $fs-text;
         color: $red;
         height: 30px;
+    }
+
+    &__checkbox-container {
+        width: 300px;
+        height: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    &__checkbox-label {
+        font-size: $fs-text;
+    }
+
+    &__checkbox-link {
+        color: $blue;
+        text-decoration: underline;
+        font-weight: $fw-bold;
+    }
+
+    &__icon {
+        height: 180px;
+        width: 180px;
+        margin-bottom: 50px;
+        position: relative;
+        padding: 10px;
+
+        &-upload {
+            display: none;
+        }
+
+        &-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        &-edit {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: $soft-gray;
+            padding: 5px;
+        }
+    }
+
+    &__item-multi {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 500px;
+        height: 200px;
+        background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
+        border-radius: 10px;
+        padding: 1px;
+    }
+
+
+    &__form-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    &__label {
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+    }
+
+    &__char-count {
+        align-self: flex-end;
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+    }
+
+    &__sns-item {
+        width: 500px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
+    }
+
+    &__sns-icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    &__sns-input {
+        width: 120px;
+        height: 30px;
+        align-self: center;
+        font-size: $fs-x-small;
+        background-color: $white;
+        color: $gray;
+        border: 1px solid $gray;
     }
 }

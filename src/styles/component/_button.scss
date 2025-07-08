@@ -2,12 +2,13 @@
 
 .c-button {
     height: 50px;
-    width: 200px;
-    background-color: $theme;
+    width: 250px;
+    background-color: $black;
     color: $white;
-    border-radius: 4px;
+    border-radius: 25px;
     box-shadow: none;
-    font-size: $fs-small;
+    font-size: $fs-input;
+    font-weight: $fw-bold;
     text-align: center;
     cursor: pointer;
     white-space: pre-wrap;

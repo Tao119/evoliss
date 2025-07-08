@@ -1,28 +1,33 @@
 import { prisma } from "@/lib/prisma";
+import { safeTransaction } from "@/lib/transaction";
 
 export const historyFuncs: { [funcName: string]: Function } = {
-    createHistory,
-    deleteHistoryFromList,
+	createHistory,
+	deleteHistoryFromList,
 };
 
 async function createHistory({
-    userId,
-    query,
+	userId,
+	query,
 }: {
-    userId: number;
-    query: string;
+	userId: number;
+	query: string;
 }) {
-    return prisma.searchHistory.create({
-        data: {
-            userId,
-            query,
-        },
-    });
+	return safeTransaction(async (tx) => {
+		return tx.searchHistory.create({
+			data: {
+				userId,
+				query,
+			},
+		});
+	});
 }
 
 async function deleteHistoryFromList({ id }: { id: number }) {
-    return prisma.searchHistory.update({
-        where: { id },
-        data: { show: false },
-    });
+	return safeTransaction(async (tx) => {
+		return tx.searchHistory.update({
+			where: { id },
+			data: { show: false },
+		});
+	});
 }

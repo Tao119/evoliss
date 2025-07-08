@@ -1,0 +1,180 @@
+@use '../../foundation' as *;
+
+.p-course-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 400px;
+    gap: 10px;
+
+    &__coach {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+        height: 40px;
+    }
+
+    &__coach-name {
+        color: $black;
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+        margin-top: 16px;
+        max-width: 350px;
+        text-overflow: ellipsis;
+
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    &__coach-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    &__item {
+        width: 100%;
+        height: 240px;
+        flex-shrink: 0;
+        border-radius: 10px;
+        color: $white;
+        cursor: pointer;
+        position: relative;
+        box-shadow: 6px 6px 0 0 $orange;
+        background-color: $white;
+
+        display: flex;
+        flex-direction: row;
+
+
+        @include mq(sp) {
+            width: 45%;
+            height: 300px;
+        }
+    }
+
+    &__left {
+        width: 180px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    &__right {
+        width: 220px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    &__game {
+        width: 132px;
+        text-align: center;
+        height: 32px;
+        padding: 10px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        font-weight: $fw-bold;
+        white-space: nowrap;
+        flex-shrink: 0;
+        border: 1px solid $gray;
+        color: $gray;
+        font-size: $fs-small;
+        background-color: $white;
+
+    }
+
+    &__image {
+        width: 160px;
+        height: 120px;
+        border-radius: 10px;
+
+        object-fit: cover;
+    }
+
+    &__title {
+        font-size: $fs-medium;
+        color: $black;
+        font-weight: $fw-bold;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 0;
+        text-align: start;
+    }
+
+    &__details {
+        height: 60px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+
+        @include mq(sp) {
+            flex-direction: column;
+            height: auto;
+            gap: 10px;
+        }
+    }
+
+    &__value {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        color: $black;
+        font-size: $fs-small;
+        font-weight: $fw-bold;
+    }
+
+    &__tags {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px;
+        width: 100%;
+    }
+
+    &__tag {
+        background-color: $white;
+        font-size: $fs-small;
+        border: 1px solid $gray;
+        color: $gray;
+        width: auto;
+        height: 36px;
+        padding: 0 30px;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        font-weight: $fw-bold;
+        border-radius: 20px;
+    }
+
+    &__tag-text {
+        max-width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    &__date {
+        font-size: $fs-input;
+        color: $black;
+        font-weight: $fw-bold;
+    }
+
+    &__time {
+        font-size: $fs-input;
+        color: $black;
+        font-weight: $fw-bold;
+    }
+}

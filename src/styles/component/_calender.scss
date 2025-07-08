@@ -3,18 +3,15 @@
 .p-calendar {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: 500px;
     gap: 10px;
     display: flex;
-
-
 
     &__upper {
         display: flex;
         gap: 10px;
         flex-direction: row;
         border-radius: 10px;
-
 
         &.-customer {
             flex-direction: column;
@@ -50,6 +47,9 @@
         justify-content: space-between;
         width: 100%;
         height: 50px;
+        align-items: center;
+        padding: 10px;
+        ;
     }
 
     &__current {
@@ -78,21 +78,31 @@
         grid-template-columns: repeat(7, minmax(0, 1fr));
         width: 100%;
         height: auto;
-        max-height: 300px;
-        max-width: 280px;
+        max-width: 500px;
         gap: 0;
+        border-top: 1px solid $gray;
+        border-left: 1px solid $gray;
+        font-size: $fs-input;
     }
 
     &__day {
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         padding: 4px;
-        width: clamp(10px, 100%, 40px);
-        height: clamp(10px, 100%, 40px);
-        border-bottom: 1px solid $white;
-        aspect-ratio: 1 / 1;
+        width: clamp(10px, 100%, 80px);
+        height: clamp(10px, 100%, 80px);
+        border-bottom: 1px solid $gray;
+        border-right: 1px solid $gray;
+        aspect-ratio: 4 / 3;
+        background-color: $white;
 
-        &.-null {
-            border: none;
+        &.-sunday {
+            background-color: $light-red;
+        }
+
+        &.-saturday {
+            background-color: $light-blue;
         }
     }
 
@@ -100,34 +110,64 @@
         text-align: center;
         padding: 4px;
         aspect-ratio: 1 / 1;
-        width: clamp(10px, 100%, 40px);
-        height: clamp(10px, 100%, 40px);
+        width: clamp(10px, 100%, 80px);
+        height: clamp(10px, 100%, 80px);
         display: flex;
-        align-items: flex-start;
-        justify-content: flex-start;
+        align-items: center;
+        justify-content: center;
         padding: 5px;
-        border-right: 1px solid $white;
-        border-bottom: 1px solid $white;
+        border-right: 1px solid $gray;
+        border-bottom: 1px solid $gray;
         position: relative;
         cursor: pointer;
+        background-color: $white;
+        z-index: 1;
 
         &.-active {
             cursor: default;
-            background-color: rgb(from $gray r g b / 0.2);
+
+            &::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                translate: -50% -50%;
+                width: clamp(6px, 100%, 48px);
+                height: clamp(6px, 100%, 48px);
+                border-radius: 50%;
+                background: linear-gradient(145.53deg, rgba(102, 14, 235, 0.5) 10.59%, rgba(255, 170, 0, 0.5) 85.52%);
+
+                z-index: 1;
+            }
         }
 
-        &.-first-column {
-            border-left: 1px solid $white;
+
+        &.-other-month {
+            color: $gray;
         }
 
-        &.-first-row {
-            border-top: 1px solid $white;
+        &.-no-schedule {
+            background-color: $mid-gray;
+            color: $white;
         }
 
-        &.-null {
-            cursor: default;
-            border: none;
+        &.-available {
+            background-color: $white;
         }
+
+    }
+
+    &__date-text {
+        z-index: 2;
+    }
+
+    &__available-indicator {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        font-size: 8px;
+        color: #00aa00;
+        font-weight: bold;
     }
 
     &__circle {
@@ -162,7 +202,38 @@
 
     &__button {
         background: none;
-        width: 10px;
+        width: 20px;
+        position: relative;
+
+        &::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-top: 2px solid $black;
+            border-right: 2px solid $black;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            translate: -50% -50%;
+        }
+
+        &.-next {
+            &::after {
+                rotate: 45deg;
+            }
+        }
+
+        &.-prev {
+            &::after {
+                rotate: 225deg;
+            }
+        }
+
+        &.-none {
+            &::after {
+                display: none;
+            }
+        }
     }
 
     &__selected-date-input {
@@ -237,6 +308,31 @@
         width: 100%;
     }
 
+    &__selector {
+        margin: 20px;
+        display: flex;
+        flex-direction: row;
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    &__selector-item {
+        width: 200px;
+        height: 60px;
+        font-size: $fs-medium;
+        border: 1px solid $gray;
+        background-color: $white;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+    }
+
+
     &__schedule-grid {
         display: grid;
         grid-auto-flow: column;
@@ -251,8 +347,6 @@
         align-items: center;
         gap: 5px;
         font-size: $fs-input;
-
-
     }
 
     &__selected-schedule {
@@ -285,14 +379,13 @@
 
         &.-inactive {
             border: 1px solid $light-red;
-            background-color: $dark-gray;
+            background-color: $mid-gray;
             cursor: default;
         }
 
         &.-disabled {
             background-color: $gray;
             cursor: default;
-
         }
 
         &.-customer {
@@ -307,4 +400,77 @@
         cursor: pointer;
     }
 
+    // Time slots section
+    &__time-slots {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    &__selected-date {
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+    }
+
+    &__available-times {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    &__time-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    &__time-slot {
+        padding: 8px 12px;
+        border: 1px solid $gray;
+        border-radius: 4px;
+        cursor: pointer;
+        background-color: $white;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: rgb(from $gray r g b / 0.1);
+        }
+
+        &.-selected {
+            background-color: $theme;
+            color: $white;
+            border-color: $theme;
+        }
+    }
+
+    &__time-range {
+        font-size: $fs-text;
+        white-space: nowrap;
+    }
+
+    &__no-slots {
+        padding: 20px;
+        text-align: center;
+        font-size: $fs-medium ;
+        font-weight: $fw-bold;
+    }
+
+    &__selected-info {
+        padding: 10px;
+        background-color: rgb(from $theme r g b / 0.1);
+        border-radius: 4px;
+        border: 1px solid $theme;
+    }
+
+    &__selected-label {
+        font-size: $fs-small;
+        color: rgb(from $black r g b / 0.7);
+        margin-bottom: 4px;
+    }
+
+    &__selected-time {
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+        color: $theme;
+    }
 }

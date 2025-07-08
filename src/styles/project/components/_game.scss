@@ -1,0 +1,33 @@
+@use '../../foundation' as *;
+
+.p-game-card {
+    &__item {
+        width: 150px;
+        height: 180px;
+        flex-shrink: 0;
+        border-radius: 10px;
+        background-color: $gray;
+        overflow: hidden;
+        cursor: pointer;
+
+        @include mq(sp) {
+            width: 45%;
+        }
+    }
+
+    &__image {
+        width: 150px;
+        height: 120px;
+        border-radius: 10px;
+    }
+
+    &__name {
+        font-size: $fs-text;
+        color: $black;
+
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

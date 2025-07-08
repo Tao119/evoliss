@@ -1,0 +1,8 @@
+@use '../foundation' as *;
+
+.c-border {
+    width: 300px;
+    color: $black;
+    border-image: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%) 1/2px 0 0 0;
+    height: 30px;
+}

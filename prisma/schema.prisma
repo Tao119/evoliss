@@ -14,24 +14,24 @@ model User {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   bio              String?
-  header           String?
   icon             String?
+  gameId           Int?
+  game             Game?     @relation(fields: [gameId], references: [id])
   isAdmin          Boolean           @default(false)
+  isInitialized          Boolean           @default(false)
   courses          Course[]
   accesses         CourseAccess[]
   sentMessages     Message[]
-  messageRooms     MessageRoom[]
-  sentNotification Notification[]    @relation("sentNotification")
-  notification     Notification[]    @relation("receicvedNotification")
+  customerMessageRooms MessageRoom[] @relation("CustomerMessageRooms")
+  coachMessageRooms    MessageRoom[] @relation("CoachMessageRooms")
   payments         Payment[]
   paymentAccount   PaymentAccount?
-  purchaseMessages PurchaseMessage[]
   refunds          Refund[]
   reservations     Reservation[]
   searchHistories  SearchHistory[]
-  userGames        UserGame[]
   userPayment      UserPayment[]
   reviews          Review[]
+  timeSlots        TimeSlot[]
 }
 
 model PaymentAccount {
@@ -71,27 +71,26 @@ model Course {
   coach        User           @relation(fields: [coachId], references: [id], onDelete: Cascade)
   game         Game?          @relation(fields: [gameId], references: [id])
   accesses     CourseAccess[]
-  messageRooms MessageRoom[]
   reservations Reservation[]  @relation("CourseReservations")
   reviews      Review[]
-  schedules    Schedule[]
+  isPublic     Boolean        @default(true)
+  tagCourses   TagCourse[]
 
   @@index([coachId], map: "Course_coachId_fkey")
   @@index([gameId], map: "Course_gameId_fkey")
 }
 
-model Schedule {
+model TimeSlot {
   id               Int               @id @default(autoincrement())
-  courseId         Int
-  startTime        DateTime
+  coachId         Int
+  dateTime        String
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  payments         Payment?
-  purchaseMessages PurchaseMessage[]
-  reservations     Reservation?
-  course           Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  reservationId     Int?
+  reservation     Reservation?    @relation(fields: [reservationId], references: [id])
+  coach            User            @relation(fields: [coachId], references: [id], onDelete: Cascade)
 
-  @@index([courseId], map: "Schedule_courseId_fkey")
+  @@index([coachId], map: "Schedule_coachId_fkey")
 }
 
 model Refund {
@@ -110,34 +109,34 @@ model Refund {
 model Reservation {
   id         Int      @id @default(autoincrement())
   customerId Int
-  scheduleId Int      @unique
   courseId   Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  roomId     Int
   refunds    Refund[]
+  status     Int
   course     Course   @relation("CourseReservations", fields: [courseId], references: [id], onDelete: Cascade)
   customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  room       MessageRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  timeSlots   TimeSlot[]
+  payment         Payment?
+  roomId   Int?
+  room     MessageRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([courseId], map: "Reservation_courseId_fkey")
   @@index([customerId], map: "Reservation_customerId_fkey")
+  @@index([roomId], map: "Reservation_roomId_fkey")
 }
 
 model MessageRoom {
   id               Int               @id @default(autoincrement())
-  courseId         Int?
+  coachId          Int?
   customerId       Int
   roomKey          String            @unique
   messages         Message[]
-  course           Course?           @relation(fields: [courseId], references: [id])
-  customer         User              @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  notifications    Notification[]
-  purchaseMessages PurchaseMessage[]
+  coach            User?             @relation("CoachMessageRooms", fields: [coachId], references: [id])
+  customer         User              @relation("CustomerMessageRooms", fields: [customerId], references: [id], onDelete: Cascade)
   reservations     Reservation[]
 
-  @@index([courseId], map: "MessageRoom_courseId_fkey")
+  @@index([coachId], map: "MessageRoom_coachId_fkey")
   @@index([customerId], map: "MessageRoom_customerId_fkey")
 }
 
@@ -155,33 +154,16 @@ model Message {
   @@index([senderId], map: "Message_senderId_fkey")
 }
 
-model PurchaseMessage {
-  id         Int         @id @default(autoincrement())
-  roomId     Int
-  senderId   Int?
-  scheduleId Int?
-  isRead     Boolean     @default(false)
-  sentAt     DateTime    @default(now())
-  room       MessageRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  schedule   Schedule?   @relation(fields: [scheduleId], references: [id])
-  sender     User?       @relation(fields: [senderId], references: [id])
-
-  @@index([roomId], map: "PurchaseMessage_roomId_fkey")
-  @@index([scheduleId], map: "PurchaseMessage_scheduleId_fkey")
-  @@index([senderId], map: "PurchaseMessage_senderId_fkey")
-}
-
 model Payment {
   id         Int      @id @default(autoincrement())
   customerId Int
   amount     Int
   method     String
-  status     Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  scheduleId Int      @unique
+  reservationId Int      @unique
   customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  reservation Reservation @relation(fields: [reservationId], references: [id])
 
   @@index([customerId], map: "Payment_customerId_fkey")
 }
@@ -217,18 +199,22 @@ model Game {
   createdAt DateTime   @default(now())
   image     String?
   courses   Course[]
-  userGames UserGame[]
+  users     User[]
 }
 
-model UserGame {
-  id     Int  @id @default(autoincrement())
-  userId Int
-  gameId Int
-  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Tag {
+  id        Int        @id @default(autoincrement())
+  name      String
+  createdAt DateTime   @default(now())
+  tagCourses   TagCourse[]
+}
 
-  @@index([gameId], map: "UserGame_gameId_fkey")
-  @@index([userId], map: "UserGame_userId_fkey")
+model TagCourse {
+  id        Int        @id @default(autoincrement())
+  tagId     Int
+  tag       Tag       @relation(fields: [tagId], references: [id])
+  courseId  Int
+  course    Course    @relation(fields: [courseId], references: [id])
 }
 
 model CourseAccess {
@@ -243,19 +229,3 @@ model CourseAccess {
   @@index([userId], map: "CourseAccess_userId_fkey")
 }
 
-model Notification {
-  id        Int          @id @default(autoincrement())
-  userId    Int
-  content   String
-  createdAt DateTime     @default(now())
-  isRead    Boolean      @default(false)
-  senderId  Int?
-  roomId    Int?
-  room      MessageRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  sender    User?        @relation("sentNotification", fields: [senderId], references: [id], onDelete: Cascade)
-  user      User         @relation("receicvedNotification", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([roomId], map: "Notification_roomId_fkey")
-  @@index([senderId], map: "Notification_senderId_fkey")
-  @@index([userId], map: "Notification_userId_fkey")
-}

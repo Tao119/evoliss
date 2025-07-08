@@ -3,12 +3,14 @@
 .p-courses {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
     width: 100%;
     height: auto;
-    padding: 30px;
-    color: $white;
+    gap: 50px;
+    padding: 30px 0;
+    width: 860px;
+    color: $black;
 
     &__history {
         height: 60px;
@@ -96,10 +98,25 @@
         }
     }
 
+    &__text {
+        color: $black;
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+    }
+
     &__title {
         height: 30px;
         font-size: $fs-medium;
-        margin-bottom: 30px;
+        font-weight: $fw-bold ;
+    }
+
+    &__section {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        // gap: 20px;
     }
 
     &__list {
@@ -107,8 +124,10 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        gap: 20px;
-        margin-bottom: 20px;
+        gap: 48px;
+        margin-bottom: 100px;
+
+        justify-content: space-between;
 
         &.-wrap {
             flex-wrap: nowrap;
@@ -116,8 +135,116 @@
         }
     }
 
+    &__coach-bio {
+        width: 100%;
+        height: auto;
+        background-color: $white;
+        border-radius: 10px;
+        text-align: start;
+        padding: 32px;
+        min-height: 100px;
+        font-size: $fs-text;
+        white-space: pre-wrap;
+        text-align: start;
+    }
+
     &__sub-title {
-        font-size: $fs-small;
+        font-size: $fs-input;
+        font-weight: $fw-bold;
+        align-self: flex-start;
         margin-bottom: 10px;
+    }
+
+    &__sort {
+        align-self: flex-end;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+    }
+
+    &__sort-label {
+        font-size: $fs-text;
+        color: $black;
+        font-weight: $fw-bold;
+    }
+
+    &__coach {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        width: 500px;
+    }
+
+    &__coach-game {
+        width: 132px;
+        text-align: center;
+        height: 32px;
+        padding: 10px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        font-weight: $fw-bold;
+        white-space: nowrap;
+        flex-shrink: 0;
+        border: 1px solid $gray;
+        color: $gray;
+        font-size: $fs-small;
+        background-color: $white;
+
+    }
+
+    &__coach-detail {
+        display: flex;
+        flex-direction: column;
+        width: 200px;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    &__coach-name {
+        color: $black;
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+        max-width: 350px;
+        text-overflow: ellipsis;
+
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    &__coach-icon {
+        width: 200px;
+        height: 200px;
+    }
+
+    &__coach-rating {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        font-size: $fs-medium;
+        font-weight: $fw-bold ;
+        align-items: center;
+        justify-content: flex-start;
+        height: 15px;
+    }
+
+    &__load-more-button {
+        background: none;
+        color: $black;
+        position: relative;
+        width: 160px;
+
+        &::before {
+            content: "";
+            border-top: 2px solid $black;
+            border-left: 2px solid $black;
+            height: 16px;
+            width: 16px;
+            transform: rotate(225deg);
+            position: absolute;
+            top: 40%;
+            left: 0;
+            translate: -50% -50%;
+        }
     }
 }

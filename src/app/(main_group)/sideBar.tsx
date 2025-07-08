@@ -1,250 +1,185 @@
 "use client";
 
-import React, { Dispatch, SetStateAction, useContext, useState } from "react";
+import chartIcon from "@/assets/image/chart.svg";
+import closeIcon from "@/assets/image/close.svg";
+import logoImage from "@/assets/image/logo_long.png";
+import messageIcon from "@/assets/image/mail.svg";
+import notificationIcon from "@/assets/image/notification.svg";
+import defaultIcon from "@/assets/image/user_icon.svg";
+import { ImageBox } from "@/components/imageBox";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ImageBox } from "@/components/imageBox";
-import notificationIcon from "@/assets/image/notification.svg";
-import messageIcon from "@/assets/image/mail.svg";
-import defaultIcon from "@/assets/image/user_icon.svg";
+import React, {
+	type Dispatch,
+	type SetStateAction,
+	useContext,
+	useState,
+} from "react";
 import { UserDataContext } from "../contextProvider";
-import loginIcon from "@/assets/image/login.svg";
-import chartIcon from "@/assets/image/chart.svg";
-import logoImage from "@/assets/image/logo_long.png";
+import { signOut } from "next-auth/react";
 
 interface Prop {
-  newMessage: boolean;
-  newNotification: boolean;
-  setShowMessagePopup: Dispatch<SetStateAction<boolean>>;
-  setShowNotificationPopup: Dispatch<SetStateAction<boolean>>;
-  showMessagePopup: boolean;
-  showNotificationPopup: boolean;
-  setShowSideBar: Dispatch<SetStateAction<boolean>>;
+	setShowSideBar: Dispatch<SetStateAction<boolean>>;
 }
 
-const Sidebar = ({
-  newMessage,
-  newNotification,
-  setShowMessagePopup,
-  setShowNotificationPopup,
-  showMessagePopup,
-  showNotificationPopup,
-  setShowSideBar,
-}: Prop) => {
-  const { userData } = useContext(UserDataContext)!;
-  const pathname = usePathname()!;
-  const router = useRouter();
+const Sidebar = ({ setShowSideBar }: Prop) => {
+	const { userData } = useContext(UserDataContext)!;
+	const pathname = usePathname()!;
+	const router = useRouter();
 
-  const mainRoutes = [
-    { path: "/", text: "トップページ" },
-    { path: "/courses", text: "講座を探す" },
-    { path: "/create", text: "コーチをしてみる" },
-  ];
-  const iconRoutes = [
-    {
-      path: "/notification",
-      icon: notificationIcon,
-      alt: "notification Icon",
-      text: "通知",
-    },
-    {
-      path: "/message",
-      icon: messageIcon,
-      alt: "Message Icon",
-      text: "メッセージ",
-    },
-    {
-      path: "/mypage",
-      icon: userData?.icon || defaultIcon,
-      alt: "user Icon",
-      text: "マイページ",
-    },
-  ];
+	const mainRoutes = [
+		{ path: "/", text: "TOP" },
+		{ path: "/courses/coach", text: "コーチから探す" },
+		{ path: "/courses", text: "講座を検索する" },
+	];
+	const iconRoutes = [
+		{
+			path: "/mypage",
+			icon: userData?.icon || defaultIcon,
+			alt: "user Icon",
+			text: "マイページ",
+		},
+	];
 
-  const pushRoute = (path: string) => {
-    setShowSideBar(false);
-    router.push(path);
-  };
+	const pushRoute = (path: string) => {
+		setShowSideBar(false);
+		router.push(path);
+	};
 
-  return (
-    <>
-      <div className="p-side-bar">
-        <div className="p-side-bar__icon" onClick={() => router.push("/")}>
-          <ImageBox
-            src={logoImage}
-            alt="Profile"
-            className="p-side-bar__logo-icon"
-            round
-          />
-        </div>
+	const handleLogout = async () => {
+		setShowSideBar(false);
+		await signOut({ redirect: true, callbackUrl: "/" });
+	};
 
-        <ul className="p-side-bar__container -upper">
-          {mainRoutes.map(({ path, text }) => (
-            <div
-              onClick={() => pushRoute(path)}
-              key={path}
-              className={`p-side-bar__list ${
-                pathname.replace("/", "").split("/")[0] ==
-                `${path.replace("/", "")}`
-                  ? "-active"
-                  : ""
-              }`}
-            >
-              {text && (
-                <div
-                  className={`p-side-bar__page-text ${
-                    pathname.replace("/", "").split("/")[0] ==
-                    `${path.replace("/", "")}`
-                      ? "-active"
-                      : ""
-                  }`}
-                >
-                  {text}
-                </div>
-              )}
-            </div>
-          ))}
-        </ul>
-        <ul className="p-side-bar__container -lower">
-          {userData?.isAdmin && (
-            <Link href={`/admin`} className="p-side-bar__list">
-              <ImageBox
-                className="p-side-bar__page-icon"
-                src={chartIcon}
-                objectFit="cover"
-                round
-              />
-              <div
-                className={`p-side-bar__page-text ${
-                  pathname.replace("/", "").split("/")[0] == "admin"
-                    ? "-active"
-                    : ""
-                }`}
-              >
-                管理者ページ
-              </div>
-            </Link>
-          )}
-          {userData ? (
-            iconRoutes.map(({ path, icon, alt, text }) => {
-              return path == "/message" ? (
-                <div
-                  key={path}
-                  className={`p-side-bar__list ${newMessage ? "-new" : ""} ${
-                    pathname.replace("/", "").split("/")[0] ==
-                    `${path.replace("/", "")}`
-                      ? "-active"
-                      : ""
-                  }`}
-                  onClick={() => {
-                    setShowSideBar(false);
-                    setShowMessagePopup(true);
-                  }}
-                >
-                  <ImageBox
-                    className="p-side-bar__page-icon"
-                    src={icon}
-                    objectFit="cover"
-                    round
-                  />
-                  {text && (
-                    <div
-                      className={`p-side-bar__page-text ${
-                        pathname.replace("/", "").split("/")[0] ==
-                        `${path.replace("/", "")}`
-                          ? "-active"
-                          : ""
-                      }`}
-                    >
-                      {text}
-                    </div>
-                  )}
-                </div>
-              ) : path == "/notification" ? (
-                <div
-                  key={path}
-                  className={`p-side-bar__list ${
-                    newNotification ? "-new" : ""
-                  } ${
-                    pathname.replace("/", "").split("/")[0] ==
-                      `${path.replace("/", "")}` || showMessagePopup
-                      ? "-active"
-                      : ""
-                  }`}
-                  onClick={() => {
-                    setShowSideBar(false);
-                    setShowNotificationPopup(true);
-                  }}
-                >
-                  <ImageBox
-                    className="p-side-bar__page-icon"
-                    src={icon}
-                    objectFit="cover"
-                    round
-                  />
-                  {text && (
-                    <div
-                      className={`p-side-bar__page-text ${
-                        pathname.replace("/", "").split("/")[0] ==
-                          `${path.replace("/", "")}` || showNotificationPopup
-                          ? "-active"
-                          : ""
-                      }`}
-                    >
-                      {text}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div
-                  onClick={() => pushRoute(path)}
-                  key={path}
-                  className={`p-side-bar__list ${
-                    pathname.replace("/", "").split("/")[0] ==
-                    `${path.replace("/", "")}`
-                      ? "-active"
-                      : ""
-                  }`}
-                >
-                  <ImageBox
-                    className="p-side-bar__page-icon"
-                    src={icon}
-                    objectFit="cover"
-                    round
-                  />
-                  {text && (
-                    <div
-                      className={`p-side-bar__page-text ${
-                        pathname.replace("/", "").split("/")[0] ==
-                        `${path.replace("/", "")}`
-                          ? "-active"
-                          : ""
-                      }`}
-                    >
-                      {text}
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          ) : (
-            <Link
-              href={`/sign-in${pathname ? "?callback=" + pathname : ""}`}
-              className="p-side-bar__list"
-            >
-              <ImageBox
-                className="p-side-bar__page-icon"
-                src={loginIcon}
-                objectFit="cover"
-                round
-              />
-              <div className={"p-side-bar__page-text"}>サインイン</div>
-            </Link>
-          )}
-        </ul>
-      </div>
-    </>
-  );
+	return (
+		<>
+			<div className="p-side-bar">
+				<div className="p-side-bar__icon" onClick={() => router.push("/")}>
+					<ImageBox
+						src={logoImage}
+						alt="Profile"
+						objectFit="cover"
+						className="p-side-bar__logo-icon"
+					/>
+					<ImageBox
+						src={closeIcon}
+						className="p-side-bar__close"
+						onClick={() => setShowSideBar(false)}
+					/>
+				</div>
+
+				<ul className="p-side-bar__container -upper">
+					{mainRoutes.map(({ path, text }) => (
+						<div
+							onClick={() => pushRoute(path)}
+							key={path}
+							className={`p-side-bar__list p-side-bar__glitch-btn ${pathname.replace("/", "").split("/")[0] ==
+								`${path.replace("/", "")}`
+								? "-active"
+								: ""
+								}`}
+						>
+							{text && (
+								<>
+									<div className="p-side-bar__glitch-label">
+										{text}
+									</div>
+									{/* グリッチエフェクト用のマスク */}
+									<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+									<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+									<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+									<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+									<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+								</>
+							)}
+						</div>
+					))}
+				</ul>
+				<ul className="p-side-bar__container -lower">
+					{userData?.isAdmin && (
+						<Link href={`/admin`} className="p-side-bar__list p-side-bar__glitch-btn">
+							<ImageBox
+								className="p-side-bar__page-icon"
+								src={chartIcon}
+								objectFit="cover"
+								round
+							/>
+							<div className="p-side-bar__glitch-label">
+								管理者ページ
+							</div>
+							{/* グリッチエフェクト用のマスク */}
+							<div className="p-side-bar__glitch-mask"><span>管理者ページ</span></div>
+							<div className="p-side-bar__glitch-mask"><span>管理者ページ</span></div>
+							<div className="p-side-bar__glitch-mask"><span>管理者ページ</span></div>
+							<div className="p-side-bar__glitch-mask"><span>管理者ページ</span></div>
+							<div className="p-side-bar__glitch-mask"><span>管理者ページ</span></div>
+						</Link>
+					)}
+					{userData ? (
+						iconRoutes.map(({ path, icon, alt, text }) => {
+							return (
+								<div
+									onClick={() => pushRoute(path)}
+									key={path}
+									className={`p-side-bar__list p-side-bar__glitch-btn ${pathname.replace("/", "").split("/")[0] ==
+										`${path.replace("/", "")}`
+										? "-active"
+										: ""
+										}`}
+								>
+									{/* <ImageBox
+										className="p-side-bar__page-icon"
+										src={icon}
+										objectFit="cover"
+										round
+									/> */}
+									{text && (
+										<>
+											<div className="p-side-bar__glitch-label">
+												{text}
+											</div>
+											{/* グリッチエフェクト用のマスク */}
+											<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+											<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+											<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+											<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+											<div className="p-side-bar__glitch-mask"><span>{text}</span></div>
+										</>
+									)}
+								</div>
+							);
+						})
+					) : (
+					<div className="p-side-bar__login p-side-bar__page-text">
+					<Link href={`/sign-in${pathname ? "?callback=" + pathname : ""}`}>
+					ログイン
+					</Link>
+					{" | "}
+					<Link href={`/sign-up${pathname ? "?callback=" + pathname : ""}`}>
+					新規登録
+					</Link>
+					</div>
+					)}
+					{userData && (
+						<div
+							onClick={handleLogout}
+							className="p-side-bar__list p-side-bar__glitch-btn p-side-bar__logout"
+						>
+							<div className="p-side-bar__glitch-label">
+								ログアウト
+							</div>
+							{/* グリッチエフェクト用のマスク */}
+							<div className="p-side-bar__glitch-mask"><span>ログアウト</span></div>
+							<div className="p-side-bar__glitch-mask"><span>ログアウト</span></div>
+							<div className="p-side-bar__glitch-mask"><span>ログアウト</span></div>
+							<div className="p-side-bar__glitch-mask"><span>ログアウト</span></div>
+							<div className="p-side-bar__glitch-mask"><span>ログアウト</span></div>
+						</div>
+					)}
+				</ul>
+			</div>
+		</>
+	);
 };
 
 export default Sidebar;

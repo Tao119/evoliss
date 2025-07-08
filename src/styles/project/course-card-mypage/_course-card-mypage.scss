@@ -1,0 +1,251 @@
+@use "../../foundation" as *;
+
+.p-course-card-mypage {
+  &__content {
+    display: flex;
+    gap: 40px;
+    padding: 24px;
+    border-radius: 16px;
+    background-color: $white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  &__left {
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__game-tag {
+    display: inline-flex;
+    padding: 6px 16px;
+    background-color: rgba($gray, 0.1);
+    border-radius: 20px;
+    font-size: 14px;
+    color: $black;
+    width: fit-content;
+  }
+
+  &__image {
+    width: 300px;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    object-fit: cover;
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: $fw-bold;
+    color: $black;
+    margin-top: 8px;
+  }
+
+  &__right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px 0;
+  }
+
+  &__datetime {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__date {
+    font-size: 24px;
+    font-weight: $fw-bold;
+    color: $black;
+  }
+
+  &__time {
+    font-size: 20px;
+    color: $black;
+  }
+
+  &__status {
+    font-size: 14px;
+    color: $gray;
+    margin-bottom: 12px;
+  }
+
+  &__status-badge {
+    display: inline-flex;
+    padding: 8px 24px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: $fw-bold;
+    text-align: center;
+    margin-bottom: 12px;
+
+    &.-completed {
+      background-color: #6c757d;
+      color: $white;
+    }
+
+    &.-pending {
+      background-color: #007bff;
+      color: $white;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: auto;
+  }
+
+  &__button {
+    width: 100%;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: $fw-bold;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+
+    &.-reschedule {
+      background-color: $white;
+      color: $black;
+      border: 2px solid $black;
+
+      &:hover:not(:disabled) {
+        background-color: $black;
+        color: $white;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    &.-message {
+      background-color: $white;
+      color: $black;
+      border: 2px solid $black;
+
+      &:hover:not(:disabled) {
+        background-color: $black;
+        color: $white;
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        border-color: rgba($black, 0.3);
+        color: rgba($black, 0.3);
+      }
+    }
+
+    &.-cancel {
+      background-color: #dc3545;
+      color: $white;
+      border: none;
+
+      &:hover:not(:disabled) {
+        background-color: #c82333;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    &.-edit {
+      background-color: $white;
+      color: $black;
+      border: 2px solid $black;
+
+      &:hover {
+        background-color: $black;
+        color: $white;
+      }
+    }
+  }
+
+  &__cancel-notice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    font-size: 16px;
+    color: #dc3545;
+    font-weight: $fw-bold;
+  }
+
+  &__review-complete {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  &__rating {
+    display: flex;
+    gap: 4px;
+    font-size: 20px;
+  }
+
+  &__star {
+    color: #ddd;
+
+    &.-filled {
+      color: #ffc107;
+    }
+  }
+
+  &__review-text {
+    font-size: 16px;
+    color: $black;
+    font-weight: $fw-bold;
+  }
+
+  @media (max-width: 768px) {
+    &__content {
+      flex-direction: column;
+      gap: 24px;
+      padding: 16px;
+    }
+
+    &__left {
+      flex: 1;
+      width: 100%;
+    }
+
+    &__image {
+      width: 100%;
+      height: 180px;
+    }
+
+    &__date {
+      font-size: 20px;
+    }
+
+    &__time {
+      font-size: 18px;
+    }
+
+    &__actions {
+      gap: 8px;
+    }
+
+    &__button {
+      font-size: 14px;
+      padding: 10px 20px;
+    }
+  }
+}

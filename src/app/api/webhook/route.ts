@@ -1,114 +1,173 @@
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
-import { Readable } from "stream";
 import { requestDB } from "@/services/axios";
-import { paymentStatus } from "@/type/models";
+import { reservationStatus } from "@/type/models";
+import { headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { prisma } from "@/lib/prisma";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-};
+export async function POST(request: NextRequest) {
+	console.log("🔍 Webhook Request Received");
 
-async function getRawBody(request: Request): Promise<Buffer> {
-    const chunks: Uint8Array[] = [];
-    const readable = request.body as unknown as Readable;
+	const body = await request.text();
+	const headersList = await headers();
+	const signature = headersList.get("stripe-signature");
 
-    for await (const chunk of readable) {
-        chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
-    }
-    return Buffer.concat(chunks);
-}
+	if (!signature) {
+		console.error("🚨 Missing Stripe Signature");
+		return NextResponse.json(
+			{ message: "🚨 Bad request: Missing signature" },
+			{ status: 400 },
+		);
+	}
 
-export async function POST(request: Request) {
-    console.log("🔍 Webhook Request Received");
+	try {
+		console.log("📥 Raw Body Length:", body.length);
 
-    const signature = request.headers.get("stripe-signature");
+		const event = stripe.webhooks.constructEvent(
+			body,
+			signature,
+			process.env.STRIPE_WEBHOOK_SECRET as string,
+		);
 
-    if (!signature) {
-        console.error("🚨 Missing Stripe Signature");
-        return NextResponse.json({ message: "🚨 Bad request: Missing signature" }, { status: 400 });
-    }
+		console.log("✅ Webhook Event Received:", event.type);
 
-    try {
-        // **修正: rawBody を正しく取得**
-        const rawBody = await getRawBody(request);
-        console.log("📥 Raw Body Length:", rawBody.length);
-        console.log("📥 Raw Body as String:", rawBody.toString());
+		if (event.type === "checkout.session.completed") {
+			const session = event.data.object as Stripe.Checkout.Session;
+			console.log(
+				"💳 Checkout Session Completed:",
+				JSON.stringify(session, null, 2),
+			);
 
-        const event = stripe.webhooks.constructEvent(
-            rawBody,
-            signature,
-            process.env.STRIPE_WEBHOOK_SECRET as string
-        );
+			const userId = session.metadata?.userId;
+			const courseId = session.metadata?.courseId;
+			const reservationId = session.metadata?.reservationId;
+			const amount = session.amount_total;
+			const timeSlotIds = session.metadata?.timeSlotIds;
 
-        console.log("✅ Webhook Event Received:", event.type);
+			if (
+				!userId ||
+				!courseId ||
+				!reservationId ||
+				!timeSlotIds
+			) {
+				console.error("🚨 Missing required metadata:", {
+					userId,
+					timeSlotIds,
+					courseId,
+					reservationId,
+				});
+				return NextResponse.json(
+					{ message: "🚨 Missing metadata" },
+					{ status: 400 },
+				);
+			}
 
-        if (event.type === "checkout.session.completed") {
-            const session = event.data.object as Stripe.Checkout.Session;
-            console.log("💳 Checkout Session Completed:", JSON.stringify(session, null, 2));
+			const parsedUserId = Number.parseInt(userId);
+			const parsedCourseId = Number.parseInt(courseId);
+			const parsedTimeSlotIds = timeSlotIds.split(',').map(id => Number.parseInt(id.trim()));
+			const parsedReservationId = Number.parseInt(reservationId);
 
-            const userId = session.metadata?.userId;
-            const scheduleId = session.metadata?.scheduleId;
-            const courseId = session.metadata?.courseId;
-            const paymentId = session.metadata?.paymentId;
-            const amount = session.amount_total;
+			const courseRes = await requestDB("course", "readCourseById", {
+				id: parsedCourseId,
+			});
+			const course = courseRes.data;
+			const userRes = await requestDB("user", "readUserById", {
+				id: parsedUserId,
+			});
+			const user = userRes.data;
 
-            if (!userId || !scheduleId || !courseId || !paymentId) {
-                console.error("🚨 Missing required metadata:", {
-                    userId,
-                    scheduleId,
-                    courseId,
-                    paymentId
-                });
-                return NextResponse.json({ message: "🚨 Missing metadata" }, { status: 400 });
-            }
+			// MessageRoomを作成または取得
+			let messageRoom = await prisma.messageRoom.findFirst({
+				where: {
+					customerId: parsedUserId,
+					coachId: course.coachId,
+				},
+			});
 
-            const parsedUserId = parseInt(userId);
-            const parsedCourseId = parseInt(courseId);
-            const parsedScheduleId = parseInt(scheduleId);
-            const parsedPaymentId = parseInt(paymentId);
+			if (!messageRoom) {
+				// MessageRoomが存在しない場合は新規作成
+				let roomKey = "";
+				let isUnique = false;
 
-            const courseRes = await requestDB("course", "readCourseById", {
-                id: parsedCourseId,
-            });
-            const course = courseRes.data;
-            const userRes = await requestDB("user", "readUserById", {
-                id: parsedUserId,
-            });
-            const user = userRes.data;
+				while (!isUnique) {
+					// nanoidの代わりにランダムな文字列を生成
+					roomKey = Math.random().toString(36).substring(2, 12);
+					const existingKey = await prisma.messageRoom.findUnique({
+						where: { roomKey },
+					});
 
-            await requestDB("payment", "updatePayment", { id: parsedPaymentId, status: paymentStatus.Paid });
-            const { data: room } = await requestDB("message", "sendSystemMessage", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId });
-            await requestDB("notification", "createNotification", {
-                userId: course.coachId,
-                content: `${user.name}さんがあなたの講座を購入しました。`,
-                senderId: parsedUserId,
-                roomId: room.id
-            });
+					if (!existingKey) {
+						isUnique = true;
+					}
+				}
 
-            await requestDB("reservation", "createReservation", { userId: parsedUserId, courseId: parsedCourseId, scheduleId: parsedScheduleId, roomId: room.id });
+				messageRoom = await prisma.messageRoom.create({
+					data: {
+						roomKey,
+						customerId: parsedUserId,
+						coachId: course.coachId,
+					},
+				});
 
-            console.log("📝 Reservations Created:", {
-                userId: parsedUserId,
-                courseId: parsedCourseId,
-                scheduleId: parsedScheduleId,
-                paymentId: parsedPaymentId,
-                roomId: room.id
-            });
+				console.log("📨 New MessageRoom created:", {
+					roomId: messageRoom.id,
+					roomKey: messageRoom.roomKey,
+					customerId: parsedUserId,
+					coachId: course.coachId,
+				});
 
+				// システムメッセージを送信（オプション）
+				await prisma.message.create({
+					data: {
+						roomId: messageRoom.id,
+						senderId: parsedUserId,
+						content: `${course.title}の予約が完了しました。`,
+					},
+				});
+			} else {
+				console.log("📨 Existing MessageRoom found:", {
+					roomId: messageRoom.id,
+					roomKey: messageRoom.roomKey,
+				});
+			}
 
-            return NextResponse.json({ message: "✅ Success" }, { status: 200 });
-        }
+			// 予約のステータスを更新（roomIdも含めて）
+			await requestDB("reservation", "updateReservation", {
+				id: parsedReservationId,
+				status: reservationStatus.Paid,
+				roomId: messageRoom.id,
+			});
 
-        return NextResponse.json({ message: "Unhandled event type" }, { status: 400 });
+			// 支払い記録を作成
+			await requestDB("payment", "createPayment", {
+				customerId: parsedUserId,
+				reservationId: parsedReservationId,
+				amount,
+				method: "card",
+			});
 
-    } catch (err: any) {
-        console.error("🚨 Webhook Handling Error:", err.message);
-        console.error("🔍 Error Stack:", err.stack);
+			console.log("📝 Payment Processing Completed:", {
+				userId: parsedUserId,
+				courseId: parsedCourseId,
+				reservationId: parsedReservationId,
+				messageRoomId: messageRoom.id,
+			});
 
-        return NextResponse.json({ error: err.message }, { status: 500 });
-    }
+			return NextResponse.json({ message: "✅ Success" }, { status: 200 });
+		}
+
+		// その他のイベントタイプも処理したい場合はここに追加
+		console.log(`ℹ️ Unhandled event type: ${event.type}`);
+		return NextResponse.json(
+			{ message: "Event received" },
+			{ status: 200 },
+		);
+	} catch (err: any) {
+		console.error("🚨 Webhook Handling Error:", err.message);
+		console.error("🔍 Error Stack:", err.stack);
+
+		return NextResponse.json({ error: err.message }, { status: 400 });
+	}
 }

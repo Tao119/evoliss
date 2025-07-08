@@ -1,0 +1,109 @@
+@use '../../foundation' as *;
+
+.p-coach-card {
+    &__item {
+        width: 300px;
+        height: 180px;
+        flex-shrink: 0;
+        border-radius: 10px;
+        background-color: $white;
+        border: 1px solid $black;
+        color: $black;
+        padding: 0 20px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        box-shadow: 6px 6px 0 0 $purple;
+
+        @include mq(sp) {
+            width: 45%;
+            height: auto;
+            padding: 10px;
+            gap: 10px;
+        }
+    }
+
+    &__icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-right: 20px;
+        flex-shrink: 0;
+        position: absolute;
+        top: -20px;
+        left: 20px;
+        z-index: 20;
+
+        &.-big {
+            width: 132px;
+            height: 132px;
+            top: -50px;
+            left: -10px;
+        }
+    }
+
+    &__bio {
+        width: calc(100% - 30px);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        white-space: wrap;
+        overflow: scroll;
+        height: calc(100% - 110px);
+        justify-content: flex-start;
+        margin: 0 0 10px 0;
+        white-space: pre-wrap;
+        text-align: start;
+    }
+
+    &__more {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        z-index: 20;
+    }
+
+    &__name {
+        font-size: $fs-medium;
+        width: auto;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        margin-left: 120px;
+        font-weight: $fw-bold;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        height: 100px;
+    }
+
+    &__game {
+        width: 132px;
+        text-align: center;
+        height: 32px;
+        padding: 10px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+
+        white-space: nowrap;
+        flex-shrink: 0;
+        border: 1px solid $gray;
+        color: $gray;
+        font-size: $fs-small;
+        background-color: $white;
+
+        // display: flex;
+        // align-items: center;
+        // justify-content: center;
+        position: absolute;
+        top: -40px;
+        right: -10px;
+        z-index: 20;
+    }
+}
