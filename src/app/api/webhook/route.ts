@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 				where: {
 					customerId: parsedUserId,
 					coachId: course.coachId,
-				},
+				} as any,  // 一時的な回避策
 			});
 
 			if (!messageRoom) {
