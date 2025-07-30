@@ -1,0 +1,106 @@
+import React from 'react';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ja';
+
+dayjs.locale('ja');
+
+interface CalendarProps {
+  selectedDate: Date;
+  onDateSelect: (date: Date) => void;
+  renderDateContent?: (date: Date) => React.ReactNode;
+}
+
+export const Calendar: React.FC<CalendarProps> = ({
+  selectedDate,
+  onDateSelect,
+  renderDateContent
+}) => {
+  const currentMonth = dayjs(selectedDate);
+  const [displayMonth, setDisplayMonth] = React.useState(currentMonth);
+
+  const startOfMonth = displayMonth.startOf('month');
+  const endOfMonth = displayMonth.endOf('month');
+  const startOfWeek = startOfMonth.startOf('week');
+  const endOfWeek = endOfMonth.endOf('week');
+
+  const dates = [];
+  let current = startOfWeek;
+  while (current.isBefore(endOfWeek) || current.isSame(endOfWeek, 'day')) {
+    dates.push(current);
+    current = current.add(1, 'day');
+  }
+
+  const weeks = [];
+  for (let i = 0; i < dates.length; i += 7) {
+    weeks.push(dates.slice(i, i + 7));
+  }
+
+  const handlePrevMonth = () => {
+    setDisplayMonth(displayMonth.subtract(1, 'month'));
+  };
+
+  const handleNextMonth = () => {
+    setDisplayMonth(displayMonth.add(1, 'month'));
+  };
+
+  const handleDateClick = (date: dayjs.Dayjs) => {
+    onDateSelect(date.toDate());
+  };
+
+  return (
+    <div className="p-calendar">
+      <div className="p-calendar__header">
+        <button className="p-calendar__nav" onClick={handlePrevMonth}>
+          &lt;
+        </button>
+        <div className="p-calendar__month">
+          {displayMonth.format('YYYY年 M月')}
+        </div>
+        <button className="p-calendar__nav" onClick={handleNextMonth}>
+          &gt;
+        </button>
+      </div>
+
+      <div className="p-calendar__weekdays">
+        {['日', '月', '火', '水', '木', '金', '土'].map((day) => (
+          <div key={day} className="p-calendar__weekday">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="p-calendar__body">
+        {weeks.map((week, weekIndex) => (
+          <div key={weekIndex} className="p-calendar__week">
+            {week.map((date) => {
+              const isCurrentMonth = date.isSame(displayMonth, 'month');
+              const isSelected = date.isSame(dayjs(selectedDate), 'day');
+              const isToday = date.isSame(dayjs(), 'day');
+
+              return (
+                <div
+                  key={date.format('YYYY-MM-DD')}
+                  className={`p-calendar__date ${
+                    !isCurrentMonth ? '-other-month' : ''
+                  } ${isSelected ? '-selected' : ''} ${
+                    isToday ? '-today' : ''
+                  }`}
+                  onClick={() => handleDateClick(date)}
+                >
+                  <div className="p-calendar__date-number">
+                    {date.format('D')}
+                  </div>
+                  {renderDateContent && (
+                    <div className="p-calendar__date-content">
+                      {renderDateContent(date.toDate())}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

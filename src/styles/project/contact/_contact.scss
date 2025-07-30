@@ -1,0 +1,229 @@
+@use '../../foundation' as *;
+
+.p-contact {
+    color: $black;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    align-items: center;
+    gap: 20px;
+    width: 500px;
+    padding: 30px;
+
+    @include mq(sp) {
+        position: inherit;
+        width: 100%;
+    }
+
+    &__title {
+        font-size: $fs-input;
+        font-weight: $fw-bold;
+        white-space: wrap;
+        position: relative;
+    }
+
+    &__item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 10px;
+
+    }
+
+    &__item-label {
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+    }
+
+    &__item-input-outline {
+        background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
+        width: 70%;
+        height: 50px;
+        cursor: text;
+        border-radius: 10px;
+        padding: 1px;
+
+        &.-multi {
+            height: auto;
+            width: 100%;
+        }
+    }
+
+    &__item-input {
+        width: 100%;
+        height: 100%;
+        cursor: text;
+        border-radius: 9px;
+        background-color: $white;
+        border: none;
+        font-size: $fs-text;
+        position: relative;
+
+
+        &.-filter {
+            &::after {
+                content: "";
+                width: 10px;
+                height: 10px;
+                border-top: 1.5px solid $black;
+                border-right: 1.5px solid $black;
+                position: absolute;
+                top: calc(50% - 2px);
+                right: 20px;
+                translate: -50% -50%;
+                rotate: 135deg;
+                cursor: pointer;
+            }
+        }
+    }
+
+    &__item-announce {
+        align-self: flex-end;
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+
+    }
+
+    &__text {
+        align-self: flex-start;
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+    }
+
+    &__confirm {
+        margin-top: 40px;
+        background-color: $soft-gray;
+        border-radius: 10px;
+        width: 100%;
+        padding: 10px;
+        border: 1px solid $black;
+    }
+
+    &__confirm-item {
+        margin-bottom: 30px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+    }
+
+    &__confirm-label {
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+        color: $dark-gray;
+        margin-bottom: 10px;
+    }
+
+    &__confirm-value {
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+        color: $black;
+        line-height: 1.6;
+        margin-left: 16px;
+    }
+
+    &__confirm-message {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    &__confirm-notice {
+        background-color: rgba($theme, 0.1);
+        border: 1px solid $theme;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+        font-size: $fs-text;
+        line-height: 1.6;
+        color: $black;
+    }
+
+    // 完了画面
+    &__complete {
+        text-align: center;
+        padding: 60px 0;
+    }
+
+    &__complete-message {
+        h2 {
+            font-size: $fs-large;
+            font-weight: $fw-bold;
+            margin-bottom: 30px;
+            color: $black;
+            line-height: 1.8;
+        }
+
+        p {
+            font-size: $fs-text;
+            line-height: 1.8;
+            color: $black;
+        }
+    }
+
+    // ボタン
+    &__button-wrapper {
+        margin-top: 40px;
+        text-align: center;
+    }
+
+    &__button-group {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+
+        @include mq(sp) {
+            flex-direction: column;
+        }
+    }
+
+    &__submit {
+        min-width: 200px;
+        height: 50px;
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+        background-color: $black;
+        color: $white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+            opacity: 0.8;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @include mq(sp) {
+            width: 100%;
+        }
+    }
+
+    &__back {
+        min-width: 200px;
+        height: 50px;
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+        background-color: $white;
+        color: $black;
+        border: 2px solid $black;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: $soft-gray;
+        }
+
+        @include mq(sp) {
+            width: 100%;
+        }
+    }
+}

@@ -1,24 +1,35 @@
 "use client";
 
-import { AnimationContext } from "@/app/contextProvider";
+import { AnimationContext, UserDataContext } from "@/app/contextProvider";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { InputBox } from "@/components/inputBox";
 import { MultilineInput } from "@/components/multilineInput";
 import { Axios } from "@/services/axios";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ImageBox } from "@/components/imageBox";
+import { BackButton } from "@/components/backbutton";
+
+type Step = 1 | 2 | 3;
 
 const ContactPage = () => {
 	const animation = useContext(AnimationContext)!;
 	const router = useRouter();
+	const [currentStep, setCurrentStep] = useState<Step>(1);
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
-	const [subject, setSubject] = useState("");
 	const [message, setMessage] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const { userData } = useContext(UserDataContext)!;
 
-	const validateForm = () => {
+	useEffect(() => {
+		if (userData) {
+			setEmail(userData.email);
+		}
+	}, [userData]);
+
+	const validateStep1 = () => {
 		if (!name.trim()) {
 			alert("お名前を入力してください");
 			return false;
@@ -31,45 +42,45 @@ const ContactPage = () => {
 			alert("正しいメールアドレスを入力してください");
 			return false;
 		}
-		if (!subject.trim()) {
-			alert("件名を入力してください");
-			return false;
-		}
 		if (!message.trim()) {
 			alert("お問い合わせ内容を入力してください");
+			return false;
+		}
+		if (message.length > 1000) {
+			alert("お問い合わせ内容は1000文字以内で入力してください");
 			return false;
 		}
 		return true;
 	};
 
-	const handleSubmit = async () => {
-		if (!validateForm()) {
-			return;
+	const handleNext = () => {
+		if (currentStep === 1 && validateStep1()) {
+			setCurrentStep(2);
 		}
+	};
 
+	const handleBack = () => {
+		if (currentStep === 2) {
+			setCurrentStep(1);
+		}
+	};
+
+	const handleSubmit = async () => {
 		setIsSubmitting(true);
 		animation.startAnimation();
 
 		try {
-			// TODO: 実際のお問い合わせ送信処理を実装
-			// const response = await Axios.post("/api/contact", {
-			// 	name,
-			// 	email,
-			// 	subject,
-			// 	message,
-			// });
+			const response = await Axios.post("/api/contact", {
+				name,
+				email,
+				message,
+			});
 
-			// 仮の処理
-			await new Promise(resolve => setTimeout(resolve, 1000));
-
-			alert("お問い合わせを送信しました。ご連絡ありがとうございます。");
-			
-			// フォームをクリア
-			setName("");
-			setEmail("");
-			setSubject("");
-			setMessage("");
-			
+			if (response.data.success) {
+				setCurrentStep(3);
+			} else {
+				alert("送信中にエラーが発生しました。しばらく経ってから再度お試しください。");
+			}
 		} catch (error) {
 			console.error("Error sending contact:", error);
 			alert("送信中にエラーが発生しました。しばらく経ってから再度お試しください。");
@@ -79,60 +90,95 @@ const ContactPage = () => {
 		}
 	};
 
+	const handleBackToTop = () => {
+		router.push("/");
+	};
+
 	return (
-		<>
-			<div className="p-contact l-page">
-				<div className="p-contact__title">お問い合わせ</div>
-				<Border />
-				
-				<div className="p-contact__description">
-					ご質問、ご意見、ご要望などございましたら、下記フォームよりお気軽にお問い合わせください。
-				</div>
+		<div className="l-page p-contact">
+			<div className="p-contact__title">お問い合わせ{currentStep === 2 && "確認"}{currentStep === 3 && "完了"}</div>
+			<Border />
 
-				<div className="p-contact__form">
+			{currentStep === 1 && (
+				<>
 					<div className="p-contact__item">
-						<div className="p-contact__item-label">お名前 <span className="p-contact__required">*</span></div>
-						<InputBox 
-							className="p-contact__item-input" 
-							value={name} 
-							onChange={(e) => setName(e.target.value)}
-							placeholder="山田 太郎"
-						/>
+						<div className="p-contact__item-label">お名前</div>
+						<div className="p-contact__item-input-outline">
+							<InputBox
+								className="p-contact__item-input"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+							/>
+						</div>
 					</div>
 
 					<div className="p-contact__item">
-						<div className="p-contact__item-label">メールアドレス <span className="p-contact__required">*</span></div>
-						<InputBox 
-							className="p-contact__item-input" 
-							type="email"
-							value={email} 
-							onChange={(e) => setEmail(e.target.value)}
-							placeholder="example@email.com"
-						/>
+						<div className="p-contact__item-label">メールアドレス</div>
+						<div className="p-contact__item-input-outline">
+							<InputBox
+								className="p-contact__item-input"
+								type="email"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								placeholder="example@email.com"
+							/>
+						</div>
 					</div>
 
 					<div className="p-contact__item">
-						<div className="p-contact__item-label">件名 <span className="p-contact__required">*</span></div>
-						<InputBox 
-							className="p-contact__item-input" 
-							value={subject} 
-							onChange={(e) => setSubject(e.target.value)}
-							placeholder="お問い合わせの件名"
-						/>
-					</div>
-
-					<div className="p-contact__item">
-						<div className="p-contact__item-label">お問い合わせ内容 <span className="p-contact__required">*</span></div>
-						<MultilineInput 
-							className="p-contact__item-input p-contact__item-textarea" 
-							value={message} 
-							onChange={(e) => setMessage(e.target.value)}
-							placeholder="お問い合わせ内容をご記入ください"
-							rows={8}
-						/>
+						<div className="p-contact__item-label">お問い合わせ内容</div>
+						<div className="p-contact__item-input-outline -multi">
+							<MultilineInput
+								className="p-contact__item-input p-contact__item-textarea"
+								value={message}
+								onChange={(e) => setMessage(e.target.value)}
+								placeholder="お問い合わせ内容をご記入ください"
+								minHeight={200}
+								maxHeight={200}
+							/>
+						</div>
+						<div className="p-contact__text">※1000文字まで</div>
 					</div>
 
 					<div className="p-contact__button-wrapper">
+						<Button
+							className="p-contact__submit"
+							onClick={handleNext}
+						>
+							確認画面へ
+						</Button>
+					</div>
+				</>
+			)}
+
+			{/* ステップ2: 確認画面 */}
+			{currentStep === 2 && (
+				<>
+					<BackButton className="p-courses__back" back={() => setCurrentStep(1)} />
+					<div className="p-contact__confirm">
+						<div className="p-contact__confirm-item">
+							<div className="p-contact__confirm-label">お名前</div>
+							<div className="p-contact__confirm-value">{name}</div>
+						</div>
+
+						<div className="p-contact__confirm-item">
+							<div className="p-contact__confirm-label">メールアドレス</div>
+							<div className="p-contact__confirm-value">{email}</div>
+						</div>
+
+						<div className="p-contact__confirm-item">
+							<div className="p-contact__confirm-label">お問い合わせ内容</div>
+							<div className="p-contact__confirm-value p-contact__confirm-message">
+								{message.split('\n').map((line, index) => (
+									<span key={index}>
+										{line}
+										{index < message.split('\n').length - 1 && <br />}
+									</span>
+								))}
+							</div>
+						</div>
+					</div>
+					<div className="p-contact__button-wrapper p-contact__button-group">
 						<Button
 							className="p-contact__submit"
 							onClick={handleSubmit}
@@ -141,9 +187,35 @@ const ContactPage = () => {
 							{isSubmitting ? "送信中..." : "送信する"}
 						</Button>
 					</div>
+				</>
+			)}
+
+			{/* ステップ3: 完了画面 */}
+			{currentStep === 3 && (
+				<div className="p-contact__complete">
+					<div className="p-contact__complete-message">
+						<h2>お問い合わせ<br />ありがとうございます。</h2>
+						<p>
+							{email} より、<br />
+							お問い合わせ回答メールをお送りします。<br />
+							回答メールが届かない場合は、<br />
+							入力していただいたメールアドレスに<br />
+							誤りがないかをご確認の上、<br />
+							再度当フォームよりお問い合わせをお願いいたします。
+						</p>
+					</div>
+
+					<div className="p-contact__button-wrapper">
+						<Button
+							className="p-contact__submit"
+							onClick={handleBackToTop}
+						>
+							TOPへ戻る
+						</Button>
+					</div>
 				</div>
-			</div>
-		</>
+			)}
+		</div>
 	);
 };
 

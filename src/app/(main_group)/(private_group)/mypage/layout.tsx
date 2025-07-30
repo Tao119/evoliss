@@ -9,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import defaultIcon from "@/assets/image/user_icon.svg";
 import Link from "next/link";
+import { BackButton } from "@/components/backbutton";
 
 
 interface MenuItem {
@@ -23,7 +24,7 @@ export default function GuestLayout({
 }) {
 	const { userDataStatus, userData } = useContext(UserDataContext)!;
 	const router = useRouter();
-	const path = usePathname();
+	const path = usePathname()!;
 	const animation = useContext(AnimationContext);
 
 	const { breakpoint, orLower } = useBreakpoint();
@@ -67,36 +68,77 @@ export default function GuestLayout({
 	return (
 		<>
 			<div className="p-mypage l-page">
-				<div className="p-mypage-menu">
-					<ImageBox
-						className="p-mypage-menu__icon"
-						src={userData.icon || defaultIcon}
-						objectFit="cover"
-						round
-					/>
-					<div className="p-mypage-menu__name">{userData.name}</div>
+				{(!orLower("sp")) &&
+					<div className="p-mypage-menu">
+						<ImageBox
+							className="p-mypage-menu__icon"
+							src={userData.icon || defaultIcon}
+							objectFit="cover"
+							round
+						/>
+						<div className="p-mypage-menu__name">{userData.name}</div>
 
-					<div className="p-mypage-menu__menu-outline">
+						<div className="p-mypage-menu__menu-outline">
+							<div className="p-mypage-menu__menu">
+								{menuItems.map(((m, i) => (
+									<div className={`p-mypage-menu__menu-item ${isActiveMenu(m.path, path) ? "-active" : ""}`} onClick={() => handleMenuClick(m.path)} key={i}>{m.name}</div>
+								)))}
+							</div>
+						</div>
+						<div className="p-mypage-menu__label">コーチ用メニュー</div>
+						<div className="p-mypage-menu__menu-outline">
+							<div className="p-mypage-menu__menu">
+								{coachMenuItems.map(((m, i) => (
+									<div className={`p-mypage-menu__menu-item ${isActiveMenu(m.path, path) ? "-active" : ""}`} onClick={() => handleMenuClick(m.path)} key={i}>{m.name}</div>
+								)))}
+							</div>
+						</div><div className="p-mypage-menu__menu-outline">
+							<div className="p-mypage-menu__menu">
+								<Link className={`p-mypage-menu__menu-item`} href="/contact">お問い合わせ</Link>
+							</div>
+						</div>
+					</div>}
+				{orLower("sp") && path == "/mypage" &&
+					<div className="p-mypage-menu">
+						<ImageBox
+							className="p-mypage-menu__icon"
+							src={userData.icon || defaultIcon}
+							objectFit="cover"
+							round
+						/>
+						<div className="p-mypage-menu__name">{userData.name}</div>
+
+
 						<div className="p-mypage-menu__menu">
 							{menuItems.map(((m, i) => (
-								<div className={`p-mypage-menu__menu-item ${isActiveMenu(m.path, path) ? "-active" : ""}`} onClick={() => handleMenuClick(m.path)} key={i}>{m.name}</div>
+								<div className="p-mypage-menu__menu-item-outline" key={i}>
+									<div className={`p-mypage-menu__menu-item ${isActiveMenu(m.path, path) ? "-active" : ""}`} onClick={() => handleMenuClick(m.path)} >{m.name}</div>
+								</div>
 							)))}
 						</div>
-					</div>
-					<div className="p-mypage-menu__label">コーチ用メニュー</div>
-					<div className="p-mypage-menu__menu-outline">
+						<div className="p-mypage-menu__label">コーチ用メニュー</div>
 						<div className="p-mypage-menu__menu">
 							{coachMenuItems.map(((m, i) => (
-								<div className={`p-mypage-menu__menu-item ${isActiveMenu(m.path, path) ? "-active" : ""}`} onClick={() => handleMenuClick(m.path)} key={i}>{m.name}</div>
+								<div className="p-mypage-menu__menu-item-outline" key={i}>
+									<div className={`p-mypage-menu__menu-item ${isActiveMenu(m.path, path) ? "-active" : ""}`} onClick={() => handleMenuClick(m.path)} >{m.name}</div>
+								</div>
 							)))}
+						</div><div className="p-mypage-menu__menu">
+							<div className="p-mypage-menu__menu-item-outline">
+								<Link className={`p-mypage-menu__menu-item`} href="/contact">お問い合わせ</Link>
+							</div>
 						</div>
-					</div><div className="p-mypage-menu__menu-outline">
-						<div className="p-mypage-menu__menu">
-							<Link className={`p-mypage-menu__menu-item`} href="/contact">お問い合わせ</Link>
-						</div>
-					</div>
+					</div>}
+				<div className={`p-mypage__content ${path == "/mypage" ? "-none" : ""}`}>
+					{orLower("sp") &&
+						<BackButton back={() => {
+							router.back();
+							router.push("/mypage")
+						}
+						} className="p-mypage__back" />
+					}
+					{children}
 				</div>
-				<div className="p-mypage__content">{children}</div>
 			</div>
 		</>
 	);

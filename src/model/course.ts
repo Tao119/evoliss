@@ -1,6 +1,8 @@
+
 import { prisma } from "@/lib/prisma";
 import { getFormattedDate } from "@/services/formatDate";
 import { withTransaction, safeTransaction } from "@/lib/transaction";
+import { withCache, CACHE_PREFIX, CACHE_TTL, createCacheInvalidator, generatePaginationCacheKey, deleteCachedData, deleteCachedDataByPattern } from "@/lib/cache";
 
 export const courseFuncs: { [funcName: string]: Function } = {
 	readCourses,
@@ -8,63 +10,72 @@ export const courseFuncs: { [funcName: string]: Function } = {
 	readCourseById,
 	createCourse,
 	updateCourse,
+	updateCoursePublicStatus,
+	deleteCourse,
 	readCoursesNumByCoachId,
 	readCoursesByCoachId,
 	readRecommendedCourses,
 	readCoursesByQuery,
 	readCoursesNumByQuery,
 	readCoursesNum,
+	invalidateCourseCache,
 };
 
+// キャッシュ無効化関数
+const courseCacheInvalidator = createCacheInvalidator(CACHE_PREFIX.COURSE);
+
 async function readCourseById({ id }: { id: number }) {
-	return await prisma.course.findUnique({
-		where: { id },
-		include: {
-			coach: {
-				select: {
-					id: true,
-					name: true,
-					bio: true,
-					icon: true,
-					game: true,
-					courses: {
+	const cacheKey = `${CACHE_PREFIX.COURSE}${id}`;
+
+	return withCache(
+		cacheKey,
+		async () => {
+			return await prisma.course.findUnique({
+				where: { id },
+				include: {
+					coach: {
 						include: {
-							reviews: true,
-							accesses: true,
+							courses: {
+								include: {
+									reviews: true,
+									accesses: true,
+								},
+							},
+							timeSlots: {
+								select: {
+									id: true,
+									dateTime: true,
+									reservation: true,
+								},
+								orderBy: {
+									dateTime: "asc",
+								},
+							},
 						},
 					},
-					timeSlots: {
+					reviews: {
 						select: {
 							id: true,
-							dateTime: true,
-							reservation: true,
-						},
-						orderBy: {
-							dateTime: "asc",
+							rating: true,
+							comment: true,
+							customer: {
+								select: { id: true, name: true, icon: true },
+							},
+							createdAt: true,
 						},
 					},
-				},
-			},
-			reviews: {
-				select: {
-					id: true,
-					rating: true,
-					comment: true,
-					customer: {
-						select: { id: true, name: true, icon: true },
+					tagCourses: {
+						include: {
+							tag: true,
+						},
 					},
-					createdAt: true,
+					game: true,
+					reservations: true,
 				},
-			},
-			tagCourses: {
-				include: {
-					tag: true,
-				},
-			},
-			game: true,
-			reservations: true,
+			});
 		},
-	});
+		CACHE_TTL.MEDIUM // 30分キャッシュ（コース詳細は頻繁にアクセスされる）
+	);
 }
 
 // コーチの予約可能な時間枠を取得（Course関数として追加）
@@ -73,6 +84,9 @@ async function readCourses({ page, total }: { page: number; total: number }) {
 	const skip = (page - 1) * total;
 
 	const data = await prisma.course.findMany({
+		where: {
+			isPublic: true,
+		},
 		skip: skip,
 		take: total,
 		include: {
@@ -97,25 +111,40 @@ async function readCourses({ page, total }: { page: number; total: number }) {
 }
 
 async function readCoursesNum() {
-	const count = await prisma.course.count({});
+	const count = await prisma.course.count({
+		where: {
+			isPublic: true,
+		},
+	});
 	return count;
 }
 
 async function readTopCourses() {
-	return prisma.course.findMany({
-		include: {
-			coach: true,
-			reviews: true,
-			game: true,
-			accesses: true,
+	const cacheKey = `${CACHE_PREFIX.TOP}courses`;
+
+	return withCache(
+		cacheKey,
+		async () => {
+			return prisma.course.findMany({
+				where: {
+					isPublic: true,
+				},
+				include: {
+					coach: true,
+					reviews: true,
+					game: true,
+					accesses: true,
+				},
+				orderBy: {
+					accesses: {
+						_count: "desc",
+					},
+				},
+				take: 10,
+			});
 		},
-		orderBy: {
-			accesses: {
-				_count: "desc",
-			},
-		},
-		take: 10,
-	});
+		CACHE_TTL.SHORT // 5分キャッシュ（ランキングは頻繁に変化）
+	);
 }
 
 async function readCoursesByQuery({
@@ -136,6 +165,9 @@ async function readCoursesByQuery({
 	const skip = (page - 1) * total;
 
 	const AND: any[] = [];
+
+	// 公開講座のみを取得
+	AND.push({ isPublic: true });
 
 	if (query?.trim()) {
 		const q = query.trim();
@@ -215,6 +247,9 @@ async function readCoursesNumByQuery({
 	const whereConditions: any = {
 		AND: [],
 	};
+
+	// 公開講座のみを取得
+	whereConditions.AND.push({ isPublic: true });
 
 	// フリーワード検索
 	if (query && query.trim()) {
@@ -324,7 +359,10 @@ async function readCoursesByCoachId({
 }: { coachId: number; page: number; total: number }) {
 	const skip = (page - 1) * total;
 	return await prisma.course.findMany({
-		where: { coachId },
+		where: {
+			coachId,
+			isPublic: true,
+		},
 		include: {
 			coach: true,
 			reviews: true,
@@ -344,7 +382,10 @@ async function readCoursesByCoachId({
 
 async function readCoursesNumByCoachId({ coachId }: { coachId: number }) {
 	const count = await prisma.course.count({
-		where: { coachId },
+		where: {
+			coachId,
+			isPublic: true,
+		},
 	});
 	return count;
 }
@@ -394,7 +435,7 @@ async function createCourse({
 	gameId: number; // 直接ゲームIDを指定
 	tagIds?: number[]; // タグIDの配列
 }) {
-	return withTransaction(async (tx) => {
+	const result = await withTransaction(async (tx) => {
 		const newCourse = await tx.course.create({
 			data: {
 				title,
@@ -419,6 +460,35 @@ async function createCourse({
 
 		return newCourse;
 	});
+
+	// キャッシュの無効化
+	if (result) {
+		await invalidateCourseCache();
+	}
+
+	return result;
+}
+
+async function updateCoursePublicStatus({
+	id,
+	isPublic,
+}: {
+	id: number;
+	isPublic: boolean;
+}) {
+	const result = await safeTransaction(async (tx) => {
+		return tx.course.update({
+			where: { id },
+			data: { isPublic },
+		});
+	});
+
+	// キャッシュの無効化
+	if (result) {
+		await invalidateCourseCache(id);
+	}
+
+	return result;
 }
 
 async function updateCourse({
@@ -429,6 +499,8 @@ async function updateCourse({
 	duration,
 	image,
 	gameId,
+	tagIds,
+	isPublic,
 }: {
 	id: number;
 	title?: string;
@@ -437,13 +509,61 @@ async function updateCourse({
 	duration?: number;
 	image?: string;
 	gameId?: number;
+	tagIds?: number[];
+	isPublic?: boolean;
 }) {
-	return safeTransaction(async (tx) => {
-		return tx.course.update({
+	const result = await safeTransaction(async (tx) => {
+		// 更新前のコース情報を取得（コーチID取得のため）
+		const originalCourse = await tx.course.findUnique({
 			where: { id },
-			data: { title, description, price, duration, image, gameId },
+			select: { coachId: true }
 		});
+
+		// コースの基本情報を更新
+		const updatedCourse = await tx.course.update({
+			where: { id },
+			data: { title, description, price, duration, image, gameId, isPublic },
+		});
+
+		// タグの更新処理
+		if (tagIds !== undefined) {
+			// 既存のタグ関連を全て削除
+			await tx.tagCourse.deleteMany({
+				where: { courseId: id },
+			});
+
+			// 新しいタグ関連を作成
+			if (tagIds.length > 0) {
+				await tx.tagCourse.createMany({
+					data: tagIds.map((tagId) => ({
+						courseId: id,
+						tagId,
+					})),
+				});
+			}
+		}
+
+		return { updatedCourse, originalCourse };
 	});
+
+	// キャッシュの無効化
+	if (result) {
+		// 特定のコースのキャッシュを削除
+		await invalidateCourseCache(id);
+
+		// コーチのキャッシュも削除（coachモジュールのinvalidateCoachCacheをインポートする必要がある）
+		if (result.originalCourse?.coachId) {
+			await deleteCachedData(`${CACHE_PREFIX.COACH}${result.originalCourse.coachId}`);
+		}
+
+		// 検索結果のキャッシュも削除
+		await deleteCachedDataByPattern(`${CACHE_PREFIX.SEARCH}*`);
+
+		// トップコースのキャッシュも削除
+		await deleteCachedData(`${CACHE_PREFIX.TOP}courses`);
+	}
+
+	return result?.updatedCourse;
 }
 
 async function readRecommendedCourses({
@@ -464,6 +584,7 @@ async function readRecommendedCourses({
 				NOT: {
 					id: courseId,
 				},
+				isPublic: true,
 			},
 			include: {
 				coach: {
@@ -502,7 +623,7 @@ async function readRecommendedCourses({
 					(keyword) =>
 						course.title.toLowerCase().includes(keyword) ||
 						(course.game?.name &&
-							course.game.name.toLowerCase().includes(keyword)),
+							course.game?.name.toLowerCase().includes(keyword)),
 				).length;
 				searchScore = (matchCount / searchKeywords.length) * 100;
 			}
@@ -510,7 +631,7 @@ async function readRecommendedCourses({
 			const avgRating =
 				course.reviews.length > 0
 					? course.reviews.reduce((sum, r) => sum + r.rating, 0) /
-						course.reviews.length
+					course.reviews.length
 					: 0;
 			const ratingScore = (avgRating / 5) * 100;
 
@@ -529,4 +650,60 @@ async function readRecommendedCourses({
 	} catch (error) {
 		console.error("Error recommend course:", error);
 	}
+}
+
+// コースキャッシュを無効化
+async function invalidateCourseCache(id?: number) {
+	if (id) {
+		// 特定のコースのキャッシュを削除
+		await courseCacheInvalidator.invalidateById(id);
+	} else {
+		// 全てのコースキャッシュを削除
+		await courseCacheInvalidator.invalidateAll();
+		// トップコースのキャッシュも削除
+		await deleteCachedData(`${CACHE_PREFIX.TOP}courses`);
+		// 検索結果のキャッシュも削除
+		await deleteCachedDataByPattern(`${CACHE_PREFIX.SEARCH}*`);
+	}
+}
+
+// コースを削除
+async function deleteCourse({ id }: { id: number }) {
+	const result = await safeTransaction(async (tx) => {
+		// 削除前のコース情報を取得（コーチID取得のため）
+		const courseToDelete = await tx.course.findUnique({
+			where: { id },
+			select: { coachId: true }
+		});
+
+		// 関連データを削除（カスケード削除が設定されていない場合）
+		// TagCourseはカスケード削除が設定されているので自動削除
+		// Reservation, Review, Accessなどもカスケード削除が設定されている場合は自動削除
+
+		// コースを削除
+		const deletedCourse = await tx.course.delete({
+			where: { id },
+		});
+
+		return { deletedCourse, courseToDelete };
+	});
+
+	// キャッシュの無効化
+	if (result) {
+		// 特定のコースのキャッシュを削除
+		await invalidateCourseCache(id);
+
+		// コーチのキャッシュも削除
+		if (result.courseToDelete?.coachId) {
+			await deleteCachedData(`${CACHE_PREFIX.COACH}${result.courseToDelete.coachId}`);
+		}
+
+		// 検索結果のキャッシュも削除
+		await deleteCachedDataByPattern(`${CACHE_PREFIX.SEARCH}*`);
+
+		// トップコースのキャッシュも削除
+		await deleteCachedData(`${CACHE_PREFIX.TOP}courses`);
+	}
+
+	return result?.deletedCourse;
 }

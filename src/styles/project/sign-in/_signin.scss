@@ -13,7 +13,7 @@
     margin-bottom: 30px;
 
     @include mq(sp) {
-        width: 300px;
+        width: 100%;
     }
 
 
@@ -37,6 +37,10 @@
         background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
         border-radius: 10px;
         padding: 1px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
     &__input {
@@ -53,12 +57,13 @@
             padding-left: 40px;
         }
 
-
-
-
         width: 100%;
         height: 100%;
         font-size: $fs-text;
+
+        @include mq(sp) {
+            width: 100%;
+        }
 
         &::placeholder {
             color: $gray;
@@ -204,6 +209,10 @@
         background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
         border-radius: 10px;
         padding: 1px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
 
@@ -212,6 +221,10 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
     &__label {
@@ -231,6 +244,10 @@
         flex-direction: row;
         align-items: center;
         gap: 20px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
     &__sns-icon {
@@ -239,12 +256,25 @@
     }
 
     &__sns-input {
-        width: 120px;
-        height: 30px;
-        align-self: center;
-        font-size: $fs-x-small;
+        flex: 1;
+        height: 40px;
+        padding: 0 12px;
+        font-size: $fs-small;
         background-color: $white;
-        color: $gray;
+        color: $black;
         border: 1px solid $gray;
+        border-radius: 4px;
+        box-shadow: none;
+        outline: none;
+        transition: border-color 0.2s;
+
+        &:focus {
+            border-color: $theme;
+        }
+
+        &::placeholder {
+            color: $gray;
+            font-size: $fs-small;
+        }
     }
 }

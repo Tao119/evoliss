@@ -13,6 +13,10 @@
     gap: 30px;
     margin-bottom: 50px;
 
+    @include mq(sp) {
+        height: auto;
+    }
+
 
     &__row {
         font-size: $fs-input;
@@ -24,6 +28,10 @@
         gap: 20px;
         height: auto;
         width: 100%;
+
+        @include mq(sp) {
+            flex-direction: column;
+        }
     }
 
     &__row-items {
@@ -34,6 +42,11 @@
         flex-wrap: wrap;
         width: calc(100% - 150px);
         justify-content: flex-start;
+
+        @include mq(sp) {
+            width: 100%;
+            gap: 10px;
+        }
     }
 
     &__row-item {
@@ -49,6 +62,10 @@
         justify-content: center;
         cursor: pointer;
         font-weight: $fw-bold;
+
+        @include mq(sp) {
+            padding: 0 15px;
+        }
 
         &.-round {
             border-radius: 20px;

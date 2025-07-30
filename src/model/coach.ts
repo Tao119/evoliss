@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getFormattedDate } from "@/services/formatDate";
 import { withTransaction, safeTransaction } from "@/lib/transaction";
+import { withCache, CACHE_PREFIX, CACHE_TTL, createCacheInvalidator, deleteCachedData } from "@/lib/cache";
 
 export const coachFuncs: { [funcName: string]: Function } = {
 	readCoachById,
@@ -11,10 +12,15 @@ export const coachFuncs: { [funcName: string]: Function } = {
 	readTimeSlotsByCoachId,
 	createTimeSlots,
 	updateTimeSlots,
+	updateTimeSlotsMonthly,
 	deleteTimeSlot,
 	readTimeSlotById,
 	readMonthlyStats,
+	invalidateCoachCache,
 };
+
+// キャッシュ無効化関数
+const coachCacheInvalidator = createCacheInvalidator(CACHE_PREFIX.COACH);
 
 async function readCoachById({ id }: { id: number }) {
 	return prisma.user.findUnique({
@@ -40,33 +46,41 @@ async function readCoachById({ id }: { id: number }) {
 }
 
 async function readTopCoaches() {
-	const coaches = await prisma.user.findMany({
-		where: {
-			courses: {
-				some: {},
-			},
-		},
-		include: {
-			courses: {
-				include: {
-					reviews: true,
-					accesses: true,
-				},
-			},
-		},
-	});
-	const sortedCoaches = coaches
-		.map((coach) => ({
-			...coach,
-			accessCount: coach.courses.reduce(
-				(sum, course) => sum + (course.accesses?.length || 0),
-				0,
-			),
-		}))
-		.sort((a, b) => b.accessCount - a.accessCount)
-		.slice(0, 6);
+	const cacheKey = `${CACHE_PREFIX.TOP}coaches`;
 
-	return sortedCoaches;
+	return withCache(
+		cacheKey,
+		async () => {
+			const coaches = await prisma.user.findMany({
+				where: {
+					courses: {
+						some: {},
+					},
+				},
+				include: {
+					courses: {
+						include: {
+							reviews: true,
+							accesses: true,
+						},
+					},
+				},
+			});
+			const sortedCoaches = coaches
+				.map((coach) => ({
+					...coach,
+					accessCount: coach.courses.reduce(
+						(sum, course) => sum + (course.accesses?.length || 0),
+						0,
+					),
+				}))
+				.sort((a, b) => b.accessCount - a.accessCount)
+				.slice(0, 6);
+
+			return sortedCoaches;
+		},
+		CACHE_TTL.MEDIUM // 30分キャッシュ
+	);
 }
 
 async function readCoachesByQuery({
@@ -100,6 +114,7 @@ async function readCoachesByQuery({
 					accesses: true,
 				},
 			},
+			game: true
 		},
 	});
 
@@ -110,12 +125,12 @@ async function readCoachesByQuery({
 		);
 		const averageRating = c.courses.length
 			? c.courses.reduce((sum, course) => {
-					const avg = course.reviews.length
-						? course.reviews.reduce((s, r) => s + r.rating, 0) /
-							course.reviews.length
-						: 0;
-					return sum + avg;
-				}, 0) / c.courses.length
+				const avg = course.reviews.length
+					? course.reviews.reduce((s, r) => s + r.rating, 0) /
+					course.reviews.length
+					: 0;
+				return sum + avg;
+			}, 0) / c.courses.length
 			: 0;
 
 		return {
@@ -294,7 +309,7 @@ async function createTimeSlots({
 	coachId: number;
 	timeSlots: string[];
 }) {
-	return withTransaction(async (tx) => {
+	const result = await withTransaction(async (tx) => {
 		const existingSlots = await tx.timeSlot.findMany({
 			where: {
 				coachId,
@@ -313,10 +328,10 @@ async function createTimeSlots({
 		);
 
 		if (newTimeSlots.length === 0) {
-			return { created: 0, skipped: timeSlots.length };
+			return { created: 0, skipped: timeSlots.length, coachId };
 		}
 
-		const result = await tx.timeSlot.createMany({
+		const createResult = await tx.timeSlot.createMany({
 			data: newTimeSlots.map((dateTime) => ({
 				coachId,
 				dateTime,
@@ -325,47 +340,156 @@ async function createTimeSlots({
 		});
 
 		return {
-			created: result.count,
-			skipped: timeSlots.length - result.count,
+			created: createResult.count,
+			skipped: timeSlots.length - createResult.count,
+			coachId
 		};
 	});
+
+	// キャッシュの無効化
+	if (result && result.created > 0) {
+		// コーチキャッシュを無効化
+		await invalidateCoachCache(result.coachId);
+	}
+
+	return result;
 }
 
 async function updateTimeSlots({
-	updates,
+	coachId,
+	timeSlots,
 }: {
-	updates: Array<{
-		id: number;
-		dateTime: string;
-	}>;
+	coachId: number;
+	timeSlots: string[];
 }) {
-	return withTransaction(async (tx) => {
-		const results = await Promise.allSettled(
-			updates.map((update) =>
-				tx.timeSlot.update({
-					where: { id: update.id },
-					data: { dateTime: update.dateTime },
-				}),
-			),
-		);
-
-		const successful = results.filter(
-			(result) => result.status === "fulfilled",
-		).length;
-		const failed = results.filter(
-			(result) => result.status === "rejected",
-		).length;
-
+	const result = await withTransaction(async (tx) => {
+		// 指定された日付範囲の既存のタイムスロットを削除（予約済みを除く）
+		const dates = [...new Set(timeSlots.map(ts => ts.split(' ')[0]))];
+		
+		if (dates.length > 0) {
+			const startDate = dates[0] + ' 00:00:00';
+			const endDate = dates[dates.length - 1] + ' 23:59:59';
+			
+			// 予約のないタイムスロットのみ削除
+			await tx.timeSlot.deleteMany({
+				where: {
+					coachId,
+					dateTime: {
+						gte: startDate,
+						lte: endDate,
+					},
+					reservationId: null,
+				},
+			});
+		}
+		
+		// 新しいタイムスロットを作成
+		if (timeSlots.length > 0) {
+			const createResult = await tx.timeSlot.createMany({
+				data: timeSlots.map((dateTime) => ({
+					coachId,
+					dateTime,
+				})),
+				skipDuplicates: true,
+			});
+			
+			return {
+				created: createResult.count,
+				coachId,
+			};
+		}
+		
 		return {
-			successful,
-			failed,
-			total: updates.length,
+			created: 0,
+			coachId,
 		};
 	});
+
+	// キャッシュの無効化
+	if (result && result.created >= 0) {
+		// コーチキャッシュを無効化
+		await invalidateCoachCache(result.coachId);
+	}
+
+	return result;
+}
+
+async function updateTimeSlotsMonthly({
+	coachId,
+	timeSlots,
+	deleteSlotIds,
+	month,
+}: {
+	coachId: number;
+	timeSlots: string[];
+	deleteSlotIds: number[];
+	month: string;
+}) {
+	const result = await withTransaction(async (tx) => {
+		// 削除対象のスロットを削除（予約がないもののみ）
+		if (deleteSlotIds.length > 0) {
+			await tx.timeSlot.deleteMany({
+				where: {
+					id: {
+						in: deleteSlotIds,
+					},
+					coachId,
+					reservationId: null,
+				},
+			});
+		}
+		
+		// 新しいタイムスロットを作成
+		let created = 0;
+		if (timeSlots.length > 0) {
+			// 既存のスロットと重複しないようにフィルタリング
+			const existingSlots = await tx.timeSlot.findMany({
+				where: {
+					coachId,
+					dateTime: {
+						in: timeSlots,
+					},
+				},
+				select: {
+					dateTime: true,
+				},
+			});
+
+			const existingDateTimes = existingSlots.map((slot) => slot.dateTime);
+			const newTimeSlots = timeSlots.filter(
+				(dateTime) => !existingDateTimes.includes(dateTime),
+			);
+
+			if (newTimeSlots.length > 0) {
+				const createResult = await tx.timeSlot.createMany({
+					data: newTimeSlots.map((dateTime) => ({
+						coachId,
+						dateTime,
+					})),
+					skipDuplicates: true,
+				});
+				created = createResult.count;
+			}
+		}
+		
+		return {
+			created,
+			deleted: deleteSlotIds.length,
+			coachId,
+		};
+	});
+
+	// キャッシュの無効化
+	if (result) {
+		// コーチキャッシュを無効化
+		await invalidateCoachCache(result.coachId);
+	}
+
+	return result;
 }
 
 async function deleteTimeSlot({ id }: { id: number }) {
-	return safeTransaction(async (tx) => {
+	const result = await safeTransaction(async (tx) => {
 		const timeSlot = await tx.timeSlot.findUnique({
 			where: { id },
 			include: {
@@ -381,10 +505,20 @@ async function deleteTimeSlot({ id }: { id: number }) {
 			throw new Error("予約がある時間枠は削除できません");
 		}
 
-		return await tx.timeSlot.delete({
+		const deletedSlot = await tx.timeSlot.delete({
 			where: { id },
 		});
+
+		return { deletedSlot, coachId: timeSlot.coachId };
 	});
+
+	// キャッシュの無効化
+	if (result && result.coachId) {
+		// コーチキャッシュを無効化
+		await invalidateCoachCache(result.coachId);
+	}
+
+	return result?.deletedSlot;
 }
 
 async function readTimeSlotById({ id }: { id: number }) {
@@ -464,4 +598,17 @@ async function readMonthlyStats({
 		bookingRate: totalSlots > 0 ? (bookedSlots / totalSlots) * 100 : 0,
 		totalRevenue,
 	};
+}
+
+// コーチキャッシュを無効化
+async function invalidateCoachCache(id?: number) {
+	if (id) {
+		// 特定のコーチのキャッシュを削除
+		await coachCacheInvalidator.invalidateById(id);
+	} else {
+		// 全てのコーチキャッシュを削除
+		await coachCacheInvalidator.invalidateAll();
+		// トップコーチのキャッシュも削除
+		await deleteCachedData(`${CACHE_PREFIX.TOP}coaches`);
+	}
 }

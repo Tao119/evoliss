@@ -3,8 +3,13 @@ import {
 	cancelReservationExpiry,
 	scheduleReservationExpiry,
 } from "@/lib/queue/reservationQueue";
+import { scheduleAutoReview } from "@/lib/queue/reviewQueue";
 import { RefundStatus, reservationStatus } from "@/type/models";
 import { withTransaction, safeTransaction } from "@/lib/transaction";
+import dayjs from "dayjs";
+import "dayjs/locale/ja";
+
+dayjs.locale("ja");
 
 export const reservationFuncs: { [funcName: string]: Function } = {
 	createReservation,
@@ -15,6 +20,10 @@ export const reservationFuncs: { [funcName: string]: Function } = {
 	readReservationByCustomerAndSchedule,
 	cancelReservation,
 	readReservationsByCoachAndCustomer,
+	rescheduleReservation,
+	readReservationsByCourseId,
+	readReservationsByUserId,
+	doneCourse,
 };
 
 async function createReservation({
@@ -26,17 +35,38 @@ async function createReservation({
 	courseId: number;
 	timeSlotIds: number[];
 }) {
+	// まずタイムスロット情報を取得
+	const timeSlots = await prisma.timeSlot.findMany({
+		where: {
+			id: { in: timeSlotIds },
+		},
+		orderBy: {
+			dateTime: 'asc',
+		},
+	});
+
+	if (timeSlots.length === 0) {
+		throw new Error("タイムスロットが見つかりません");
+	}
+
+	// courseTimeを生成 (YYYY/MM/dd HH:mm~HH:mm形式)
+	const firstSlot = timeSlots[0];
+	const lastSlot = timeSlots[timeSlots.length - 1];
+	const courseTime = `${dayjs(firstSlot.dateTime).format('YYYY/MM/DD HH:mm')}~${dayjs(lastSlot.dateTime).add(30, 'minute').format('HH:mm')}`;
+
 	const reservation = await prisma.reservation.create({
 		data: {
 			customerId: userId,
 			courseId: courseId,
 			status: reservationStatus.Created,
+			courseTime: courseTime,
 		},
 	});
 
 	const reservationId = reservation.id;
 
-	const timeSlots = await prisma.timeSlot.updateMany({
+	// タイムスロットを予約に紐付け
+	await prisma.timeSlot.updateMany({
 		where: {
 			id: {
 				in: timeSlotIds,
@@ -54,21 +84,79 @@ async function createReservation({
 
 async function createRefund({
 	reservationId,
-	customerId,
-	text,
 }: {
 	reservationId: number;
-	customerId: number;
-	text: string;
 }) {
-	return await prisma.refund.create({
-		data: {
-			reservationId,
-			customerId,
-			text,
-			status: RefundStatus.Created,
-		},
+	const result = await safeTransaction(async (tx) => {
+		// 予約情報を取得
+		const reservation = await tx.reservation.findUnique({
+			where: { id: reservationId },
+			include: {
+				course: {
+					select: {
+						id: true,
+						coachId: true
+					}
+				},
+				timeSlots: {
+					select: {
+						id: true,
+						coachId: true
+					}
+				}
+			}
+		});
+
+		if (!reservation) {
+			throw new Error("予約が見つかりません");
+		}
+
+		// Refundを作成
+		const refund = await tx.refund.create({
+			data: {
+				reservationId,
+				status: RefundStatus.Created,
+			},
+		});
+
+		// Reservationのステータスをコーチ側キャンセル申請中に更新
+		await tx.reservation.update({
+			where: { id: reservationId },
+			data: {
+				status: reservationStatus.CancelRequestedByCoach,
+			},
+		});
+
+		console.log(`✅ Reservation ${reservationId} status updated to CancelRequestedByCoach`);
+
+		return { refund, reservation };
 	});
+
+	// キャッシュの無効化
+	if (result && result.reservation) {
+		// コースキャッシュを無効化
+		if (result.reservation.course?.id) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COURSE}${result.reservation.course.id}`);
+		}
+
+		// コーチキャッシュを無効化
+		if (result.reservation.course?.coachId) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COACH}${result.reservation.course.coachId}`);
+		}
+
+		// TimeSlotのコーチキャッシュも無効化
+		if (result.reservation.timeSlots && result.reservation.timeSlots.length > 0) {
+			const coachId = result.reservation.timeSlots[0].coachId;
+			if (coachId) {
+				const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+				await deleteCachedData(`${CACHE_PREFIX.COACH}${coachId}`);
+			}
+		}
+	}
+
+	return result?.refund;
 }
 
 async function updateRefund({
@@ -78,12 +166,208 @@ async function updateRefund({
 	refundId: number;
 	accept: boolean;
 }) {
-	return await prisma.refund.update({
-		where: { id: refundId },
-		data: {
-			status: accept ? RefundStatus.Accepted : RefundStatus.Denied,
-		},
+	const result = await safeTransaction(async (tx) => {
+		// Refundを更新
+		const updatedRefund = await tx.refund.update({
+			where: { id: refundId },
+			data: {
+				status: accept ? RefundStatus.Accepted : RefundStatus.Denied,
+			},
+			include: {
+				reservation: {
+					include: {
+						timeSlots: {
+							select: {
+								id: true,
+								coachId: true
+							}
+						},
+						course: {
+							select: {
+								id: true,
+								coachId: true
+							}
+						}
+					}
+				}
+			}
+		});
+
+		// 承認の場合、Reservationのステータスをコーチ側キャンセルに更新
+		if (accept && updatedRefund.reservation) {
+			// TimeSlotをリリース
+			if (updatedRefund.reservation.timeSlots.length > 0) {
+				await tx.timeSlot.updateMany({
+					where: {
+						id: { in: updatedRefund.reservation.timeSlots.map((slot) => slot.id) },
+					},
+					data: {
+						reservationId: null
+					},
+				});
+			}
+
+			// 予約ステータスをCanceledByCoachに更新
+			await tx.reservation.update({
+				where: { id: updatedRefund.reservationId! },
+				data: {
+					status: reservationStatus.CanceledByCoach,
+				},
+			});
+
+			console.log(`✅ Reservation ${updatedRefund.reservationId} status updated to CanceledByCoach`);
+		}
+
+		return updatedRefund;
 	});
+
+	// キャッシュの無効化
+	if (result && accept && result.reservation) {
+		// コースキャッシュを無効化
+		if (result.reservation.course?.id) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COURSE}${result.reservation.course.id}`);
+		}
+
+		// コーチキャッシュを無効化
+		if (result.reservation.course?.coachId) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COACH}${result.reservation.course.coachId}`);
+		}
+
+		// TimeSlotのコーチキャッシュも無効化
+		if (result.reservation.timeSlots && result.reservation.timeSlots.length > 0) {
+			const coachId = result.reservation.timeSlots[0].coachId;
+			if (coachId) {
+				const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+				await deleteCachedData(`${CACHE_PREFIX.COACH}${coachId}`);
+			}
+		}
+	}
+
+	return result;
+}
+
+async function doneCourse({
+	id,
+	userId,
+}: {
+	id: number;
+	userId: number;
+}) {
+	const result = await safeTransaction(async (tx) => {
+		// 予約を取得して、コーチを確認
+		const reservation = await tx.reservation.findUnique({
+			where: { id },
+			include: {
+				course: {
+					select: {
+						id: true,
+						coachId: true
+					}
+				},
+				timeSlots: {
+					select: {
+						id: true,
+						coachId: true,
+						dateTime: true
+					}
+				}
+			},
+		});
+
+		if (!reservation) {
+			throw new Error("予約が見つかりません");
+		}
+
+		// コーチの確認
+		if (reservation.course.coachId !== userId) {
+			throw new Error("この予約を完了する権限がありません");
+		}
+
+		// ステータスチェック（Confirmedのみ完了可能）
+		if (reservation.status !== reservationStatus.Confirmed) {
+			throw new Error("確定済みの予約のみ完了できます");
+		}
+
+		// 時間が過ぎているかチェック（オプション）
+		const now = new Date();
+		const firstTimeSlot = reservation.timeSlots[0];
+		if (firstTimeSlot) {
+			const slotTime = new Date(firstTimeSlot.dateTime);
+			if (slotTime > now) {
+				// 講義時間前でも完了できるようにする（コーチの判断）
+				console.log(`⚠️ Completing reservation ${id} before scheduled time`);
+			}
+		}
+
+		// 予約ステータスをDoneに更新（includeで全情報を取得）
+		const updatedReservation = await tx.reservation.update({
+			where: { id },
+			data: {
+				status: reservationStatus.Done,
+			},
+			include: {
+				course: {
+					include: {
+						coach: true,
+						game: true,
+						tagCourses: {
+							include: {
+								tag: true,
+							},
+						},
+					},
+				},
+				customer: {
+					select: {
+						id: true,
+						name: true,
+						icon: true,
+					},
+				},
+				timeSlots: {
+					orderBy: {
+						dateTime: "asc",
+					},
+				},
+				room: true,
+			},
+		});
+
+		console.log(`✅ Reservation ${id} marked as Done`);
+
+		// 自動レビューをスケジュール
+		try {
+			await scheduleAutoReview(id, 5); // 5日後に自動レビュー
+			console.log(`✅ Auto review scheduled for reservation ${id}`);
+		} catch (error) {
+			console.error(`⚠️ Failed to schedule auto review for reservation ${id}:`, error);
+			// エラーが発生しても予約の更新は継続
+		}
+
+		// コース情報を取得してキャッシュ無効化に使用
+		const courseInfo = reservation.course;
+
+		return { success: true, reservation: updatedReservation, courseId: courseInfo.id, courseCoachId: courseInfo.coachId };
+	});
+
+	// キャッシュの無効化
+	if (result && result.success) {
+		// コースキャッシュを無効化
+		if (result.courseId) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COURSE}${result.courseId}`);
+		}
+
+		// コーチキャッシュを無効化
+		if (result.courseCoachId) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COACH}${result.courseCoachId}`);
+		}
+	}
+
+	return result;
 }
 
 async function updateReservation({
@@ -111,6 +395,17 @@ async function updateReservation({
 			await cancelReservationExpiry(id);
 		}
 
+		// 講義終了時に自動レビューをスケジュール
+		if (status === reservationStatus.Done) {
+			try {
+				await scheduleAutoReview(id, 5); // 5日後に自動レビュー
+				console.log(`✅ Auto review scheduled for reservation ${id}`);
+			} catch (error) {
+				console.error(`⚠️ Failed to schedule auto review for reservation ${id}:`, error);
+				// エラーが発生しても予約の更新は継続
+			}
+		}
+
 		return updatedReservation;
 	});
 }
@@ -128,6 +423,7 @@ async function readReservationById({
 			include: {
 				timeSlots: true,
 				room: true,
+				course: { include: { game: true } }
 			},
 		});
 	} catch (error) {
@@ -177,13 +473,24 @@ async function cancelReservation({
 	id: number;
 	customerId: number;
 }) {
-	return safeTransaction(async (tx) => {
+	const result = await safeTransaction(async (tx) => {
 		// 予約を取得して、所有者を確認
 		const reservation = await tx.reservation.findUnique({
 			where: { id },
 			include: {
-				timeSlots: true,
+				timeSlots: {
+					select: {
+						id: true,
+						coachId: true
+					}
+				},
 				payment: true,
+				course: {
+					select: {
+						id: true,
+						coachId: true
+					}
+				}
 			},
 		});
 
@@ -195,17 +502,7 @@ async function cancelReservation({
 			throw new Error("この予約をキャンセルする権限がありません");
 		}
 
-		// 5日前までのキャンセルか確認
-		const firstSlot = reservation.timeSlots[0];
-		if (firstSlot) {
-			const daysUntilClass = Math.floor(
-				(new Date(firstSlot.dateTime).getTime() - new Date().getTime()) /
-				(1000 * 60 * 60 * 24)
-			);
-			if (daysUntilClass < 5) {
-				throw new Error("キャンセル期限を過ぎています（5日前まで）");
-			}
-		}
+		// キャンセルに期限はなし
 
 		// TimeSlotをリリース
 		if (reservation.timeSlots.length > 0) {
@@ -232,8 +529,129 @@ async function cancelReservation({
 		//   await refundPayment(reservation.payment.stripePaymentIntentId);
 		// }
 
-		return { success: true };
+		return { success: true, reservation };
 	});
+
+	// キャッシュの無効化
+	if (result && result.success) {
+		// コースキャッシュを無効化
+		if (result.reservation?.course?.id) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COURSE}${result.reservation.course.id}`);
+		}
+
+		// コーチキャッシュを無効化
+		if (result.reservation?.course?.coachId) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COACH}${result.reservation.course.coachId}`);
+		}
+
+		// TimeSlotのコーチキャッシュも無効化
+		if (result.reservation?.timeSlots && result.reservation.timeSlots.length > 0) {
+			const coachId = result.reservation.timeSlots[0].coachId;
+			if (coachId) {
+				const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+				await deleteCachedData(`${CACHE_PREFIX.COACH}${coachId}`);
+			}
+		}
+	}
+
+	return result;
+}
+
+async function readReservationsByCourseId({
+	courseId,
+}: {
+	courseId: number;
+}) {
+	try {
+		return await prisma.reservation.findMany({
+			where: {
+				courseId,
+			},
+			include: {
+				course: {
+					include: {
+						coach: true,
+						game: true,
+						tagCourses: {
+							include: {
+								tag: true,
+							},
+						},
+					},
+				},
+				customer: {
+					select: {
+						id: true,
+						name: true,
+						icon: true,
+					},
+				},
+				timeSlots: {
+					orderBy: {
+						dateTime: "asc",
+					},
+				},
+				room: true,
+				review: true
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+		});
+	} catch (error) {
+		console.error("🚨 Error reading reservations by course:", error);
+		return [];
+	}
+}
+
+async function readReservationsByUserId({
+	userId,
+}: {
+	userId: number;
+}) {
+	try {
+		return await prisma.reservation.findMany({
+			where: {
+				customerId: userId,
+			},
+			include: {
+				course: {
+					include: {
+						coach: true,
+						game: true,
+						tagCourses: {
+							include: {
+								tag: true,
+							},
+						},
+					},
+				},
+				customer: {
+					select: {
+						id: true,
+						name: true,
+						icon: true,
+					},
+				},
+				timeSlots: {
+					orderBy: {
+						dateTime: "asc",
+					},
+				},
+				room: true,
+				review: true,
+				refunds: true,
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+		});
+	} catch (error) {
+		console.error("🚨 Error reading reservations by user:", error);
+		return [];
+	}
 }
 
 async function readReservationsByCoachAndCustomer({
@@ -281,4 +699,146 @@ async function readReservationsByCoachAndCustomer({
 		console.error("🚨 Error reading reservations:", error);
 		return [];
 	}
+}
+
+async function rescheduleReservation({
+	id,
+	customerId,
+	newTimeSlotIds,
+}: {
+	id: number;
+	customerId: number;
+	newTimeSlotIds: number[];
+}) {
+	const result = await safeTransaction(async (tx) => {
+		// 予約を取得して、所有者を確認
+		const reservation = await tx.reservation.findUnique({
+			where: { id },
+			include: {
+				timeSlots: true,
+				course: {
+					select: {
+						id: true,
+						coachId: true
+					}
+				}
+			},
+		});
+
+		if (!reservation) {
+			throw new Error("予約が見つかりません");
+		}
+
+		if (reservation.customerId !== customerId) {
+			throw new Error("この予約を変更する権限がありません");
+		}
+
+		// キャンセル済みの確認
+		if (reservation.status === reservationStatus.Canceled) {
+			throw new Error("キャンセル済みの予約は日程変更できません");
+		}
+
+		// 過去の予約・5日前までの変更か確認
+		const firstSlot = reservation.timeSlots[0];
+		if (firstSlot) {
+			const now = new Date().getTime();
+			const classTime = new Date(firstSlot.dateTime).getTime();
+
+			// 過去の予約
+			if (classTime < now) {
+				throw new Error("過去の予約は日程変更できません");
+			}
+
+			// 5日前までの変更か確認
+			const daysUntilClass = Math.floor(
+				(classTime - now) / (1000 * 60 * 60 * 24)
+			);
+			if (daysUntilClass < 5) {
+				throw new Error("日程変更期限を過ぎています（5日前まで）");
+			}
+		}
+
+		// 新しいTimeSlotが利用可能か確認
+		const newSlots = await tx.timeSlot.findMany({
+			where: {
+				id: { in: newTimeSlotIds },
+				reservationId: null,
+			},
+			select: {
+				id: true,
+				coachId: true,
+				dateTime: true,
+			},
+			orderBy: {
+				dateTime: 'asc',
+			},
+		});
+
+		if (newSlots.length !== newTimeSlotIds.length) {
+			throw new Error("選択された時間が利用できません");
+		}
+
+		// 新しいcourseTimeを生成
+		const firstNewSlot = newSlots[0];
+		const lastNewSlot = newSlots[newSlots.length - 1];
+		const newCourseTime = `${dayjs(firstNewSlot.dateTime).format('YYYY/MM/DD HH:mm')}~${dayjs(lastNewSlot.dateTime).add(30, 'minute').format('HH:mm')}`;
+
+		// 古いTimeSlotをリリース
+		if (reservation.timeSlots.length > 0) {
+			await tx.timeSlot.updateMany({
+				where: {
+					id: { in: reservation.timeSlots.map((slot) => slot.id) },
+				},
+				data: {
+					reservationId: null
+				},
+			});
+		}
+
+		// 新しいTimeSlotを予約
+		await tx.timeSlot.updateMany({
+			where: {
+				id: { in: newTimeSlotIds },
+			},
+			data: {
+				reservationId: id,
+			},
+		});
+
+		// courseTimeを更新
+		await tx.reservation.update({
+			where: { id },
+			data: {
+				courseTime: newCourseTime,
+			},
+		});
+
+		return { success: true, reservation, newSlots };
+	});
+
+	// キャッシュの無効化
+	if (result && result.success) {
+		// コースキャッシュを無効化
+		if (result.reservation?.course?.id) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COURSE}${result.reservation.course.id}`);
+		}
+
+		// コーチキャッシュを無効化
+		if (result.reservation?.course?.coachId) {
+			const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+			await deleteCachedData(`${CACHE_PREFIX.COACH}${result.reservation.course.coachId}`);
+		}
+
+		// 新しいコーチのキャッシュも無効化（コーチが変わった場合）
+		if (result.newSlots && result.newSlots.length > 0) {
+			const newCoachId = result.newSlots[0].coachId;
+			if (newCoachId && newCoachId !== result.reservation?.course?.coachId) {
+				const { deleteCachedData, CACHE_PREFIX } = await import("@/lib/cache");
+				await deleteCachedData(`${CACHE_PREFIX.COACH}${newCoachId}`);
+			}
+		}
+	}
+
+	return result;
 }

@@ -1,12 +1,10 @@
 "use client";
-import { AnimationContext, UserDataContext } from "@/app/contextProvider";
+import { UserDataContext } from "@/app/contextProvider";
 import eyeIcon from "@/assets/image/eye.svg";
 import lockIcon from "@/assets/image/key.svg";
 import mailIcon from "@/assets/image/mail.svg";
-import { BackButton } from "@/components/backbutton";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 
@@ -26,7 +24,6 @@ const Page = () => {
 	const callbackPath = params?.get("callback");
 	const emailFromUrl = params?.get("email");
 	const router = useRouter();
-	const animation = useContext(AnimationContext)!;
 
 	useEffect(() => {
 		if (userData) {
@@ -37,7 +34,7 @@ const Page = () => {
 			setEmail(decodeURIComponent(emailFromUrl));
 			setStep(1);
 		}
-	}, [userData, router, emailFromUrl]);
+	}, [userData, router, emailFromUrl, callbackPath]);
 
 	const sendResetCode = async () => {
 		if (!email) return;
@@ -64,7 +61,7 @@ const Page = () => {
 			} else {
 				setErr(data.error || "エラーが発生しました。");
 			}
-		} catch (error) {
+		} catch {
 			setErr("ネットワークエラーが発生しました。");
 		} finally {
 			setLoading(false);
@@ -111,7 +108,7 @@ const Page = () => {
 			} else {
 				setErr(data.error || "エラーが発生しました。");
 			}
-		} catch (error) {
+		} catch {
 			setErr("ネットワークエラーが発生しました。");
 		} finally {
 			setLoading(false);

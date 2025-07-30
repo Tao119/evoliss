@@ -1,0 +1,75 @@
+@use '../../foundation' as *;
+
+// フェードインアニメーション
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// アニメーション用のクラス
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+// 初期状態を非表示にするクラス
+.animation-hidden {
+  opacity: 0;
+  
+  &.animate-fade-in-up {
+    transform: translateY(30px);
+  }
+  
+  &.animate-scale-in {
+    transform: scale(0.9);
+  }
+}
+
+// 遅延クラス
+@for $i from 1 through 20 {
+  .animate-delay-#{$i * 100} {
+    animation-delay: #{$i * 0.1}s;
+  }
+}
+
+// ビューポート内に入ったときにアニメーションを実行
+.animate-on-view {
+  opacity: 0;
+  
+  &.in-view {
+    opacity: 1;
+  }
+}

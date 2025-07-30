@@ -3,23 +3,23 @@
 
 // Glitch effect mixins and keyframes
 @mixin jitter($steps: 10, $strX: 10, $strY: 10) {
-@keyframes jitter-#{$steps}-#{$strX}-#{$strY} {
+  @keyframes jitter-#{$steps}-#{$strX}-#{$strY} {
     $i: $steps;
 
-@while $i >0 {
-#{math.div($i, $steps) * 100}% {
-$effectFalloff: 1 - math.div($i, $steps);
-$x: (
-  random($strX) - math.div($strX, 2)) * $effectFalloff + px;
-$y: (
-  random($strY) - math.div($strY, 2)) * $effectFalloff + px;
-transform: translate($x, $y
-    );
+    @while $i >0 {
+      #{math.div($i, $steps) * 100}% {
+        $effectFalloff: 1 - math.div($i, $steps);
+        $x: (
+          math.random($strX) - math.div($strX, 2)) * $effectFalloff + px;
+        $y: (
+          math.random($strY) - math.div($strY, 2)) * $effectFalloff + px;
+        transform: translate($x, $y
+        );
     }
 
-  $i: $i - 1;
-}
+    $i: $i - 1;
   }
+}
 }
 
 // Generate multiple jitter animations
@@ -40,24 +40,24 @@ transform: translate($x, $y
 }
 
 .p-side-bar {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   width: 400px;
-  height: 100%;
+  height: 100vh;
   padding: 20px 24px;
   gap: 48px;
   display: flex;
-  z-index: 1;
   flex-direction: column;
   align-items: center;
-  z-index: 11;
+  z-index: 10001;
   background-color: rgba(30, 30, 30, 1);
 
   @include mq(sp) {
-    position: absolute;
+    position: fixed;
     background-color: $black;
-    z-index: 11;
+    width: 80%;
+    max-width: 300px;
   }
 
   &__icon {

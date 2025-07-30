@@ -21,20 +21,44 @@
     }
 
     &__bar {
-        display: flex;
         height: 40px;
         border-radius: 20px;
         overflow: hidden;
         border: 1px solid $gray;
         position: relative;
+        background-color: $dark-gray; // デフォルト背景色
+        transition: background 0.3s ease;
+        
+        // スマホサイズでの表示問題を修正
+        @include mq(sp) {
+            // グラデーションが正しく表示されるように
+            transform: translateZ(0);
+            will-change: background;
+        }
+    }
+
+    &__segments {
+        display: flex;
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
     }
 
     &__segment {
         height: 100%;
+        flex: 0 0 auto;
         transition: all 0.2s ease;
+        position: relative;
+
+        // 隣接するセグメントと重なるようにして隙間を防ぐ
+        &:not(:last-child) {
+            margin-right: -1px;
+        }
 
         &.-unavailable {
-            background-color: $dark-gray;
+            background-color: $dark-gray; // 背景色と同じ色を明示的に設定
         }
 
         &.-available {

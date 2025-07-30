@@ -27,10 +27,6 @@ const Page = () => {
 		return <></>;
 	}
 
-	if (orLower && orLower("sp")) {
-		return <div className="">MENU FOR SMARTPHONE</div>;
-	}
-
 	return <></>;
 };
 

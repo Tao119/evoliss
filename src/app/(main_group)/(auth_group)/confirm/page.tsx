@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";
-import { BackButton } from "@/components/backbutton";
+
 import { Button } from "@/components/button";
 import { InputBox } from "@/components/inputBox";
 import { signin } from "@/services/auth";
@@ -123,9 +123,9 @@ const Page = () => {
 					);
 				}, 2000);
 			}
-		} catch (error: any) {
+		} catch (error) {
 			console.error("Confirmation error:", error);
-			const errorMessage = getCognitoErrorMessage(error, "confirm");
+			const errorMessage = getCognitoErrorMessage(error as Error, "confirm");
 			setError(errorMessage);
 		} finally {
 			setLoading(false);
@@ -157,9 +157,9 @@ const Page = () => {
 			await client.send(command);
 
 			setError("確認コードを再送信しました");
-		} catch (error: any) {
+		} catch (error) {
 			console.error("Resend error:", error);
-			const errorMessage = getCognitoErrorMessage(error, "confirm");
+			const errorMessage = getCognitoErrorMessage(error as Error, "confirm");
 			setError(errorMessage);
 		} finally {
 			setResendLoading(false);

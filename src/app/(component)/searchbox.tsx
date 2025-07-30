@@ -26,7 +26,7 @@ export const SearchBox = ({ name, className }: Props) => {
 	const animation = useContext(AnimationContext)!;
 	const router = useRouter();
 	const history = userData?.searchHistories ?? [];
-	const { breakpoint, orLower } = useContext(BreakPointContext)!;
+	const { orLower } = useContext(BreakPointContext)!;
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const [searchText, setSearchText] = useState("");
@@ -35,14 +35,14 @@ export const SearchBox = ({ name, className }: Props) => {
 	const onReady = userData;
 
 	useEffect(() => {
-		animation.startAnimation();
-	}, []);
+	animation.startAnimation();
+	}, [animation]);
 
 	useEffect(() => {
-		if (onReady) {
-			animation.endAnimation();
-		}
-	}, [onReady]);
+	if (onReady) {
+	animation.endAnimation();
+	}
+	}, [onReady, animation]);
 
 	const onInputChange = (event: { target: HTMLInputElement }) => {
 		setSearchText(event.target.value);
@@ -55,7 +55,7 @@ export const SearchBox = ({ name, className }: Props) => {
 			await requestDB("history", "deleteHistoryFromList", { id });
 			fetchUserData();
 			animation.endAnimation();
-		} catch (e) {
+		} catch {
 			alert("削除に失敗しました");
 		}
 		animation.endAnimation();
@@ -67,7 +67,7 @@ export const SearchBox = ({ name, className }: Props) => {
 		if (e.key === "Enter") {
 			try {
 				search();
-			} catch (e) {
+			} catch {
 				alert("検索に失敗しました");
 			}
 		}
@@ -117,8 +117,8 @@ export const SearchBox = ({ name, className }: Props) => {
 							if (searchText.trim() == "") return;
 							try {
 								search();
-							} catch (e) {
-								alert("検索に失敗しました");
+							} catch {
+							alert("検索に失敗しました");
 							}
 						}}
 					>

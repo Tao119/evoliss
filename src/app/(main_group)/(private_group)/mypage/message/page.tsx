@@ -123,7 +123,7 @@ const MessagePage = () => {
 							onClick={() => router.push(`/mypage/message/${room.roomKey}`)}
 						>
 							<MessageBox
-								user={otherUser}
+								user={otherUser!}
 								latestMessage={lastMessage?.content}
 								unread={hasUnread}
 							/>

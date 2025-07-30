@@ -27,6 +27,26 @@ const Sidebar = ({ setShowSideBar }: Prop) => {
 	const pathname = usePathname()!;
 	const router = useRouter();
 
+	// ルートのアクティブ判定関数
+	const isActiveRoute = (currentPath: string, targetPath: string) => {
+		// TOPページの場合は完全一致
+		if (targetPath === "/") {
+			return currentPath === "/";
+		}
+
+		// /courses/coach の場合
+		if (targetPath === "/courses/coach") {
+			return currentPath.startsWith("/courses/coach");
+		}
+
+		// /courses の場合（/courses/coach以外）
+		if (targetPath === "/courses") {
+			return currentPath.startsWith("/courses") && !currentPath.startsWith("/courses/coach");
+		}
+
+		return false;
+	};
+
 	const mainRoutes = [
 		{ path: "/", text: "TOP" },
 		{ path: "/courses/coach", text: "コーチから探す" },
@@ -73,11 +93,7 @@ const Sidebar = ({ setShowSideBar }: Prop) => {
 						<div
 							onClick={() => pushRoute(path)}
 							key={path}
-							className={`p-side-bar__list p-side-bar__glitch-btn ${pathname.replace("/", "").split("/")[0] ==
-								`${path.replace("/", "")}`
-								? "-active"
-								: ""
-								}`}
+							className={`p-side-bar__list p-side-bar__glitch-btn ${isActiveRoute(pathname, path) ? "-active" : ""}`}
 						>
 							{text && (
 								<>
@@ -150,15 +166,15 @@ const Sidebar = ({ setShowSideBar }: Prop) => {
 							);
 						})
 					) : (
-					<div className="p-side-bar__login p-side-bar__page-text">
-					<Link href={`/sign-in${pathname ? "?callback=" + pathname : ""}`}>
-					ログイン
-					</Link>
-					{" | "}
-					<Link href={`/sign-up${pathname ? "?callback=" + pathname : ""}`}>
-					新規登録
-					</Link>
-					</div>
+						<div className="p-side-bar__login p-side-bar__page-text">
+							<div onClick={() => pushRoute(`/sign-in${pathname ? "?callback=" + pathname : ""}`)}>
+								ログイン
+							</div>
+							{" | "}
+							<div onClick={() => pushRoute(`/sign-up${pathname ? "?callback=" + pathname : ""}`)}>
+								新規登録
+							</div>
+						</div>
 					)}
 					{userData && (
 						<div

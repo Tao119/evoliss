@@ -3,7 +3,6 @@ import { AnimationContext, UserDataContext } from "@/app/contextProvider";
 import lockIcon from "@/assets/image/key.svg";
 import mailIcon from "@/assets/image/mail.svg";
 import eyeIcon from "@/assets/image/show_input.svg";
-import { BackButton } from "@/components/backbutton";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
 import { requestDB } from "@/services/axios";
@@ -106,8 +105,8 @@ const Page = () => {
 			} else {
 				setErr("ユーザー情報の保存に失敗しました");
 			}
-		} catch (cognitoError: any) {
-			const errorMessage = getCognitoErrorMessage(cognitoError, "signup");
+		} catch (cognitoError) {
+			const errorMessage = getCognitoErrorMessage(cognitoError as Error, "signup");
 			setErr(errorMessage);
 		} finally {
 			setLoading(false);

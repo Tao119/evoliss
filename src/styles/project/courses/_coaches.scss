@@ -28,6 +28,10 @@
         background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
         border-radius: 10px;
         padding: 1px;
+
+        @include mq(sp) {
+            width: 80%;
+        }
     }
 
     &__input-title {
@@ -75,6 +79,11 @@
         gap: 100px;
         padding: 50px;
         justify-content: flex-start;
+
+        @include mq(sp) {
+            width: 100%;
+            padding: 50px 20px;
+        }
     }
 
     &__sort {

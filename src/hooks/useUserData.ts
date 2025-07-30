@@ -12,7 +12,7 @@ export enum UserDataStatus {
 
 export type UserDataContextType = {
 	userData: User | undefined;
-	fetchUserData: () => void;
+	fetchUserData: (forceRefresh?: boolean) => void;
 	userDataStatus: UserDataStatus;
 	setUserDataStatus: Dispatch<SetStateAction<UserDataStatus>>;
 };
@@ -22,11 +22,13 @@ export const useUserData = (): UserDataContextType => {
 	const session = useSession();
 	const [userDataStatus, setUserDataStatus] = useState(UserDataStatus.Loading);
 
-	const fetchUserData = async () => {
+	const fetchUserData = async (forceRefresh: boolean = false) => {
 		try {
-			if (userData) {
+			// forceRefreshが指定された場合、またはuserDataが存在する場合はIDで取得
+			if (userData && (forceRefresh || userData.id)) {
 				const { data: user } = await requestDB("user", "readUserById", {
 					id: userData.id,
+					forceRefresh: forceRefresh // キャッシュを無視するオプション
 				});
 				setUserData(user);
 				setUserDataStatus(UserDataStatus.Authorized);
@@ -37,6 +39,7 @@ export const useUserData = (): UserDataContextType => {
 				}
 				const { data: user } = await requestDB("user", "readUserByEmail", {
 					email: session.data?.user?.email,
+					forceRefresh: forceRefresh // キャッシュを無視するオプション
 				});
 				if (user) {
 					setUserData(user);

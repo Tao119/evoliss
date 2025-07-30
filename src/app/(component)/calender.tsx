@@ -31,7 +31,6 @@ interface CalendarProps {
 const Calendar: React.FC<CalendarProps> = ({
 	schedule,
 	setSchedule,
-	duration,
 	target,
 	chosenSchedule,
 	setChosenSchedule,
@@ -97,7 +96,7 @@ const Calendar: React.FC<CalendarProps> = ({
 			num--;
 		}
 		setSelectedSchedule(timeSlots[num]);
-	}, [selectedDate, timeSlots]);
+	}, [selectedDate, timeSlots, prevSelectIndex]);
 
 	useEffect(() => {
 		if (selectedSchedule != undefined) {
@@ -108,7 +107,7 @@ const Calendar: React.FC<CalendarProps> = ({
 				setPrevSelectIndex(newIndex);
 			}
 		}
-	}, [selectedSchedule]);
+	}, [selectedSchedule, prevSelectIndex, timeSlots]);
 
 	const addToSchedule = () => {
 		if (!setSchedule || !selectedSchedule) return;
@@ -130,14 +129,12 @@ const Calendar: React.FC<CalendarProps> = ({
 	return (
 		<div className={`p-calendar`}>
 			<div
-				className={`p-calendar__upper ${
-					target != CalendarTarget.editor ? "-customer" : ""
-				}`}
+				className={`p-calendar__upper ${target != CalendarTarget.editor ? "-customer" : ""
+					}`}
 			>
 				<div
-					className={`p-calendar__calender ${
-						target != CalendarTarget.editor ? "-customer" : ""
-					}`}
+					className={`p-calendar__calender ${target != CalendarTarget.editor ? "-customer" : ""
+						}`}
 				>
 					<div className="p-calendar__header">
 						<div className="p-calendar__current">
@@ -161,9 +158,8 @@ const Calendar: React.FC<CalendarProps> = ({
 						{["日", "月", "火", "水", "木", "金", "土"].map((day, idx) => (
 							<div
 								key={day}
-								className={`p-calendar__day ${
-									dates[idx] == null ? "-null" : ""
-								}`}
+								className={`p-calendar__day ${dates[idx] == null ? "-null" : ""
+									}`}
 							>
 								{day}
 							</div>
@@ -171,15 +167,12 @@ const Calendar: React.FC<CalendarProps> = ({
 						{dates.map((date, idx) => (
 							<div
 								key={idx}
-								className={`p-calendar__date ${
-									dayjs(selectedDate).isSame(date, "day") ? "-active" : ""
-								} ${
-									date && (idx % 7 == 0 || !dates[idx - 1])
+								className={`p-calendar__date ${dayjs(selectedDate).isSame(date, "day") ? "-active" : ""
+									} ${date && (idx % 7 == 0 || !dates[idx - 1])
 										? "-first-column"
 										: ""
-								} ${date && idx >= 7 && !dates[idx - 7] ? "-first-row" : ""} ${
-									!date ? "-null" : ""
-								}`}
+									} ${date && idx >= 7 && !dates[idx - 7] ? "-first-row" : ""} ${!date ? "-null" : ""
+									}`}
 								onClick={() => date && setSelectedDate(date.toDate())}
 							>
 								{date ? date.date() : ""}
@@ -203,14 +196,12 @@ const Calendar: React.FC<CalendarProps> = ({
 					</div>
 				</div>
 				<div
-					className={`p-calendar__selected-date ${
-						target != CalendarTarget.editor ? "-customer" : ""
-					}`}
+					className={`p-calendar__selected-date ${target != CalendarTarget.editor ? "-customer" : ""
+						}`}
 				>
 					<div
-						className={`p-calendar__selected-current ${
-							target != CalendarTarget.editor ? "-customer" : ""
-						}`}
+						className={`p-calendar__selected-current ${target != CalendarTarget.editor ? "-customer" : ""
+							}`}
 					>
 						<div className="p-calendar__current-year">
 							{dayjs(selectedDate).format("YYYY")}
@@ -220,9 +211,8 @@ const Calendar: React.FC<CalendarProps> = ({
 						</div>
 					</div>
 					<div
-						className={`p-calendar__selected-list ${
-							target != CalendarTarget.editor ? "-customer" : ""
-						}`}
+						className={`p-calendar__selected-list ${target != CalendarTarget.editor ? "-customer" : ""
+							}`}
 					>
 						{schedule
 							.filter((s) =>
@@ -233,31 +223,31 @@ const Calendar: React.FC<CalendarProps> = ({
 							)
 							.map((s, i) => (
 								<div
-									className={`p-calendar__selected-schedule ${
-										target != CalendarTarget.editor ? "-customer" : ""
-									}`}
+									className={`p-calendar__selected-schedule ${target != CalendarTarget.editor ? "-customer" : ""
+										}`}
 									key={i}
 								>
 									<div
-										className={`p-calendar__selected-schedule-schedule ${
-											dayjs(chosenSchedule).isSame(s.startTime, "minutes")
+										className={`p-calendar__selected-schedule-schedule ${dayjs(chosenSchedule).isSame(s.startTime, "minutes")
 												? "-active"
 												: ""
-										}  ${target != CalendarTarget.editor ? "-customer" : ""} ${
-											s.hasReservation
+											}  ${target != CalendarTarget.editor ? "-customer" : ""} ${s.hasReservation
 												? "-disabled"
 												: new Date(s.startTime).getTime() <=
-														new Date().getTime()
+													new Date().getTime()
 													? "-inactive"
 													: ""
-										}`}
+											}`}
 										onClick={() => {
 											if (
 												s.hasReservation ||
 												new Date(s.startTime).getTime() <= new Date().getTime()
-											)
+											) {
 												return;
-											setChosenSchedule && setChosenSchedule(s.startTime);
+											}
+											if (setChosenSchedule) {
+												setChosenSchedule(s.startTime);
+											}
 										}}
 									>
 										・{dayjs(s.startTime).format("H:mm")}~
@@ -284,7 +274,7 @@ const Calendar: React.FC<CalendarProps> = ({
 						options={timeSlots.map((slot) => {
 							return { label: `${dayjs(slot).format("H:mm")}~`, value: slot };
 						})}
-						onChange={(value: any) => {
+						onChange={(value: Date) => {
 							setSelectedSchedule(new Date(value));
 						}}
 					/>

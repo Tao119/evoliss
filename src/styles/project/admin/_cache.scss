@@ -1,0 +1,125 @@
+@use "../../foundation" as *;
+@use "sass:color";
+
+// キャッシュ管理ダッシュボード用のスタイル
+.p-admin-cache {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  &__title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: $black;
+  }
+
+  &__section {
+    background: $white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  &__section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: $black;
+  }
+
+  &__stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__stat-card {
+    background: $light-gray;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+
+    h3 {
+      font-size: 0.875rem;
+      color: $gray;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  &__stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: $black;
+  }
+
+  &__info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid $light-gray;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__info-label {
+    font-weight: 500;
+    color: $gray;
+  }
+
+  &__info-value {
+    font-weight: 600;
+    color: $black;
+  }
+
+  &__warming-info {
+    margin-bottom: 1rem;
+
+    p {
+      margin-bottom: 0.5rem;
+      color: $black;
+    }
+  }
+
+  &__button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &--primary {
+      background-color: $theme;
+      color: $white;
+
+      &:hover:not(:disabled) {
+        background-color: color.adjust($theme, $lightness: -10%);
+      }
+    }
+
+    &--secondary {
+      background-color: $gray;
+      color: $white;
+
+      &:hover:not(:disabled) {
+        background-color: color.adjust($gray, $lightness: -10%);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}

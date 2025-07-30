@@ -13,6 +13,10 @@ import defaultIcon from "@/assets/image/user_icon.svg";
 import { Filter } from "@/components/filter";
 import { Game } from "@/type/models";
 
+import youtubeIcon from "@/assets/image/youtube.svg"
+import xIcon from "@/assets/image/x.svg"
+import noteIcon from "@/assets/image/note.svg"
+
 const ProfilePage = () => {
 	const { userData, fetchUserData } = useContext(UserDataContext)!;
 	const animation = useContext(AnimationContext)!;
@@ -21,6 +25,10 @@ const ProfilePage = () => {
 	const [icon, setIcon] = useState("");
 	const [gameId, setGameId] = useState<number | string>();
 	const iconInputRef = useRef<HTMLInputElement>(null);
+	const [youtubeLink, setYoutubeLink] = useState("");
+	const [xLink, setXLink] = useState("");
+	const [noteLink, setNoteLink] = useState("");
+
 
 	// 一時的なアイコンファイルとプレビューURL
 	const [tempIconFile, setTempIconFile] = useState<File | null>(null);
@@ -35,6 +43,9 @@ const ProfilePage = () => {
 			setName(userData.name || "");
 			setBio(userData.bio || "");
 			setIcon(userData.icon || "");
+			setYoutubeLink(userData.youtube || "");
+			setXLink(userData.x || "");
+			setNoteLink(userData.note || "");
 			setGameId(userData.gameId ?? undefined);
 		}
 		fetchGames()
@@ -71,6 +82,74 @@ const ProfilePage = () => {
 		);
 	}
 
+	// SNS URLのバリデーション関数と正規化
+	const normalizeYoutubeUrl = (input: string): string => {
+		if (!input) return '';
+		// 完全なURLの場合はそのまま返す
+		if (input.startsWith('http://') || input.startsWith('https://')) {
+			return input;
+		}
+		// チャンネルIDや@ハンドルの場合はURLに変換
+		if (input.startsWith('@')) {
+			return `https://youtube.com/${input}`;
+		}
+		// その他のIDの場合はチャンネルURLに変換
+		return `https://youtube.com/channel/${input}`;
+	};
+
+	const validateYoutubeUrl = (url: string): boolean => {
+		if (!url) return true;
+		// URLパターン
+		const urlPattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/(channel\/|c\/|user\/|@)|youtu\.be\/)([\w-]+)/;
+		// チャンネルIDパターン（UC開始の24文字）
+		const channelIdPattern = /^UC[a-zA-Z0-9_-]{22}$/;
+		// @ハンドルパターン
+		const handlePattern = /^@[a-zA-Z0-9_-]+$/;
+		
+		return urlPattern.test(url) || channelIdPattern.test(url) || handlePattern.test(url);
+	};
+
+	const normalizeXUrl = (input: string): string => {
+		if (!input) return '';
+		// 完全なURLの場合はそのまま返す
+		if (input.startsWith('http://') || input.startsWith('https://')) {
+			return input;
+		}
+		// @を除去してURLに変換
+		const username = input.replace(/^@/, '');
+		return `https://x.com/${username}`;
+	};
+
+	const validateXUrl = (input: string): boolean => {
+		if (!input) return true;
+		// URLパターン
+		const urlPattern = /^(https?:\/\/)?(www\.)?(twitter\.com\/|x\.com\/)([a-zA-Z0-9_]{1,15})$/;
+		// ユーザー名パターン
+		const usernamePattern = /^@?[a-zA-Z0-9_]{1,15}$/;
+		
+		return urlPattern.test(input) || usernamePattern.test(input);
+	};
+
+	const normalizeNoteUrl = (input: string): string => {
+		if (!input) return '';
+		// 完全なURLの場合はそのまま返す
+		if (input.startsWith('http://') || input.startsWith('https://')) {
+			return input;
+		}
+		// ユーザー名のみの場合はURLに変換
+		return `https://note.com/${input}`;
+	};
+
+	const validateNoteUrl = (input: string): boolean => {
+		if (!input) return true;
+		// URLパターン
+		const urlPattern = /^(https?:\/\/)?(note\.com\/)([\w-]+)$/;
+		// ユーザー名パターン
+		const usernamePattern = /^[\w-]+$/;
+		
+		return urlPattern.test(input) || usernamePattern.test(input);
+	};
+
 	const handleSave = async () => {
 		if (name.length > 10) {
 			return alert("名前は10文字以内で入力してください")
@@ -78,6 +157,20 @@ const ProfilePage = () => {
 		if (bio.length > 400) {
 			return alert("自己紹介は400文字以内で入力してください")
 		}
+
+		// SNS URLのバリデーション
+		if (youtubeLink && !validateYoutubeUrl(youtubeLink)) {
+			return alert("正しいYouTubeチャンネルURL、チャンネルID、または@ハンドルを入力してください");
+		}
+
+		if (xLink && !validateXUrl(xLink)) {
+			return alert("正しいXのURL、またはユーザー名（@付きも可）を入力してください");
+		}
+
+		if (noteLink && !validateNoteUrl(noteLink)) {
+			return alert("正しいnoteのURL、またはユーザー名を入力してください");
+		}
+
 		animation.startAnimation();
 
 
@@ -96,12 +189,20 @@ const ProfilePage = () => {
 			}
 
 
+			// SNS URLを正規化（完全なURLに変換）
+			const normalizedYoutube = normalizeYoutubeUrl(youtubeLink);
+			const normalizedX = normalizeXUrl(xLink);
+			const normalizedNote = normalizeNoteUrl(noteLink);
+
 			const response = await requestDB("user", "updateUser", {
 				id: userData.id,
 				name,
 				bio,
 				icon: newIconUrl,
-				gameId: parseInt(gameId as string)
+				gameId: parseInt(gameId as string),
+				youtube: normalizedYoutube,
+				x: normalizedX,
+				note: normalizedNote,
 			});
 
 			if (response.success) {
@@ -217,13 +318,36 @@ const ProfilePage = () => {
 				<div className="p-profile__item-input-outline">
 					<Filter className="p-profile__item-input -filter" options={games.map((g) => ({ label: g.name, value: g.id }))} selectedValue={userData.gameId} onChange={(e: any) => setGameId(e)} /></div>
 			</div>
-			{/* <div className="p-profile__buttons"> */}
-			{/* <Button
-					className="p-profile__button p-profile__button--cancel"
-					onClick={handleCancel}
-				>
-					キャンセル
-				</Button> */}
+			<div className="p-profile__item">
+				<div className="p-profile__item-label">SNS連携</div>
+				<div className="p-profile__sns">
+					<ImageBox src={youtubeIcon} className="p-profile__sns-icon" />
+					<InputBox 
+						className="p-profile__sns-input" 
+						placeholder="URL、チャンネルID、または@ハンドル" 
+						value={youtubeLink} 
+						onChange={(e) => setYoutubeLink(e.target.value)} 
+					/>
+				</div>
+				<div className="p-profile__sns">
+					<ImageBox src={xIcon} className="p-profile__sns-icon" />
+					<InputBox 
+						className="p-profile__sns-input" 
+						value={xLink} 
+						placeholder="URL、またはユーザー名（@付きも可）" 
+						onChange={(e) => setXLink(e.target.value)} 
+					/>
+				</div>
+				<div className="p-profile__sns">
+					<ImageBox src={noteIcon} className="p-profile__sns-icon" />
+					<InputBox 
+						className="p-profile__sns-input" 
+						value={noteLink} 
+						placeholder="URL、またはユーザー名" 
+						onChange={(e) => setNoteLink(e.target.value)} 
+					/>
+				</div>
+			</div>
 			<Button
 				className="p-profile__button p-profile__button--save"
 				onClick={handleSave}

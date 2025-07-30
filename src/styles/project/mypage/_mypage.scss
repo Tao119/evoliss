@@ -1,8 +1,7 @@
 @use "../../foundation" as *;
 
 .p-mypage {
-    display: flex;
-    flex-direction: row;
+    @include flex-row;
     align-items: flex-start;
     justify-content: space-between;
     width: 100%;
@@ -10,26 +9,29 @@
     padding: 50px;
     color: $black;
     position: relative;
-
     gap: 30px;
 
     @include mq(sp) {
         flex-direction: column;
+        padding: 16px
     }
 
     &__back {
-        height: 30px;
-        width: 30px;
+        @include icon-size(30px);
         position: absolute;
         top: 20px;
         left: 20px;
         cursor: pointer;
         align-self: flex-start;
+
+        @include mq(sp) {
+            top: -10px;
+            left: 0px;
+        }
     }
 
     &__content {
-        display: flex;
-        flex-direction: column;
+        @include flex-column;
         align-items: center;
         justify-content: flex-start;
         width: calc(100% - 400px);
@@ -38,40 +40,31 @@
         height: auto;
         background-color: $soft-gray;
         position: relative;
-        gap: 30px;
+        gap: 20px;
+
+        &.-none {
+            display: none;
+        }
 
         @include mq(sp) {
             width: 100%;
+            background-color: transparent;
+            padding: 0;
         }
     }
 
     &__game {
-        width: 132px;
-        text-align: center;
-        height: 32px;
-        padding: 10px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        font-weight: $fw-bold;
-        white-space: nowrap;
-        flex-shrink: 0;
-        border: 1px solid $gray;
-        color: $gray;
-        font-size: $fs-small;
-        background-color: $white;
-
+        @include game-badge;
     }
 
     &__section {
+        @include flex-column;
         margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
         width: 100%;
     }
 
     &__subtitle {
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         justify-content: flex-start;
         align-items: flex-start;
         font-size: $fs-input;
@@ -82,7 +75,6 @@
         font-size: $fs-input;
         width: 100%;
         height: auto;
-
         white-space: wrap;
         text-align: start;
     }
@@ -110,36 +102,26 @@
         flex-direction: row;
         align-items: flex-start;
         gap: 10px;
-        width: 100%;
     }
 
     &__tag {
-        background-color: $white;
-        font-size: $fs-small;
-        border: 1px solid $mid-gray;
-        color: $mid-gray;
-        width: auto;
-        height: 36px;
-        padding: 0 30px;
-        max-width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        font-weight: $fw-bold;
-        border-radius: 20px;
+        @include tag-style;
+        & {
+            width: auto;
+            max-width: 100%;
+            justify-content: flex-start;
+            border: 1px solid $mid-gray;
+            color: $mid-gray;
+        }
     }
 
     &__tag-text {
+        @include text-ellipsis;
         max-width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
     }
 
     &__info {
-        display: flex;
-
-        flex-direction: column;
+        @include flex-column;
         width: 400px;
         gap: 10px;
         position: sticky;
@@ -153,10 +135,8 @@
     }
 
     &__info-price {
-        display: flex;
+        @include flex-column;
         border-radius: 10px;
-
-        flex-direction: column;
         align-items: center;
         width: 100%;
         border: 1px solid $white;
@@ -193,24 +173,20 @@
     }
 
     &__coach-upper {
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         height: 90px;
         align-items: center;
     }
 
     &__coach-icon {
-        width: 60px;
-        height: 60px;
+        @include icon-size(60px);
         border-radius: 50%;
         margin-right: 20px;
-        flex-shrink: 0;
     }
 
     &__coach-details {
         width: calc(100% - 80px);
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         align-items: center;
         height: 100%;
         justify-content: space-around;
@@ -220,19 +196,14 @@
         font-size: $fs-medium;
         color: $white;
         width: 100%;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-
+        @include text-ellipsis;
         text-align: start;
     }
 
     &__coach-rating {
         margin-left: auto;
-
         width: 200px;
         color: $white;
-
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -247,45 +218,37 @@
     }
 
     &__coach-tag-icon {
-        width: 24px;
-        height: 24px;
+        @include icon-size(24px);
         margin-right: 6px;
     }
 
     &__coach-games {
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         width: 100%;
         height: 60px;
         padding: 2px;
     }
 
     &__coach-game-list {
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         flex-wrap: wrap;
         width: 100%;
         overflow: hidden;
     }
 
     &__coach-game {
+        @include flex-center;
+        @include text-ellipsis;
         border: 1px solid $white;
         height: 20px;
         width: auto;
         padding: 0 5px;
-        display: flex;
-        align-items: center;
-        justify-items: center;
         margin: 2px;
         max-width: 100px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
     &__coach-bio {
-        display: flex;
-        flex-direction: column;
+        @include flex-column;
         align-items: flex-start;
         justify-content: flex-start;
         padding: 10px;
@@ -302,19 +265,33 @@
         white-space: pre-wrap;
         text-align: start;
     }
+
+    &__courses-list {
+        @include flex-column;
+        gap: 54px;
+        margin-top: 24px;
+    }
+
+    &__pagination {
+        @include flex-center;
+        margin-top: 40px;
+    }
 }
 
 .p-mypage-menu {
     width: 400px;
-    display: flex;
-    flex-direction: column;
+    @include flex-column;
     gap: 30px;
     padding: 30px;
     align-items: center;
 
+    @include mq(sp) {
+        width: 100%;
+        padding: 0;
+    }
+
     &__icon {
-        width: 200px;
-        height: 200px;
+        @include icon-size(200px);
     }
 
     &__name {
@@ -330,36 +307,45 @@
 
     &__menu-outline {
         position: relative;
-        display: flex;
-        flex-direction: column;
+        @include flex-column;
         justify-content: center;
         align-items: center;
         width: 100%;
-        background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
-        border-radius: 10px;
-        padding: 1px;
-        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        @include gradient-border;
+        @include default-shadow;
     }
 
-    &__courses-list {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        margin-top: 24px;
-    }
 
     &__menu {
-        display: flex;
+        @include flex-column;
         justify-content: flex-start;
         align-items: center;
         text-align: start;
-        flex-direction: column;
-        background-color: $soft-gray;
+        @include gradient-border-inner;
         padding: 20px;
-        border-radius: 9px;
-        width: 100%;
-        height: 100%;
         font-size: $fs-text;
+
+        @include mq(sp) {
+            background-color: transparent;
+            @include flex-row;
+            flex-wrap: wrap;
+            row-gap: 16px;
+            padding: 0;
+            justify-content: space-between;
+            height: auto;
+            margin-bottom: 50px;
+        }
+    }
+
+    &__menu-item-outline {
+        position: relative;
+        @include flex-column;
+        justify-content: center;
+        align-items: center;
+        width: 48%;
+        height: 80px;
+        @include gradient-border;
+        @include default-shadow;
     }
 
     &__menu-item {
@@ -374,5 +360,17 @@
             background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
             color: $white
         }
+
+        @include mq(sp) {
+            @include gradient-border-inner;
+            align-items: center;
+            justify-content: center;
+            display: flex
+        }
+    }
+
+    &__pagination {
+        @include flex-center;
+        margin-top: 40px;
     }
 }

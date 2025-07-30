@@ -1,7 +1,7 @@
 "use client";
 
 import { UserDataContext } from "@/app/contextProvider";
-import checkIcon from "@/assets/image/check.svg";
+
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
@@ -17,6 +17,7 @@ import { useContext, useEffect, useState } from "react";
 import { formatMinutesToTime } from "@/services/formatMinutes";
 import dayjs from "dayjs";
 import "dayjs/locale/ja";
+import { useBreakpoint } from "@/hooks/useBreakPoint";
 
 dayjs.locale("ja");
 
@@ -28,7 +29,7 @@ const Page = () => {
 	const reservationId = Number.parseInt(reservationIdStr as string);
 	const [reservationData, setReservationData] = useState<Reservation>();
 	const [courseData, setCourseData] = useState<Course>();
-
+	const { orLower } = useBreakpoint()
 	const [status, setStatus] = useState<
 		"loading" | "success" | "pending" | "invalid"
 	>("loading");
@@ -66,8 +67,8 @@ const Page = () => {
 
 				if (reservation.status === reservationStatus.Confirmed) {
 					// 以前に決済済みの予約
-					setStatus("success");
-					
+					router.push("/mypage/courses/upcoming")
+
 					// コース情報を取得
 					const { data: course } = await requestDB("course", "readCourseById", {
 						id: reservation.courseId,
@@ -82,13 +83,13 @@ const Page = () => {
 					setStatus("success");
 
 					// 予約を確定状態に更新
-					const updateResponse = await requestDB("reservation", "updateReservation", {
+					await requestDB("reservation", "updateReservation", {
 						id: reservationId,
 						status: reservationStatus.Confirmed,
 					});
 
 					// 更新された予約情報を再取得（roomIdが含まれる）
-					const { data: updatedReservation } = await requestDB("reservation", "readReservationById", {
+					await requestDB("reservation", "readReservationById", {
 						id: reservationId,
 					});
 
@@ -151,11 +152,11 @@ const Page = () => {
 									objectFit="cover"
 								/>
 								<div className="p-success__course-game">
-									{courseData?.game.name ?? "登録なし"}
+									{courseData?.game?.name ?? "登録なし"}
 								</div>
 								<div className="p-success__course-title">{courseData?.title}</div>
 								<div className="p-success__course-price">
-									{courseData?.price}円 / {formatMinutesToTime(courseData?.duration!)}
+									{courseData?.price}円 / {courseData?.duration ? formatMinutesToTime(courseData.duration) : '60分'}
 								</div>
 								<div className="p-success__course-tags">
 									{courseData?.tagCourses.slice(0, 3).map((t, i) => (
@@ -175,6 +176,32 @@ const Page = () => {
 									</>
 								)}
 							</div>
+							{!orLower("sp") && <>
+								<div className="p-success__text">詳細はコーチからメッセージが届きます。<br />
+									ご確認の上、講座当日をお待ちください。</div>
+
+								<Button
+									className="p-success__button"
+									onClick={() => {
+										if (reservationData?.room?.roomKey) {
+											router.push(`/mypage/message/${reservationData.room.roomKey}`);
+										} else {
+											// roomKeyがない場合はメッセージ一覧へ
+											router.push("/mypage/message");
+										}
+									}}
+								>
+									メッセージ
+								</Button><Button
+									className="p-success__button"
+									onClick={() => router.push("/mypage")}
+								>
+									マイページ
+								</Button>
+							</>
+							}
+						</div>
+						{orLower("sp") && <>
 							<div className="p-success__text">詳細はコーチからメッセージが届きます。<br />
 								ご確認の上、講座当日をお待ちください。</div>
 
@@ -196,7 +223,8 @@ const Page = () => {
 							>
 								マイページ
 							</Button>
-						</div>
+						</>
+						}
 					</div>
 				);
 			case "invalid":

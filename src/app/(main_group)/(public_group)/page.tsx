@@ -1,20 +1,17 @@
 "use client";
 import { CoachCard } from "@/app/(component)/coachCard";
-import { CourseCard } from "@/app/(component)/courseCard";
-import { GameCard } from "@/app/(component)/gameCard";
 import { SearchArea } from "@/app/(component)/searchArea";
 import {
 	AnimationContext,
 	UserDataContext,
 	useHeader,
 } from "@/app/contextProvider";
-import downIcon from "@/assets/image/arrow_down.svg";
 import chartIcon from "@/assets/image/chart.svg";
 import harunIcon from "@/assets/image/harun_logo.svg";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
-import { InputBox } from "@/components/inputBox";
+import { useBreakpoint } from "@/hooks/useBreakPoint";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { requestDB } from "@/services/axios";
 import type { Course, Game, Tag, User } from "@/type/models";
@@ -43,6 +40,46 @@ const Page = () => {
 		rootMargin: "0px",
 	});
 
+	// 各セクション用のIntersection Observer
+	const { elementRef: loginPanelRef } = useIntersectionObserver({
+		threshold: 0.2,
+		rootMargin: "-50px",
+		onIntersect: () => setVisibleSections(prev => new Set(prev).add('login'))
+	});
+
+	const { elementRef: coachSectionRef } = useIntersectionObserver({
+		threshold: 0.2,
+		rootMargin: "-50px",
+		onIntersect: () => setVisibleSections(prev => new Set(prev).add('coach'))
+	});
+
+	const { elementRef: searchSectionRef } = useIntersectionObserver({
+		threshold: 0.2,
+		rootMargin: "-50px",
+		onIntersect: () => setVisibleSections(prev => new Set(prev).add('search'))
+	});
+
+	const { elementRef: becomeSectionRef } = useIntersectionObserver({
+		threshold: 0.2,
+		rootMargin: "-50px",
+		onIntersect: () => setVisibleSections(prev => new Set(prev).add('become'))
+	});
+
+	const { orLower } = useBreakpoint()
+
+	// アニメーション用のフラグ
+	const [animationReady, setAnimationReady] = useState(false);
+	const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+
+	// ホームページにアクセスした時はisTopPanelVisibleをtrueに設定
+	useEffect(() => {
+		setIsTopPanelVisible(true);
+		return () => {
+			// ホームページから離れる時はfalseに
+			setIsTopPanelVisible(false);
+		};
+	}, [setIsTopPanelVisible]);
+
 	useEffect(() => {
 		setIsTopPanelVisible(isIntersecting);
 	}, [isIntersecting, setIsTopPanelVisible]);
@@ -69,6 +106,10 @@ const Page = () => {
 	useEffect(() => {
 		if (onReady) {
 			animation.endAnimation();
+			// アニメーション開始を少し遅らせる
+			setTimeout(() => {
+				setAnimationReady(true);
+			}, 100);
 		}
 	}, [onReady]);
 
@@ -149,7 +190,7 @@ const Page = () => {
 					playsInline
 					muted
 				/>
-				<div className="p-about__top-panel-phrase-container">
+				{!orLower("sp") && (<><div className="p-about__top-panel-phrase-container animation-hidden animate-fade-in-up">
 					<div className="p-about__top-panel-phrase">
 						もっと強くなりたい人と、
 					</div>
@@ -158,7 +199,27 @@ const Page = () => {
 					</div>
 				</div>
 
-				<div className="p-about__top-panel-support-container">
+					<div className="p-about__top-panel-support-container animation-hidden animate-fade-in animate-delay-300">
+						<div className="p-about__top-panel-support">
+							supported by はるnチャンネル
+						</div>
+						<ImageBox
+							className="p-about__top-panel-support-logo"
+							src={harunIcon}
+						/>
+					</div></>)}
+			</div>
+			{orLower("sp") && (<>
+				<div className="p-about__top-panel-phrase-container animation-hidden animate-fade-in-up">
+					<div className="p-about__top-panel-phrase">
+						もっと強くなりたい人と、
+					</div>
+					<div className="p-about__top-panel-phrase">
+						そのサポートをしたい人を繋ぐ。
+					</div>
+				</div>
+
+				<div className="p-about__top-panel-support-container animation-hidden animate-fade-in animate-delay-300">
 					<div className="p-about__top-panel-support">
 						supported by はるnチャンネル
 					</div>
@@ -166,12 +227,10 @@ const Page = () => {
 						className="p-about__top-panel-support-logo"
 						src={harunIcon}
 					/>
-				</div>
-			</div>
-
+				</div></>)}
 			<div className="p-about__content">
 				{!userData && (
-					<div className="p-about__login-panel">
+					<div ref={loginPanelRef} className={`p-about__login-panel animation-hidden ${visibleSections.has('login') ? 'animate-scale-in' : ''}`}>
 						<div className="p-about__login-panel-title">
 							まずは会員登録から！
 						</div>
@@ -187,7 +246,7 @@ const Page = () => {
 					</div>
 				)}
 
-				<div className="p-about__panel">
+				<div ref={coachSectionRef} className={`p-about__panel animation-hidden ${visibleSections.has('coach') ? 'animate-fade-in-up' : ''}`}>
 					<div className="p-about__section-title">コーチから選ぶ</div>
 					<Border />
 					<div className="p-about__section-sub-title">
@@ -207,7 +266,7 @@ const Page = () => {
 					</Button>
 				</div>
 
-				<div className="p-about__panel">
+				<div ref={searchSectionRef} className={`p-about__panel animation-hidden ${visibleSections.has('search') ? 'animate-fade-in-up' : ''}`}>
 					<div className="p-about__section-title">講座を検索する</div>
 					<Border />
 					<SearchArea
@@ -234,7 +293,7 @@ const Page = () => {
 					</Button>
 				</div>
 
-				<div className="p-about__panel">
+				<div ref={becomeSectionRef} className={`p-about__panel animation-hidden ${visibleSections.has('become') ? 'animate-fade-in-up' : ''}`}>
 					<div className="p-about__section-title">コーチになりたい</div>
 					<Border />
 					{userData ? (

@@ -170,7 +170,7 @@ const MessageRoomPage = () => {
 				roomKey,
 				userId: userData.id
 			});
-			
+
 			// 既読処理が成功したらSocketで通知
 			if (response && response.success && socket) {
 				socket.emit("markAsRead", {
@@ -335,12 +335,12 @@ const MessageRoomPage = () => {
 							<div className="p-message__message-user">
 								<ImageBox
 									className="p-message__message-icon"
-									src={msg.sender.icon || defaultIcon}
+									src={msg.sender?.icon || defaultIcon}
 									round
 									objectFit="cover"
 								/>
 								<div className="p-message__message-name">
-									{msg.sender.name}
+									{msg.sender?.name}
 								</div>
 							</div>
 							{msg.content}

@@ -1,9 +1,8 @@
 "use client";
-import { AnimationContext, UserDataContext } from "@/app/contextProvider";
+import { AnimationContext } from "@/app/contextProvider";
 import closeImage from "@/assets/image/cross.svg";
 import defaultIcon from "@/assets/image/user_icon.svg";
 import { Button } from "@/components/button";
-import { Filter } from "@/components/filter";
 import { IconButton } from "@/components/iconButton";
 import { ImageBox } from "@/components/imageBox";
 import { InputBox } from "@/components/inputBox";
@@ -13,8 +12,8 @@ import UserIcon from "@/components/userIcon";
 import { requestDB } from "@/services/axios";
 import { RefundStatus, type User } from "@/type/models";
 import dayjs from "dayjs";
-import { useParams, usePathname } from "next/navigation";
-import { useContext, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useContext, useEffect, useState, useCallback } from "react";
 const AccountTypeString = ["普通預金", "当座預金"];
 
 const StatusText: { [status: number]: string } = {
@@ -24,7 +23,7 @@ const StatusText: { [status: number]: string } = {
 };
 
 const Page = () => {
-	const path = usePathname();
+	const _path = usePathname();
 	const [showDetail, setShowDetail] = useState<number>();
 	const [showRefund, setShowRefund] = useState<number>();
 	const [amount, setAmount] = useState(0);
@@ -39,11 +38,7 @@ const Page = () => {
 		{ label: "キャンセル申請", value: 1 },
 	];
 
-	useEffect(() => {
-		fetchData();
-	}, []);
-
-	const fetchData = async () => {
+	const fetchData = useCallback(async () => {
 		animation.startAnimation();
 		requestDB("user", "readUsers").then((response) => {
 			if (response.success) {
@@ -51,7 +46,11 @@ const Page = () => {
 			}
 			animation.endAnimation();
 		});
-	};
+	}, [animation]);
+
+	useEffect(() => {
+		fetchData();
+	}, [fetchData]);
 
 	const handleSubmit = async () => {
 		if (amount == 0 || !showDetail) {
@@ -63,7 +62,7 @@ const Page = () => {
 			Math.floor(
 				data.courses
 					.flatMap((course) =>
-						course.reservations.map((reservation) => course.price),
+						course.reservations.map(() => course.price),
 					)
 					.reduce((sum, price) => sum + price, 0) * 0.9,
 			) -
@@ -162,7 +161,7 @@ const Page = () => {
 								59,
 								59,
 							);
-							const isAfter20th = now > thisMonth20End;
+							// const isAfter20th = now > thisMonth20End;
 
 							const start = new Date(
 								now.getFullYear(),
@@ -207,7 +206,7 @@ const Page = () => {
 											59,
 											59,
 										);
-										const isAfter20th = now > thisMonth20End;
+										// const isAfter20th = now > thisMonth20End;
 
 										const start = new Date(
 											now.getFullYear(),
@@ -296,9 +295,9 @@ const Page = () => {
 											累計売上金額:
 											{data.courses
 												.flatMap((course) =>
-													course.reservations.map(
-														(reservation) => course.price,
-													),
+												course.reservations.map(
+												() => course.price,
+												),
 												)
 												.reduce((sum, price) => sum + price, 0)}
 											円(
@@ -306,7 +305,7 @@ const Page = () => {
 												data.courses
 													.flatMap((course) =>
 														course.reservations.map(
-															(reservation) => course.price,
+														() => course.price,
 														),
 													)
 													.reduce((sum, price) => sum + price, 0) * 0.9,
@@ -327,7 +326,7 @@ const Page = () => {
 												data.courses
 													.flatMap((course) =>
 														course.reservations.map(
-															(reservation) => course.price,
+														() => course.price,
 														),
 													)
 													.reduce((sum, price) => sum + price, 0) * 0.9,
@@ -470,15 +469,18 @@ const Page = () => {
 					</div>
 					{users
 						.flatMap((user) =>
-							user.refunds
-								.filter(
-									(refund) =>
-										refund.status === RefundStatus.Created || !refundFilter,
-								)
-								.map((refund) => ({
-									...refund,
-									user,
-								})),
+							user.reservations
+								.flatMap((reservation) => 
+									reservation.refunds
+										.filter(
+											(refund) =>
+												refund.status === RefundStatus.Created || !refundFilter,
+										)
+										.map((refund) => ({
+											...refund,
+											user,
+										})),
+								),
 						)
 						.sort(
 							(a, b) =>
@@ -514,10 +516,14 @@ const Page = () => {
 						if (showRefund) {
 							const data = users
 								.flatMap((user) =>
-									user.refunds.map((refund) => ({
-										...refund,
-										user,
-									})),
+									user.reservations
+										.flatMap((reservation) => 
+											reservation.refunds.map((refund) => ({
+												...refund,
+												user,
+												reservation,
+											})),
+										),
 								)
 								.find((r) => r.id == showRefund);
 							if (!data) return;

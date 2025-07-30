@@ -10,9 +10,11 @@ export interface User {
 	updatedAt: Date;
 	gameId?: number;
 	isInitialized: boolean;
+	youtube: string | null;
+	x: string | null;
+	note: string | null;
 
 	sentMessages: Message[];
-	receivedMessages: Message[];
 	courses: Course[];
 	reservations: Reservation[];
 	payments: Payment[];
@@ -20,10 +22,11 @@ export interface User {
 	searchHistories: SearchHistory[];
 	coachMessageRooms: MessageRoom[];
 	customerMessageRooms: MessageRoom[];
-	refunds: Refund[];
-	paymentAccount: PaymentAccount;
+	paymentAccount?: PaymentAccount;
 	userPayment: UserPayment[];
+	reviews: Review[];
 	timeSlots: TimeSlot[];
+	accesses: CourseAccess[];
 }
 export interface PaymentAccount {
 	id: number;
@@ -61,24 +64,24 @@ export interface Course {
 	coachId: number;
 	createdAt: Date;
 	updatedAt: Date;
-	gameId: number;
+	gameId: number | null;
 	duration: number;
 	isPublic: boolean;
 	tagCourses: TagCourse[];
 
 	coach: User;
-	game: Game;
+	game?: Game;
 	reservations: Reservation[];
 	reviews: Review[];
-	courseAccesses: CourseAccess[];
+	accesses: CourseAccess[];
 }
 
 export interface CourseAccess {
 	id: number;
 	courseId: number;
 	course: Course;
-	userId: number;
-	user: User;
+	userId: number | null;
+	user?: User;
 	createdAt: Date;
 }
 
@@ -89,10 +92,10 @@ export interface TimeSlot {
 	dateTime: string;
 	createdAt: Date;
 	updatedAt: Date;
-	reservationId: number;
+	reservationId: number | null;
 
 	coach: User;
-	reservation: Reservation;
+	reservation?: Reservation;
 }
 
 // Reservation型
@@ -103,14 +106,16 @@ export interface Reservation {
 	createdAt: Date;
 	updatedAt: Date;
 	status: reservationStatus;
+	courseTime: string | null; // YYYY/MM/dd HH:mm~HH:mm形式
 
 	customer: User;
 	timeSlots: TimeSlot[];
 	course: Course;
 	refunds: Refund[];
-	payment: Payment;
-	roomId: number;
-	room: MessageRoom
+	payment?: Payment;
+	review?: Review;
+	roomId: number | null;
+	room?: MessageRoom;
 }
 
 export enum RefundStatus {
@@ -120,33 +125,30 @@ export enum RefundStatus {
 }
 export interface Refund {
 	id: number;
-	customerId: number;
-	customer: User;
-	reservationId: number;
-	reservation: Reservation;
-	status: RefundStatus;
+	reservationId: number | null;
+	reservation?: Reservation;
+	status: number;
 	text: string;
 	createdAt: Date;
-	updatedAt: Date;
 }
 
 export interface MessageRoom {
 	id: number;
 	roomKey: string;
-	coachId: number;
-	coach: User;
+	coachId: number | null;
+	coach?: User;
 	customerId: number;
 	customer: User;
 	messages: Message[];
-	reservations: Reservation[]
+	reservations: Reservation[];
 }
 
 export interface Message {
 	id: number;
 	roomId: number;
 	room: MessageRoom;
-	senderId: number;
-	sender: User;
+	senderId: number | null;
+	sender?: User;
 	content: string;
 	isRead: boolean;
 	sentAt: Date;
@@ -174,9 +176,11 @@ export enum reservationStatus {
 	Reviewed = 4,
 	Canceled = 5,
 	Expired = 6,
+	CanceledByCoach = 7,
+	CancelRequestedByCoach = 8,
 }
 
-// CourseReview型
+// Review型
 export interface Review {
 	id: number;
 	customerId: number;
@@ -184,9 +188,11 @@ export interface Review {
 	rating: number;
 	comment: string | null;
 	createdAt: Date;
+	reservationId: number;
 
 	customer: User;
 	course: Course;
+	reservation: Reservation;
 }
 
 // SearchHistory型
@@ -216,7 +222,7 @@ export interface Tag {
 	name: string;
 	createdAt: Date;
 
-	courseTags: TagCourse[];
+	tagCourses: TagCourse[];
 }
 
 export interface TagCourse {
@@ -226,4 +232,21 @@ export interface TagCourse {
 
 	course: Course;
 	tag: Tag;
+}
+
+// Contact型
+export interface Contact {
+	id: number;
+	name: string;
+	email: string;
+	message: string;
+	status: ContactStatus;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export enum ContactStatus {
+	Pending = 0,    // 未対応
+	InProgress = 1, // 対応中
+	Resolved = 2,   // 対応済み
 }

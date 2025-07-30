@@ -22,11 +22,6 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 30px;
-
-    @include mq(sp) {
-      flex-direction: column;
-      height: auto;
-    }
   }
 
   &__top-panel-background {
@@ -51,6 +46,15 @@
     // padding: 0 30px;
     align-items: flex-start;
     justify-content: flex-start;
+
+    @include mq(sp) {
+      margin-top: 0;
+      margin-left: 0;
+      align-items: flex-start;
+      justify-content: center;
+      color: $black;
+      margin-bottom: 20px;
+    }
   }
 
   &__top-panel-support-container {
@@ -64,6 +68,14 @@
     align-items: center;
     justify-content: flex-start;
     gap: 10px;
+
+    @include mq(sp) {
+      margin-top: 0;
+      margin-left: 0;
+      align-items: center;
+      justify-content: center;
+      color: $black;
+    }
   }
 
   &__top-panel-support-logo {
@@ -94,6 +106,10 @@
     align-items: center;
     justify-content: space-between;
     padding: 30px;
+
+    @include mq(sp) {
+      width: 100%;
+    }
   }
 
   &__login-panel-title {
@@ -104,11 +120,19 @@
   &__login-panel-text {
     font-size: $fs-text;
     font-weight: $fw-bold;
+
+    @include mq(sp) {
+      font-size: $fs-smaller;
+    }
   }
 
   &__login-panel-button {
     font-size: $fs-medium;
     width: 300px;
+
+    @include mq(sp) {
+      width: 80%;
+    }
   }
 
   &__section-title {

@@ -17,10 +17,14 @@
         box-shadow: 6px 6px 0 0 $purple;
 
         @include mq(sp) {
-            width: 45%;
-            height: auto;
+            width: 150px;
+            height: 150px;
             padding: 10px;
             gap: 10px;
+
+            &.-big {
+                width: 100%;
+            }
         }
     }
 
@@ -41,6 +45,13 @@
             top: -50px;
             left: -10px;
         }
+
+        @include mq(sp) {
+            width: 60px !important;
+            height: 60px !important;
+            top: -40px;
+            left: 0px;
+        }
     }
 
     &__bio {
@@ -55,6 +66,13 @@
         margin: 0 0 10px 0;
         white-space: pre-wrap;
         text-align: start;
+
+        @include mq(sp) {
+            width: 100%;
+            height: 100%;
+            padding: 20px 10px;
+            font-size: $fs-text;
+        }
     }
 
     &__more {
@@ -81,6 +99,16 @@
         justify-content: center;
         align-items: flex-start;
         height: 100px;
+
+        @include mq(sp) {
+            position: absolute;
+            height: 32px;
+            top: -40px;
+            font-size: $fs-text;
+            font-weight: 100;
+            left: 70px;
+            margin-left: 0;
+        }
     }
 
     &__game {

@@ -1,0 +1,31 @@
+@use "../foundation" as *;
+@use "sass:map";
+
+
+
+.u-al-ce {
+    display: flex;
+    align-items: center;
+}
+
+.u-al-st {
+    display: flex;
+    align-items: flex-start;
+}
+
+.u-al-ed {
+    display: flex;
+    align-items: flex-end;
+}
+
+.u-tx-ce {
+    text-align: center;
+}
+
+.u-tx-st {
+    text-align: flex-start;
+}
+
+.u-tx-ed {
+    text-align: flex-end;
+}

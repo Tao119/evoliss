@@ -6,14 +6,14 @@ import { requestDB } from "@/services/axios";
 import type { Course } from "@/type/models";
 import dayjs from "dayjs";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 
 const Page = () => {
-	const { userData, fetchUserData } = useContext(UserDataContext)!;
+	const { userData } = useContext(UserDataContext)!;
 	const [courseData, setCourseData] = useState<Course>();
 	const animation = useContext(AnimationContext)!;
 	const router = useRouter();
-	const { gameId, courseId } = useParams()!;
+	const { courseId } = useParams()!;
 	const searchParams = useSearchParams()!;
 
 	const dateTimeParam = searchParams.get("dateTime"); // "YYYY-MM-DD HH:mm" format
@@ -24,16 +24,34 @@ const Page = () => {
 
 	const onReady = userData && courseData && dateTimeParam && duration;
 
+	const fetchCourse = useCallback(async () => {
+		try {
+			const response = await requestDB("course", "readCourseById", {
+				id: courseIdNumber,
+			});
+			if (response.success) {
+				setCourseData(response.data);
+			} else {
+				animation.endAnimation();
+				alert("コース情報の取得中にエラーが発生しました");
+			}
+		} catch (error) {
+			console.error("Error fetching courses:", error);
+			animation.endAnimation();
+			alert("コース情報の取得中にエラーが発生しました");
+		}
+	}, [courseIdNumber, animation]);
+
 	useEffect(() => {
 		fetchCourse();
 		animation.startAnimation();
-	}, []);
+	}, [animation, fetchCourse]);
 
 	useEffect(() => {
 		if (onReady) {
 			animation.endAnimation();
 		}
-	}, [onReady]);
+	}, [onReady, animation]);
 
 	useEffect(() => {
 		if (onReady) {
@@ -68,25 +86,7 @@ const Page = () => {
 				return;
 			}
 		}
-	}, [onReady, dateTimeParam, duration]);
-
-	const fetchCourse = async () => {
-		try {
-			const response = await requestDB("course", "readCourseById", {
-				id: courseIdNumber,
-			});
-			if (response.success) {
-				setCourseData(response.data);
-			} else {
-				animation.endAnimation();
-				alert("コース情報の取得中にエラーが発生しました");
-			}
-		} catch (error) {
-			console.error("Error fetching courses:", error);
-			animation.endAnimation();
-			alert("コース情報の取得中にエラーが発生しました");
-		}
-	};
+	}, [onReady, dateTimeParam, duration, courseData?.coach.timeSlots, courseId, router]);
 
 	if (!onReady) {
 		return <div></div>;
@@ -143,7 +143,7 @@ const Page = () => {
 						講師: {courseData.coach.name}
 					</div>
 					<div className="p-courses-purchase__info-game">
-						ゲーム: {courseData.game.name}
+						ゲーム: {courseData.game?.name}
 					</div>
 				</div>
 				<div className="p-courses-purchase__details">

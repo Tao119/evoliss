@@ -41,11 +41,33 @@ const Page = () => {
 		if (onReady) {
 			animation.endAnimation();
 		}
-	}, [onReady]);
+	}, [onReady, animation]);
 
 	if (!onReady) {
 		return <div className="p-sign-in l-page"></div>;
 	}
+
+	// SNS URLのバリデーション関数
+	const validateYoutubeUrl = (url: string): boolean => {
+		if (!url) return true; // 空の場合はOK
+		const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(channel\/|c\/|user\/|@)|youtu\.be\/)([\w-]+)/;
+		const channelIdRegex = /^[\w-]+$/;
+		return youtubeRegex.test(url) || channelIdRegex.test(url);
+	};
+
+	const validateXUrl = (username: string): boolean => {
+		if (!username) return true; // 空の場合はOK
+		// @を除去してからバリデーション
+		const cleanUsername = username.replace(/^@/, '');
+		const usernameRegex = /^[a-zA-Z0-9_]{1,15}$/;
+		return usernameRegex.test(cleanUsername);
+	};
+
+	const validateNoteUrl = (url: string): boolean => {
+		if (!url) return true; // 空の場合はOK
+		const noteRegex = /^(https?:\/\/)?(note\.com\/)[\w-]+$/;
+		return noteRegex.test(url);
+	};
 
 	const handleInitialize = async () => {
 		if (!name.trim() || !bio.trim()) {
@@ -63,13 +85,38 @@ const Page = () => {
 			return;
 		}
 
+		// SNS URLのバリデーション
+		if (youtubeUrl && !validateYoutubeUrl(youtubeUrl)) {
+			setErr("正しいYouTubeチャンネルURLまたはIDを入力してください");
+			return;
+		}
+
+		if (xUrl && !validateXUrl(xUrl)) {
+			setErr("Xのユーザー名は英数字とアンダースコアのみ、最大15文字までです");
+			return;
+		}
+
+		if (noteUrl && !validateNoteUrl(noteUrl)) {
+			setErr("正しいnoteのプロフィールURLを入力してください");
+			return;
+		}
+
 		setLoading(true);
 		setErr("");
 
 		try {
 			animation.startAnimation();
 
-			const updateData: any = {
+			const updateData: {
+				id: number;
+				name: string;
+				bio: string;
+				isInitialized: boolean;
+				icon?: string;
+				youtubeUrl?: string;
+				xUrl?: string;
+				noteUrl?: string;
+			} = {
 				id: userData.id,
 				name: name.trim(),
 				bio: bio.trim(),
@@ -80,15 +127,18 @@ const Page = () => {
 				updateData.icon = icon;
 			}
 
-			//   if (youtubeUrl.trim()) {
-			//     updateData.youtubeUrl = youtubeUrl.trim();
-			//   }
-			//   if (xUrl.trim()) {
-			//     updateData.xUrl = xUrl.trim();
-			//   }
-			//   if (noteUrl.trim()) {
-			//     updateData.noteUrl = noteUrl.trim();
-			//   }
+			// SNS情報を追加（現在のスキーマにない場合はコメントアウトのまま）
+			// if (youtubeUrl.trim()) {
+			//   // @を除去して保存
+			//   updateData.youtubeUrl = youtubeUrl.trim();
+			// }
+			// if (xUrl.trim()) {
+			//   // @を除去して保存
+			//   updateData.xUrl = xUrl.trim().replace(/^@/, '');
+			// }
+			// if (noteUrl.trim()) {
+			//   updateData.noteUrl = noteUrl.trim();
+			// }
 
 			const { success } = await requestDB("user", "initializeUser", updateData);
 
@@ -99,7 +149,7 @@ const Page = () => {
 			} else {
 				setErr("ユーザー情報の保存に失敗しました");
 			}
-		} catch (error: any) {
+		} catch (error) {
 			console.error("Initialize user error:", error);
 			setErr("初期設定中にエラーが発生しました");
 		} finally {
@@ -116,9 +166,8 @@ const Page = () => {
 
 		try {
 			animation.startAnimation();
-			const fileName = `${userData.id}/icon/${Date.now()}.${
-				file.type.split("/")[1]
-			}`;
+			const fileName = `${userData.id}/icon/${Date.now()}.${file.type.split("/")[1]
+				}`;
 			const fileBase64 = await fileToBase64(file);
 
 			const response = await Axios.post("/api/s3/upload", {
@@ -152,7 +201,7 @@ const Page = () => {
 
 	return (
 		<div className="p-sign-in l-page">
-			<span className="p-sign-in__title">新規会員登録</span>
+			<span className="p-sign-in__title">会員情報入力</span>
 			<span className="p-sign-in__err">{err}</span>
 
 			<div className="p-sign-in__icon-container">
@@ -212,29 +261,45 @@ const Page = () => {
 			</div>
 
 			<div className="p-sign-in__form-group u-mb48">
-				<label className="p-sign-in__label u-mb24">SNS連携</label>
+				<label className="p-sign-in__label u-mb24">SNS連携（任意）</label>
 
 				<div className="p-sign-in__sns-item">
 					<ImageBox className="p-sign-in__sns-icon" src={youtubeIcon} />
-					<Button className="p-sign-in__sns-input">{"未連携"}</Button>
+					<input
+						className="p-sign-in__sns-input"
+						type="text"
+						value={youtubeUrl}
+						onChange={(e) => setYoutubeUrl(e.target.value)}
+						placeholder="YouTubeチャンネルURLまたはID"
+					/>
 				</div>
 
 				<div className="p-sign-in__sns-item">
 					<ImageBox className="p-sign-in__sns-icon" src={xIcon} />
-
-					<Button className="p-sign-in__sns-input">{"未連携"}</Button>
+					<input
+						className="p-sign-in__sns-input"
+						type="text"
+						value={xUrl}
+						onChange={(e) => setXUrl(e.target.value)}
+						placeholder="X（旧Twitter）のユーザー名（@なし）"
+					/>
 				</div>
 
 				<div className="p-sign-in__sns-item">
 					<ImageBox className="p-sign-in__sns-icon" src={noteIcon} />
-					<Button className="p-sign-in__sns-input">{"未連携"}</Button>
+					<input
+						className="p-sign-in__sns-input"
+						type="text"
+						value={noteUrl}
+						onChange={(e) => setNoteUrl(e.target.value)}
+						placeholder="noteのプロフィールURL"
+					/>
 				</div>
 			</div>
 
 			<Button
-				className={`p-sign-in__submit ${
-					!name.trim() || !bio.trim() || loading ? "-disabled" : ""
-				}`}
+				className={`p-sign-in__submit ${!name.trim() || !bio.trim() || loading ? "-disabled" : ""
+					}`}
 				disabled={!name.trim() || !bio.trim() || loading}
 				onClick={handleInitialize}
 			>

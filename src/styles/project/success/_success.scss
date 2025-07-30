@@ -12,6 +12,13 @@
     width: 860px;
     color: $black;
 
+    @include mq(sp) {
+        width: 100%;
+        padding: 20px;
+        justify-content: center;
+        gap: 30px;
+    }
+
 
     &__title {
         height: 30px;
@@ -41,6 +48,10 @@
 
         gap: 50px;
 
+        @include mq(sp) {
+            padding: 20px;
+        }
+
     }
 
     &__course-description {
@@ -62,6 +73,10 @@
         height: auto;
 
         gap: 20px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
     &__course-image {
@@ -141,12 +156,37 @@
 
         font-size: $fs-medium;
         font-weight: $fw-bold;
+
+        @include mq(sp) {
+            width: 100%;
+        }
     }
 
     &__text {
-        font-size: $fs-input;
+        font-size: $fs-text;
         font-weight: $fw-bold;
         align-self: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    &__status {
+        @include button-base;
+        background-color: $white;
+        font-size: $fs-small;
+        color: $black;
+        border-radius: 5px;
+        height: 30px;
+        padding: 0 30px;
+        max-width: 100%;
+        width: 180px;
+        justify-content: center;
+
+        background-color: $black;
+        color: $white;
+
     }
 
     &__course-price {

@@ -1,0 +1,225 @@
+@use "../../foundation" as *;
+
+.p-create {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    &__section {
+        margin-bottom: 40px;
+        width: 100%;
+
+        @include mq(sp) {
+            margin-bottom: 30px;
+        }
+    }
+
+    &__label {
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+        color: $black;
+        margin-bottom: 10px;
+        display: block;
+        text-align: start;
+    }
+
+    // 画像アップロード
+    &__image-container {
+        position: relative;
+        width: 400px;
+        max-width: 400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        @include mq(sp) {
+            width: 60%;
+        }
+    }
+
+
+    &__image,
+    &__image-placeholder {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 10px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    &__image-placeholder {
+        width: 100%;
+        background-color: $white;
+        // border: 2px dashed $gray;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: rgba($gray, 0.1);
+            border-color: $dark-gray;
+        }
+
+
+
+    }
+
+    &__camera-icon {
+        width: 40px;
+        height: 40px;
+        opacity: 0.5;
+    }
+
+    &__camera-icon-outer {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        bottom: 0;
+        right: -30px;
+    }
+
+    &__image-input {
+        display: none;
+    }
+
+    &__input-wrapper {
+        @include gradient-border;
+        background-color: $white;
+        position: relative;
+        width: 80%;
+
+        &.-textarea {
+            height: auto;
+            width: 100%;
+        }
+    }
+
+    &__input,
+    &__textarea,
+    &__filter {
+        @include gradient-border-inner;
+        width: 100%;
+        padding: 12px 16px;
+        font-size: $fs-text;
+        border: none;
+        outline: none;
+        color: $black;
+        height: 50px;
+
+        &::placeholder {
+            color: $gray;
+        }
+    }
+
+    &__textarea {
+        resize: none;
+        line-height: 1.6;
+        height: auto;
+    }
+
+    &__helper {
+        font-size: $fs-small;
+        color: $dark-gray;
+        margin-top: 5px;
+        text-align: right;
+    }
+
+    &__duration-options {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    &__duration-option {
+        padding: 10px 20px;
+        border: 1px solid $gray;
+        border-radius: 20px;
+        background-color: $white;
+        color: $black;
+        font-size: $fs-text;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: $soft-gray;
+        }
+
+        &.-active {
+            background-color: $black;
+            color: $white;
+            border-color: $black;
+        }
+    }
+
+    // タグ選択
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    &__tag {
+        padding: 8px 16px;
+        border: 1px solid $gray;
+        border-radius: 20px;
+        background-color: $white;
+        color: $gray;
+        font-size: $fs-small;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: $soft-gray;
+        }
+
+        &.-selected {
+            background-color: $theme;
+            color: $white;
+            border-color: $theme;
+        }
+    }
+
+    &__buttons {
+        display: flex;
+        margin-top: 60px;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        align-items: center;
+
+        @include mq(sp) {
+            margin-top: 40px;
+        }
+    }
+
+
+
+    &__submit {
+        min-width: 200px;
+        height: 50px;
+        font-size: $fs-text;
+        font-weight: $fw-bold;
+        background-color: $black;
+        color: $white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        align-self: center;
+
+        text-align: center;
+
+
+        &:hover {
+            opacity: 0.8;
+        }
+
+
+    }
+}

@@ -14,6 +14,12 @@ import dayjs from "dayjs";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useContext, useEffect, useRef, useState } from "react";
 
+import youtubeIcon from "@/assets/image/youtube.svg";
+import xIcon from "@/assets/image/x.svg";
+import noteIcon from "@/assets/image/note.svg";
+import Link from "next/link";
+import { BackButton } from "@/components/backbutton";
+
 const Page = () => {
 	const { userData, fetchUserData } = useContext(UserDataContext)!;
 	const [courseData, setCourseData] = useState<Course>();
@@ -40,7 +46,6 @@ const Page = () => {
 	}, [courseData]);
 
 	useEffect(() => {
-		console.log(courseData)
 		if (onReady) {
 			animation.endAnimation();
 			// requestDB("access", "createAccess", {
@@ -67,6 +72,13 @@ const Page = () => {
 				id: courseIdNumber,
 			});
 			if (response.success) {
+				// 非公開チェック
+				if (!response.data.isPublic) {
+					animation.endAnimation();
+					alert("非公開の講座です");
+					router.push("/courses");
+					return;
+				}
 				setCourseData(response.data);
 			} else {
 				animation.endAnimation();
@@ -110,25 +122,25 @@ const Page = () => {
 
 	const averageRating: number =
 		coach.courses &&
-		coach.courses.length > 0 &&
-		coach.courses.reduce(
-			(totalCount, course) =>
-				totalCount + (course.reviews ? course.reviews.length : 0),
-			0,
-		) != 0
+			coach.courses.length > 0 &&
+			coach.courses.reduce(
+				(totalCount, course) =>
+					totalCount + (course.reviews ? course.reviews.length : 0),
+				0,
+			) != 0
 			? coach.courses.reduce(
-					(totalScore, course) =>
-						totalScore +
-						(course.reviews
-							? course.reviews.reduce((sum, review) => sum + review.rating, 0)
-							: 0),
-					0,
-				) /
-				coach.courses.reduce(
-					(totalCount, course) =>
-						totalCount + (course.reviews ? course.reviews.length : 0),
-					0,
-				)
+				(totalScore, course) =>
+					totalScore +
+					(course.reviews
+						? course.reviews.reduce((sum, review) => sum + review.rating, 0)
+						: 0),
+				0,
+			) /
+			coach.courses.reduce(
+				(totalCount, course) =>
+					totalCount + (course.reviews ? course.reviews.length : 0),
+				0,
+			)
 			: 0;
 
 	const reviewNum = coach.courses.reduce(
@@ -142,7 +154,7 @@ const Page = () => {
 	}
 
 	const handlePurchase = async () => {
-		if (!chosenSchedule  ) {
+		if (!chosenSchedule) {
 			return;
 		}
 
@@ -219,6 +231,10 @@ const Page = () => {
 
 	return (
 		<div className="p-courses l-page">
+			<BackButton className="p-courses__back" back={() => {
+				router.back();
+				router.push("/courses");
+			}} />
 			{/* <div className="p-courses__navigation">
         <div
           className="p-courses__navigation-item -navi"
@@ -259,7 +275,35 @@ const Page = () => {
 							/>
 							({reviewNum}件)
 						</div>
-						<div className="p-courses__coach-sns"></div>
+						<div className="p-courses__coach-sns">
+							{coach.youtube && (
+								<Link href={coach.youtube} target="_blank" rel="noopener noreferrer">
+									<ImageBox
+										className="p-courses__coach-sns-icon"
+										src={youtubeIcon}
+										alt="YouTube"
+									/>
+								</Link>
+							)}
+							{coach.x && (
+								<Link href={coach.x} target="_blank" rel="noopener noreferrer">
+									<ImageBox
+										className="p-courses__coach-sns-icon"
+										src={xIcon}
+										alt="X"
+									/>
+								</Link>
+							)}
+							{coach.note && (
+								<Link href={coach.note} target="_blank" rel="noopener noreferrer">
+									<ImageBox
+										className="p-courses__coach-sns-icon"
+										src={noteIcon}
+										alt="note"
+									/>
+								</Link>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -271,7 +315,7 @@ const Page = () => {
 						objectFit="cover"
 					/>
 					<div className="p-course__game">
-						{courseData.game.name ?? "登録なし"}
+						{courseData.game?.name ?? "登録なし"}
 					</div>
 					<div className="p-course__title">{courseData.title}</div>
 					<div className="p-course__price">
@@ -299,9 +343,8 @@ const Page = () => {
 					{(!userData || userData.id != coach.id) && (
 						// コース詳細ページのボタン部分
 						<Button
-							className={`p-course__info-button ${
-								!chosenSchedule ? "-disabled" : ""
-							}`}
+							className={`p-course__info-button ${!chosenSchedule ? "-disabled" : ""
+								}`}
 							onClick={handlePurchase}
 							disabled={!chosenSchedule}
 						>

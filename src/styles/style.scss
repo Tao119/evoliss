@@ -43,6 +43,12 @@
 @use "project/admin";
 @use "project/components";
 @use "project/course-card-mypage";
+@use "project/reschedule";
+@use "project/cancel";
+@use "project/contact";
+@use "project/create";
+@use "project/delete";
+@use "project/bank";
 
 //utility
 @use "utility/align";

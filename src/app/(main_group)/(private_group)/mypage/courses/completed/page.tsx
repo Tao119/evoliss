@@ -4,11 +4,19 @@ import { AnimationContext, UserDataContext } from "@/app/contextProvider";
 import { useContext, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import Border from "@/components/border";
+import { Pagination } from "@/components/pagination";
+import "dayjs/locale/ja";
+import { CourseCardCompleted } from "./courseCardCompleted";
+import { reservationStatus } from "@/type/models";
+
+dayjs.locale("ja");
 
 const CoursesCompletedPage = () => {
 	const { userData } = useContext(UserDataContext)!;
 	const animation = useContext(AnimationContext)!;
 	const [isLoading, setIsLoading] = useState(true);
+	const [currentPage, setCurrentPage] = useState(1);
+	const itemsPerPage = 5;
 
 	useEffect(() => {
 		animation.startAnimation();
@@ -31,9 +39,21 @@ const CoursesCompletedPage = () => {
 	}
 
 	const completedReservations = userData.reservations.filter(
-		(reservation) =>
-			new Date(reservation.timeSlots?.[0]?.dateTime || 0).getTime() <= new Date().getTime()
+		(reservation) => {
+			if (reservation.status === reservationStatus.CancelRequestedByCoach) {
+				return false;
+			}
+
+			return reservation.status === reservationStatus.Done ||
+				reservation.status === reservationStatus.Reviewed
+		}
 	);
+
+	const totalItems = completedReservations.length;
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const currentItems = completedReservations.slice(startIndex, endIndex);
+	console.log(currentItems)
 
 	return (
 		<>
@@ -41,29 +61,30 @@ const CoursesCompletedPage = () => {
 			<Border />
 
 			{completedReservations.length > 0 ? (
-				<div className="p-mypage__section">
-					{completedReservations.map((reservation) => (
-						<div key={reservation.id} className="p-mypage__reservation-item">
-							<div className="p-mypage__course-title">
-								{reservation.course?.title || "No Title"}
-							</div>
-							<div className="p-mypage__course-date">
-								{reservation.timeSlots?.[0]?.dateTime
-									? dayjs(reservation.timeSlots[0].dateTime).format("YYYY/MM/DD HH:mm")
-									: "Date TBD"
-								}
-							</div>
-							<div className="p-mypage__course-coach">
-								Coach: {reservation.course?.coach?.name || "TBD"}
-							</div>
-							<div className="p-mypage__course-price">
-								Price: {reservation.course?.price || 0} yen
-							</div>
+				<>
+					<div className="p-mypage__courses-list">
+						{currentItems.map((reservation) => (
+							<CourseCardCompleted
+								key={reservation.id}
+								reservation={reservation}
+								course={reservation.course}
+							/>
+						))}
+					</div>
+
+					{totalItems > itemsPerPage && (
+						<div className="p-mypage__pagination">
+							<Pagination
+								all={totalItems}
+								total={itemsPerPage}
+								page={currentPage}
+								updatePage={setCurrentPage}
+							/>
 						</div>
-					))}
-				</div>
+					)}
+				</>
 			) : (
-				<div className="p-mypage__empty">No completed courses</div>
+				<div className="p-mypage__empty">受講済みの講座はありません</div>
 			)}
 		</>
 	);

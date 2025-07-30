@@ -1,15 +1,11 @@
 @use '../../foundation' as *;
 
+
 .p-courses {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
+    @include section-container;
     height: auto;
     gap: 50px;
-    padding: 30px 0;
-    width: 860px;
+    position: relative;
     color: $black;
 
     &__history {
@@ -18,19 +14,26 @@
         margin-bottom: 30px;
     }
 
+    &__back {
+        @include icon-size(30px);
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        cursor: pointer;
+        align-self: flex-start;
+
+    }
+
     &__history-title {
         height: 30px;
         font-size: small;
-        display: flex;
-        align-items: flex-start;
-        justify-content: flex-start;
+        @include flex-start;
         width: 100%;
     }
 
     &__histories {
         height: 30px;
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         flex-wrap: wrap;
         width: 100%;
         overflow: hidden;
@@ -43,15 +46,10 @@
         height: 24px;
         width: auto;
         padding: 5px;
-        display: flex;
-        align-items: center;
-        justify-items: center;
+        @include flex-center;
         max-width: 100px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        @include text-ellipsis;
         cursor: pointer;
-
     }
 
     &__button {
@@ -67,7 +65,6 @@
         align-items: center;
         justify-content: flex-start;
         cursor: pointer;
-
     }
 
     &__right {
@@ -81,8 +78,7 @@
 
     &__navigation {
         height: 30px;
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         align-items: center;
         justify-content: flex-start;
         gap: 10px;
@@ -105,29 +101,24 @@
     }
 
     &__title {
+        @include title-style;
         height: 30px;
-        font-size: $fs-medium;
-        font-weight: $fw-bold ;
     }
 
     &__section {
         width: 100%;
-        display: flex;
-        flex-direction: column;
+        @include flex-column;
         align-items: center;
         justify-content: flex-start;
-        // gap: 20px;
     }
 
     &__list {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 48px;
-        margin-bottom: 100px;
-
-        justify-content: space-between;
+        @include list-container;
+        & {
+            width: 860px;
+            margin-bottom: 100px;
+            justify-content: space-between;
+        }
 
         &.-wrap {
             flex-wrap: nowrap;
@@ -136,16 +127,29 @@
     }
 
     &__coach-bio {
+        @include card-style;
         width: 100%;
         height: auto;
-        background-color: $white;
-        border-radius: 10px;
         text-align: start;
         padding: 32px;
         min-height: 100px;
         font-size: $fs-text;
         white-space: pre-wrap;
         text-align: start;
+    }
+
+    &__coach-sns {
+        width: 100%;
+        display: flex;
+        height: 40px;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    &__coach-sns-icon {
+        width: 40px;
+        height: 40px;
+        ;
     }
 
     &__sub-title {
@@ -156,11 +160,7 @@
     }
 
     &__sort {
-        align-self: flex-end;
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        align-items: center;
+        @include sort-container;
     }
 
     &__sort-label {
@@ -170,59 +170,44 @@
     }
 
     &__coach {
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         justify-content: space-around;
         width: 500px;
+
+        @include mq(sp) {
+            width: 100%;
+            gap: 30px;
+        }
     }
 
     &__coach-game {
-        width: 132px;
-        text-align: center;
-        height: 32px;
-        padding: 10px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        font-weight: $fw-bold;
-        white-space: nowrap;
-        flex-shrink: 0;
-        border: 1px solid $gray;
-        color: $gray;
-        font-size: $fs-small;
-        background-color: $white;
-
+        @include game-badge;
     }
 
     &__coach-detail {
-        display: flex;
-        flex-direction: column;
+        @include flex-column;
         width: 200px;
         align-items: flex-start;
         gap: 10px;
     }
 
     &__coach-name {
-        color: $black;
-        font-size: $fs-medium;
-        font-weight: $fw-bold;
-        max-width: 350px;
-        text-overflow: ellipsis;
-
-        overflow: hidden;
-        white-space: nowrap;
+        @include coach-name;
     }
 
     &__coach-icon {
-        width: 200px;
-        height: 200px;
+        @include icon-size(200px);
+
+        @include mq(sp) {
+            @include icon-size(150px);
+        }
     }
 
     &__coach-rating {
-        display: flex;
-        flex-direction: row;
+        @include flex-row;
         gap: 10px;
         font-size: $fs-medium;
-        font-weight: $fw-bold ;
+        font-weight: $fw-bold;
         align-items: center;
         justify-content: flex-start;
         height: 15px;
@@ -233,6 +218,7 @@
         color: $black;
         position: relative;
         width: 160px;
+        box-shadow: none;
 
         &::before {
             content: "";

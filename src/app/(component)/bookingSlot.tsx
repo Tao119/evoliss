@@ -2,6 +2,10 @@
 
 import type { TimeSlot } from "@/type/models";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+
+// dayjs プラグインを有効化
+dayjs.extend(isSameOrAfter);
 
 interface BookingSlotProps {
 	availableTimeSlots: TimeSlot[];
@@ -30,7 +34,7 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
 		};
 	};
 
-	const { min, max } = getAvailableTimeRange();
+	getAvailableTimeRange();
 
 	const centerTime = duration
 		? dayjs(`2000-01-01 ${startTime}`).add(duration / 2, "minute")
@@ -42,10 +46,7 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
 	const isTimeAvailable = (checkTime: string) => {
 		return availableTimeSlots.some((slot) => {
 			const slotTime = dayjs(slot.dateTime).format("HH:mm");
-			const slotEndTime = dayjs(slot.dateTime)
-				.add(30, "minute")
-				.format("HH:mm");
-			return checkTime >= slotTime && checkTime < slotEndTime;
+			return slotTime === checkTime;
 		});
 	};
 
@@ -60,26 +61,62 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
 			const currentTime = dayjs().hour(startHour).minute(0).add(i, "minute");
 			const timeStr = currentTime.format("HH:mm");
 			const isAvailable = isTimeAvailable(timeStr);
+			
+			let isSelected = false;
 			if (startTime && duration) {
-				const endTime = dayjs(`2000-01-01 ${startTime}`)
-					.add(duration, "minute")
-					.format("HH:mm");
-
-				segments.push({
-					time: timeStr,
-					isAvailable,
-					isSelected: timeStr >= startTime && timeStr < endTime,
-				});
-			} else {
-				segments.push({
-					time: timeStr,
-					isAvailable,
-					isSelected: false,
-				});
+				const startDayjs = dayjs(`2000-01-01 ${startTime}`);
+				const endDayjs = startDayjs.add(duration, "minute");
+				const currentDayjs = dayjs(`2000-01-01 ${timeStr}`);
+				
+				isSelected = currentDayjs.isSameOrAfter(startDayjs) && 
+				            currentDayjs.isBefore(endDayjs);
 			}
+
+			segments.push({
+				time: timeStr,
+				isAvailable,
+				isSelected,
+			});
 		}
 
 		return segments;
+	};
+
+	// グラデーション用のスタイルを生成
+	const generateGradientStyle = () => {
+		if (timeBarData.length === 0) return {};
+
+		const gradientStops: string[] = [];
+		let lastColor = '';
+
+		timeBarData.forEach((segment, idx) => {
+			const position = (idx / timeBarData.length) * 100;
+			const nextPosition = ((idx + 1) / timeBarData.length) * 100;
+			
+			let color = '#666666'; // dark-gray
+			if (segment.isSelected) {
+				color = '#ffa500'; // orange
+			} else if (segment.isAvailable) {
+				color = '#999999'; // gray
+			}
+
+			if (idx === 0 || color !== lastColor) {
+				if (idx > 0) {
+					gradientStops.push(`${lastColor} ${position}%`);
+				}
+				gradientStops.push(`${color} ${position}%`);
+			}
+
+			if (idx === timeBarData.length - 1) {
+				gradientStops.push(`${color} ${nextPosition}%`);
+			}
+
+			lastColor = color;
+		});
+
+		return {
+			background: `linear-gradient(to right, ${gradientStops.join(', ')})`
+		};
 	};
 
 	const timeBarData = generateTimeBarData();
@@ -94,18 +131,22 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
 					<span>18時</span>
 					<span>24時</span>
 				</div>
-				<div className="p-booking-slot__bar">
-					{timeBarData.map((segment, idx) => (
-						<div
-							key={idx}
-							className={`p-booking-slot__segment ${
-								segment.isAvailable ? "-available" : "-unavailable"
-							} ${segment.isSelected ? "-selected" : ""}`}
-							style={{
-								width: `${100 / timeBarData.length}%`,
-							}}
-						/>
-					))}
+				<div className="p-booking-slot__bar" style={generateGradientStyle()}>
+					{/* グラデーションで表示するため、個別のセグメントは不要
+					<div className="p-booking-slot__segments">
+						{timeBarData.map((segment, idx) => (
+							<div
+								key={idx}
+								className={`p-booking-slot__segment ${
+									segment.isAvailable ? "-available" : "-unavailable"
+								} ${segment.isSelected ? "-selected" : ""}`}
+								style={{
+									width: `calc(${100 / timeBarData.length}% + 1px)`,
+								}}
+							/>
+						))}
+					</div>
+					*/}
 				</div>
 				{startTime && duration && (
 					<div

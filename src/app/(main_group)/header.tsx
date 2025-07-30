@@ -4,7 +4,9 @@ import chartIcon from "@/assets/image/chart.svg";
 import hamburgerIconWhite from "@/assets/image/hamburger-white.svg";
 import hamburgerIcon from "@/assets/image/hamburger.svg";
 import logoImage from "@/assets/image/logo-black.svg";
-import logoImageWhite from "@/assets/image/logo_long.png";
+import logoImageSmall from "@/assets/image/logo-small-black.svg";
+import logoImageWhite from "@/assets/image/logo-black.svg";
+import logoImageSmallWhite from "@/assets/image/logo-small.svg";
 import messageIcon from "@/assets/image/mail.svg";
 import mypageIconWhite from "@/assets/image/mypage-white.svg";
 import mypageIcon from "@/assets/image/mypage.svg";
@@ -17,9 +19,11 @@ import React, {
 	type Dispatch,
 	type SetStateAction,
 	useContext,
+	useEffect,
 	useState,
 } from "react";
 import { UserDataContext, useHeader } from "../contextProvider";
+import { useBreakpoint } from "@/hooks/useBreakPoint";
 
 interface Prop {
 	setShowSideBar: Dispatch<SetStateAction<boolean>>;
@@ -30,47 +34,37 @@ const Header = ({ setShowSideBar }: Prop) => {
 	const pathname = usePathname()!;
 	const router = useRouter();
 
-	const { isTopPanelVisible } = useHeader();
+	const { isTopPanelVisible, setIsTopPanelVisible } = useHeader();
+
+	const { orLower } = useBreakpoint()
+
+	// ホームページ以外では常にヘッダーを通常スタイルにする
+	useEffect(() => {
+		if (pathname !== "/") {
+			setIsTopPanelVisible(false);
+		}
+	}, [pathname, setIsTopPanelVisible]);
 
 	const mainRoutes = [
 		{ path: "/courses/coach", text: "コーチから探す" },
 		{ path: "/courses", text: "講座を検索する" },
-	];
-	const iconRoutes = [
-		{
-			path: "/notification",
-			icon: notificationIcon,
-			alt: "notification Icon",
-			text: "通知",
-		},
-		{
-			path: "/message",
-			icon: messageIcon,
-			alt: "Message Icon",
-			text: "メッセージ",
-		},
-		{
-			path: "/mypage",
-			icon: userData?.icon || defaultIcon,
-			alt: "user Icon",
-			text: "マイページ",
-		},
 	];
 
 	const pushRoute = (path: string) => {
 		router.push(path);
 	};
 
-	const isHomePage = pathname.replace("/", "") === "";
+	// ホームページの判定を厳密に
+	const isHomePage = pathname === "/";
+	// ホームページでかつトップパネルが表示されている場合のみ白いヘッダー
 	const shouldChangeHeaderStyle = isHomePage && isTopPanelVisible;
 
 	return (
 		<>
 			<div
-				className={`p-header ${isHomePage ? "-top" : ""} ${
-					shouldChangeHeaderStyle ? "-wh" : ""
-				}`}
-			>
+				className={`p-header ${isHomePage ? "-top" : ""} ${shouldChangeHeaderStyle ? "-wh" : ""
+					}`}
+			>{!orLower("sp") ? <>
 				<div className="p-header__icon" onClick={() => router.push("/")}>
 					<ImageBox
 						src={shouldChangeHeaderStyle ? logoImageWhite : logoImage}
@@ -84,21 +78,19 @@ const Header = ({ setShowSideBar }: Prop) => {
 						<div
 							onClick={() => pushRoute(path)}
 							key={path}
-							className={`p-header__list ${
-								pathname.replace("/", "").split("/")[0] ==
+							className={`p-header__list ${pathname.replace("/", "").split("/")[0] ==
 								`${path.replace("/", "")}`
-									? "-active"
-									: ""
-							}`}
+								? "-active"
+								: ""
+								}`}
 						>
 							{text && (
 								<div
-									className={`p-header__page-text ${
-										pathname.replace("/", "").split("/")[0] ==
+									className={`p-header__page-text ${pathname.replace("/", "").split("/")[0] ==
 										`${path.replace("/", "")}`
-											? "-active"
-											: ""
-									}`}
+										? "-active"
+										: ""
+										}`}
 								>
 									{text}
 								</div>
@@ -116,11 +108,10 @@ const Header = ({ setShowSideBar }: Prop) => {
 								round
 							/>
 							<div
-								className={`p-header__page-text ${
-									pathname.replace("/", "").split("/")[0] == "admin"
-										? "-active"
-										: ""
-								}`}
+								className={`p-header__page-text ${pathname.replace("/", "").split("/")[0] == "admin"
+									? "-active"
+									: ""
+									}`}
 							>
 								管理者ページ
 							</div>
@@ -129,9 +120,8 @@ const Header = ({ setShowSideBar }: Prop) => {
 					{userData ? (
 						<Link
 							href={`/mypage`}
-							className={`p-header__login ${
-								shouldChangeHeaderStyle ? "-wh" : ""
-							}`}
+							className={`p-header__login ${shouldChangeHeaderStyle ? "-wh" : ""
+								}`}
 						>
 							<ImageBox
 								className={`p-header__page-icon`}
@@ -142,9 +132,8 @@ const Header = ({ setShowSideBar }: Prop) => {
 					) : (
 						<Link
 							href={`/sign-in${pathname ? "?callback=" + pathname : ""}`}
-							className={`p-header__login ${
-								shouldChangeHeaderStyle ? "-wh" : ""
-							}`}
+							className={`p-header__login ${shouldChangeHeaderStyle ? "-wh" : ""
+								}`}
 						>
 							<ImageBox
 								className={`p-header__page-icon`}
@@ -154,6 +143,30 @@ const Header = ({ setShowSideBar }: Prop) => {
 						</Link>
 					)}
 				</ul>
+
+			</> : <>
+				<div className="p-header__icon -small" onClick={() => router.push("/")}>
+					<ImageBox
+						src={shouldChangeHeaderStyle ? logoImageSmallWhite : logoImageSmall}
+						alt="Profile"
+						objectFit="cover"
+						className="p-header__logo-icon"
+					/>
+				</div>
+
+				<Link
+					href={userData ? `/mypage` : `/sign-in${pathname ? "?callback=" + pathname : ""}`}
+					className={`p-header__login ${shouldChangeHeaderStyle ? "-wh" : ""
+						}`}
+				>
+					<ImageBox
+						className={`p-header__page-icon`}
+						src={shouldChangeHeaderStyle ? mypageIconWhite : mypageIcon}
+					/>
+				</Link>
+
+			</>
+				}
 				<ImageBox
 					src={shouldChangeHeaderStyle ? hamburgerIconWhite : hamburgerIcon}
 					className="p-header__menu"

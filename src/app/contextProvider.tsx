@@ -43,7 +43,8 @@ export const useHeader = () => {
 // メインのContextProvider
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
 	const animation = useAnimation();
-	const [isTopPanelVisible, setIsTopPanelVisible] = useState<boolean>(true);
+	// デフォルトはfalseにして、ホームページでのみtrueにする
+	const [isTopPanelVisible, setIsTopPanelVisible] = useState<boolean>(false);
 
 	return (
 		<AnimationContext.Provider value={animation}>

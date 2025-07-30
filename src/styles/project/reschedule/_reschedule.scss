@@ -1,0 +1,117 @@
+@use '../../foundation' as *;
+// Reschedule page styles
+
+.p-reschedule {
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 20px;
+
+  &__course {
+    display: flex;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  &__course-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+  }
+
+  &__course-content {
+    flex: 1;
+  }
+
+  &__course-game {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  &__course-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  &__course-price {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 12px;
+  }
+
+  &__course-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__course-tag {
+    padding: 4px 12px;
+    background-color: #f0f0f0;
+    border-radius: 16px;
+    font-size: 12px;
+  }
+
+  &__course-tag-text {
+    color: #666;
+  }
+
+  &__current {
+    margin-top: 48px;
+  }
+
+  &__current-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+
+  &__current-datetime {
+    padding: 16px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+  }
+
+  &__current-date {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  &__current-time {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  &__calendar {
+    margin-top: 48px;
+    margin-bottom: 48px;
+  }
+
+  &__calendar-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+  }
+
+  &__button {
+    &.-secondary {
+      background-color: #f0f0f0;
+      color: #333;
+    }
+
+    &.-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

@@ -115,6 +115,11 @@
         justify-content: center;
         gap: 20px;
         height: auto;
+
+        @include mq(sp) {
+            gap: 0;
+            justify-content: space-between;
+        }
     }
 
     &__course-title {
@@ -127,6 +132,11 @@
         height: 30px;
         flex-shrink: 0;
         margin-top: 40px;
+
+        @include mq(sp) {
+            width: 20px;
+            height: 20px;
+        }
     }
 
     &__course-container {
@@ -134,6 +144,11 @@
         overflow: hidden;
         height: 300px;
         width: 420px;
+
+        @include mq(sp) {
+            height: 300px;
+            width: 310px;
+        }
     }
 
     &__course-slide {

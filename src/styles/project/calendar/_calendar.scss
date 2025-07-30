@@ -1,0 +1,234 @@
+@use '../../foundation' as *;
+
+// マイカレンダーページのスタイル
+.p-mypage {
+  &__calendar-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0;
+  }
+
+  &__selected-date {
+    text-align: center;
+    margin: 32px 0 24px;
+
+    h3 {
+      font-size: $fs-large;
+      font-weight: $fw-bold;
+      color: $black;
+    }
+  }
+
+  &__reservations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin: 20px;
+  }
+
+  &__reservation-item {
+    // CourseCardCoachUpcoming のスタイルで対応
+  }
+}
+
+// カレンダー表示の追加スタイル
+.p-calendar {
+  &__date {
+
+    &.-end-ng {
+      background-color: $soft-gray;
+      color: $mid-gray;
+      cursor: default;
+
+      .p-calendar__date-text {
+        opacity: 0.6;
+      }
+    }
+
+    &.-past {
+      background-color: $light-gray;
+      color: $mid-gray;
+      cursor: not-allowed;
+
+      .p-calendar__date-text {
+        opacity: 0.5;
+      }
+    }
+
+    &.-no-schedule {
+      background-color: $mid-gray;
+      color: $white;
+
+      .p-calendar__date-text {
+        opacity: 0.7;
+      }
+    }
+  }
+
+}
+
+// 登録ページ用スタイル
+.p-calendar-register {
+  &__note {
+    text-align: center;
+    color: $black;
+    font-size: $fs-input;
+    margin: 20px 0;
+    font-weight: $fw-bold;
+  }
+
+  &__note-warning {
+    text-align: center;
+    color: $red;
+    font-size: $fs-text;
+    margin: 10px 0 20px;
+  }
+
+  &__month-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 20px 0;
+    width: 100%;
+
+    .p-calendar__current-month {
+      font-size: $fs-large;
+      font-weight: $fw-bold;
+      min-width: 100px;
+      text-align: center;
+    }
+  }
+
+  &__days-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid $light-gray;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  &__day-section {
+    border-bottom: 1px solid $light-gray;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+  }
+
+  &__day-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__day-number {
+    font-size: $fs-medium;
+    font-weight: $fw-bold;
+    min-width: 30px;
+  }
+
+  &__day-weekday {
+    font-size: $fs-text;
+    font-weight: $fw-bold;
+
+    &.-sunday {
+      color: $red;
+    }
+
+    &.-saturday {
+      color: $blue;
+    }
+  }
+
+  &__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: $fs-text;
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__slots-container {
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__slot-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__time-select {
+    padding: 8px 12px;
+    border: 1px solid $dark-gray;
+    border-radius: 4px;
+    font-size: $fs-input;
+    min-width: 120px;
+    background-color: $white;
+
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  &__time-separator {
+    color: $dark-gray;
+    font-size: $fs-input;
+  }
+
+  &__status {
+    color: $red;
+    font-size: $fs-text;
+    font-weight: $fw-bold;
+    margin-left: 10px;
+  }
+
+  &__remove-button,
+  &__add-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    font-size: $fs-large;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    transform: rotate(45deg);
+
+  }
+
+  &__add-button {
+    transform: none;
+  }
+
+  &__reserved-label {
+    color: $dark-gray;
+    font-size: 14px;
+    margin-left: 10px;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 40px 0;
+  }
+}

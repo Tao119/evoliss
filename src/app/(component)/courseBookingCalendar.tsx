@@ -31,8 +31,10 @@ const CourseBookingCalendar: React.FC<BookingCalendarProps> = ({
 
 		if (dayjs().isSame(prevMonth, "month")) {
 			setSelectedDate(dayjs().format("YYYY-MM-DD"));
+			setChosenSchedule(undefined)
 		} else {
 			setSelectedDate(prevMonth.format("YYYY-MM-01"));
+			setChosenSchedule(undefined)
 		}
 	};
 	const handleNextMonth = () => {
@@ -41,8 +43,10 @@ const CourseBookingCalendar: React.FC<BookingCalendarProps> = ({
 
 		if (dayjs().isSame(nextMonth, "month")) {
 			setSelectedDate(dayjs().format("YYYY-MM-DD"));
+			setChosenSchedule(undefined)
 		} else {
 			setSelectedDate(nextMonth.format("YYYY-MM-01"));
+			setChosenSchedule(undefined)
 		}
 	};
 
@@ -87,7 +91,7 @@ const CourseBookingCalendar: React.FC<BookingCalendarProps> = ({
 
 	useEffect(() => {
 		setChosenSchedule(undefined);
-	}, [selectedDate]);
+	}, [selectedDate, setChosenSchedule]);
 
 	const availableSlots = availableTimeSlots
 		.filter((slot) => {
@@ -138,6 +142,7 @@ const CourseBookingCalendar: React.FC<BookingCalendarProps> = ({
 			setCurrentMonth(dateObj.date.startOf("month"));
 		}
 		setSelectedDate(dateObj.date.format("YYYY-MM-DD"));
+		setChosenSchedule(undefined)
 	};
 
 	const getEndTime = (dateTime: string) => {
@@ -207,13 +212,13 @@ const CourseBookingCalendar: React.FC<BookingCalendarProps> = ({
 								center
 								className="p-calendar__selector-item"
 								selectedValue={chosenSchedule}
-								onChange={(v: any) => handleTimeSlotClick(v)}
+								onChange={(v: string) => handleTimeSlotClick(v)}
 								includeDefault
 								label="時間を選択"
-								options={availableSchedules.map((slot, idx) => ({
-										value: slot.dateTime,
-										label: dayjs(slot.dateTime).format("HH:mm"),
-									}))
+								options={availableSchedules.map((slot) => ({
+									value: slot.dateTime,
+									label: dayjs(slot.dateTime).format("HH:mm"),
+								}))
 								}
 							/>
 							{"~"}

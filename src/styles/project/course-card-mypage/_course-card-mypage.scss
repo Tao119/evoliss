@@ -214,6 +214,39 @@
     font-weight: $fw-bold;
   }
 
+  // キャンセル済み表示用スタイル
+  &.-canceled {
+    position: relative;
+    
+    .p-course-card__item {
+      opacity: 0.6;
+    }
+  }
+
+  &__canceled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 8px;
+  }
+
+  &__canceled-text {
+    color: $white;
+    font-size: 24px;
+    font-weight: $fw-bold;
+    padding: 16px 32px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    border: 2px solid $white;
+  }
+
   @media (max-width: 768px) {
     &__content {
       flex-direction: column;

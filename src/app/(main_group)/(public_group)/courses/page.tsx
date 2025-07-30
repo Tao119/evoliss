@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 
 const Page = () => {
-	const { userData } = useContext(UserDataContext)!;
+	const { userData: _userData } = useContext(UserDataContext)!;
 	const [games, setGames] = useState<Game[]>();
 	const [tags, setTags] = useState<Tag[]>();
 	const animation = useContext(AnimationContext)!;
@@ -131,7 +131,7 @@ const Page = () => {
 
 	const fetchGames = async () => {
 		try {
-			const response = await requestDB("game", "readTopGames");
+			const response = await requestDB("game", "readAllGames");
 			if (response.success) {
 				setGames(response.data);
 			} else {

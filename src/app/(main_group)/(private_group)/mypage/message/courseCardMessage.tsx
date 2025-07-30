@@ -48,7 +48,7 @@ export const CourseCardMessage: React.FC<Props> = ({ course, reservation, childr
 					<div className="p-course-card__left"
 						style={{ gap: "10px" }}>
 						{displayCourse.game && (
-							<div className="p-course-card__game">{displayCourse.game.name}</div>
+							<div className="p-course-card__game">{displayCourse.game?.name}</div>
 						)}
 						<ImageBox
 							className="p-course-card__image"

@@ -1,10 +1,8 @@
 "use client";
 
-import plusIcon from "@/assets/image/plus_white.svg";
 import { Button } from "@/components/button";
-import { IconButton } from "@/components/iconButton";
 import dayjs from "dayjs";
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 
 interface TimeSlot {
 	id?: number;
@@ -107,7 +105,7 @@ const ScheduleManagementCalendar: React.FC<ScheduleManagementCalendarProps> = ({
 			</div>
 
 			<div className="p-schedule-calendar__grid">
-				{["日", "月", "火", "水", "木", "金", "土"].map((day, idx) => (
+				{["日", "月", "火", "水", "木", "金", "土"].map((day) => (
 					<div key={day} className="p-schedule-calendar__day-header">
 						{day}
 					</div>
@@ -122,7 +120,7 @@ const ScheduleManagementCalendar: React.FC<ScheduleManagementCalendarProps> = ({
 					),
 				)}
 
-				{monthDates.map((date, idx) => (
+				{monthDates.map((date) => (
 					<div
 						key={date.format("YYYY-MM-DD")}
 						className={`p-schedule-calendar__date ${

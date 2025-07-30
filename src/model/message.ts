@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { nanoid } from "nanoid";
 import { withTransaction, safeTransaction } from "@/lib/transaction";
+import { withCache, CACHE_PREFIX, CACHE_TTL, createCacheInvalidator, deleteCachedData } from "@/lib/cache";
+import { userFuncs } from "./user";
+
+const { invalidateUserCache } = userFuncs;
 
 export const messageFuncs: { [funcName: string]: Function } = {
 	readRoomByUserAndCourseId,
@@ -11,8 +15,12 @@ export const messageFuncs: { [funcName: string]: Function } = {
 	markMessagesAsRead,
 	readMessageRoomByKey,
 	readMessagesByRoomId,
+	invalidateMessageCache,
 	// sendSystemMessage
 };
+
+// キャッシュ無効化関数
+const messageCacheInvalidator = createCacheInvalidator(CACHE_PREFIX.MESSAGE);
 
 async function readRoomByUserAndCourseId({
 	userId,
@@ -58,7 +66,7 @@ async function sendMessage({
 	senderId,
 	content,
 }: { roomId: number; senderId: number; content: string }) {
-	return safeTransaction(async (tx) => {
+	const result = await safeTransaction(async (tx) => {
 		const room = await tx.messageRoom.findUnique({
 			where: { id: roomId },
 		});
@@ -76,6 +84,29 @@ async function sendMessage({
 			include: { sender: true },
 		});
 	});
+	
+	// メッセージ送信後にキャッシュを無効化
+	if (result) {
+		// ルーム情報を取得してroomKeyを取得
+		const room = await prisma.messageRoom.findUnique({
+			where: { id: roomId },
+			select: { roomKey: true },
+		});
+		if (room) {
+			await invalidateMessageCache(room.roomKey);
+		}
+		// ユーザーのキャッシュも無効化（メッセージ一覧が変わるため）
+		const roomData = await prisma.messageRoom.findUnique({
+			where: { id: roomId },
+			select: { customerId: true, coachId: true },
+		});
+		if (roomData) {
+			await invalidateUserCache(roomData.customerId);
+			await invalidateUserCache(roomData.coachId);
+		}
+	}
+	
+	return result;
 }
 
 // async function sendSystemMessage({ userId, coachId, timeSlotId }: { userId: number; coachId: number, timeSlotId: number }) {
@@ -216,17 +247,25 @@ export async function markMessagesAsRead({
 }
 
 async function readMessageRoomByKey({ roomKey }: { roomKey: string }) {
-	return await prisma.messageRoom.findUnique({
-		where: { roomKey },
-		include: {
-			customer: true,
-			coach: true,
-			messages: {
-				include: { sender: true },
-				orderBy: { sentAt: "asc" },
-			},
+	const cacheKey = `${CACHE_PREFIX.MESSAGE}room:${roomKey}`;
+	
+	return withCache(
+		cacheKey,
+		async () => {
+			return await prisma.messageRoom.findUnique({
+				where: { roomKey },
+				include: {
+					customer: true,
+					coach: true,
+					messages: {
+						include: { sender: true },
+						orderBy: { sentAt: "asc" },
+					},
+				},
+			});
 		},
-	});
+		CACHE_TTL.SHORT // 5分キャッシュ（メッセージは頻繁に更新される）
+	);
 }
 
 async function readMessagesByRoomId({ roomId }: { roomId: number }) {
@@ -235,4 +274,15 @@ async function readMessagesByRoomId({ roomId }: { roomId: number }) {
 		include: { sender: true },
 		orderBy: { sentAt: "asc" },
 	});
+}
+
+// メッセージキャッシュを無効化
+async function invalidateMessageCache(roomKey?: string) {
+	if (roomKey) {
+		// 特定のルームのキャッシュを削除
+		await deleteCachedData(`${CACHE_PREFIX.MESSAGE}room:${roomKey}`);
+	} else {
+		// 全てのメッセージキャッシュを削除
+		await messageCacheInvalidator.invalidateAll();
+	}
 }

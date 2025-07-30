@@ -43,8 +43,11 @@ export default function GuestLayout({
 	const onReady = games && coaches && userData;
 
 	const router = useRouter();
-	const path = usePathname();
+	const path = usePathname()!;
 	const animation = useAnimation();
+
+
+	const isHomePage = path.replace("/", "") === "";
 
 	useEffect(() => {
 		fetchGames();
@@ -68,9 +71,9 @@ export default function GuestLayout({
 			userData?.customerMessageRooms?.some((r) =>
 				r?.messages?.some((m) => !m.isRead && m.senderId != userData.id),
 			) ||
-				userData?.coachMessageRooms?.some((r) =>
-					r?.messages?.some((m) => !m.isRead && m.senderId != userData.id),
-				),
+			userData?.coachMessageRooms?.some((r) =>
+				r?.messages?.some((m) => !m.isRead && m.senderId != userData.id),
+			),
 		);
 	}, [userData]);
 
@@ -233,7 +236,7 @@ export default function GuestLayout({
           />
         </>
       )} */}
-			<div className="l-content">
+			<div className={`l-content ${path == "/" ? "-home" : ""}`}>
 				<div className="l-top">
 					{children}
 					<div className="l-footer">

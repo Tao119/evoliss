@@ -7,6 +7,10 @@
     gap: 10px;
     display: flex;
 
+    @include mq(sp) {
+        width: 100%;
+    }
+
     &__upper {
         display: flex;
         gap: 10px;
@@ -17,9 +21,7 @@
             flex-direction: column;
         }
 
-        @include mq(tb) {
-            flex-direction: column;
-        }
+
     }
 
     &__calender {
@@ -37,9 +39,7 @@
             width: 100%;
         }
 
-        @include mq(tb) {
-            width: 100%;
-        }
+
     }
 
     &__header {
@@ -96,6 +96,10 @@
         border-right: 1px solid $gray;
         aspect-ratio: 4 / 3;
         background-color: $white;
+
+        @include mq(sp) {
+            font-size: $fs-small;
+        }
 
         &.-sunday {
             background-color: $light-red;
@@ -159,6 +163,10 @@
 
     &__date-text {
         z-index: 2;
+
+        @include mq(sp) {
+            font-size: $fs-small;
+        }
     }
 
     &__available-indicator {
@@ -204,6 +212,7 @@
         background: none;
         width: 20px;
         position: relative;
+        box-shadow: none;
 
         &::after {
             content: "";
@@ -317,6 +326,10 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
+
+        @include mq(sp) {
+            font-size: $fs-small;
+        }
     }
 
     &__selector-item {
@@ -330,69 +343,15 @@
         align-items: center;
         justify-content: center;
 
+        @include mq(sp) {
+            font-size: $fs-small;
+            width: 120px;
+            height: 40px;
+        }
+
     }
 
 
-    &__schedule-grid {
-        display: grid;
-        grid-auto-flow: column;
-        grid-template-rows: repeat(16, auto);
-        gap: 10px;
-        padding: 10px;
-        border: 1px solid $white;
-    }
-
-    &__schedule-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: $fs-input;
-    }
-
-    &__selected-schedule {
-        width: 100%;
-        height: 30px;
-        padding: 5px;
-
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-
-        &.-customer {
-            width: 100%;
-            flex-direction: row;
-        }
-    }
-
-    &__selected-schedule-schedule {
-        font-size: $fs-input;
-        border: 1px solid $white;
-        padding: 5px;
-        width: 100px;
-        text-align: start;
-        cursor: pointer;
-
-        &.-active {
-            border: 1px solid $theme;
-        }
-
-        &.-inactive {
-            border: 1px solid $light-red;
-            background-color: $mid-gray;
-            cursor: default;
-        }
-
-        &.-disabled {
-            background-color: $gray;
-            cursor: default;
-        }
-
-        &.-customer {
-            width: 100%;
-            text-align: center;
-        }
-    }
 
     &__selected-schedule-delete {
         font-size: $fs-input;

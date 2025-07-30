@@ -1,7 +1,7 @@
 "use client";
-import { AnimationContext, UserDataContext } from "@/app/contextProvider";
+import { UserDataContext } from "@/app/contextProvider";
 import mailIcon from "@/assets/image/mail.svg";
-import { BackButton } from "@/components/backbutton";
+
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,13 +16,12 @@ const Page = () => {
 	const callbackPath = params?.get("callback");
 
 	const router = useRouter();
-	const animation = useContext(AnimationContext)!;
 
 	useEffect(() => {
 		if (userData) {
 			router.push(callbackPath ?? "/");
 		}
-	}, [userData, router]);
+	}, [userData, router, callbackPath]);
 
 	const sendConfirmMail = async () => {
 		if (!email) return;
@@ -53,7 +52,7 @@ const Page = () => {
 			} else {
 				setErr(data.error || "エラーが発生しました。");
 			}
-		} catch (error) {
+		} catch {
 			setErr("ネットワークエラーが発生しました。");
 		} finally {
 			setLoading(false);

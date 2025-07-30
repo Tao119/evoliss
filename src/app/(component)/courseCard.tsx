@@ -1,6 +1,4 @@
 import defaultImage from "@/assets/image/picture-icon.svg";
-import tagImage from "@/assets/image/tag.svg";
-import defaultIcon from "@/assets/image/user_icon.svg";
 import { ImageBox } from "@/components/imageBox";
 import { formatMinutesToTime } from "@/services/formatMinutes";
 import type { Course } from "@/type/models";
@@ -14,11 +12,6 @@ interface Props {
 
 export const CourseCard: React.FC<Props> = ({ course, children, big }) => {
 	const router = useRouter();
-	const averageRating =
-		course.reviews && course.reviews.length > 0
-			? course.reviews.reduce((acc, review) => acc + review.rating, 0) /
-				course.reviews.length
-			: 0;
 
 	return (
 		<div className="p-course-card">
@@ -40,7 +33,7 @@ export const CourseCard: React.FC<Props> = ({ course, children, big }) => {
 				onClick={() => router.push(`/courses/course/${course.id}`)}
 			>
 				<div className="p-course-card__left">
-					<div className="p-course-card__game">{course.game.name}</div>
+					<div className="p-course-card__game">{course.game?.name ?? "登録なし"}</div>
 					<ImageBox
 						className="p-course-card__image"
 						src={course.image ?? defaultImage}

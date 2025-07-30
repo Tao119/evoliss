@@ -3,19 +3,23 @@
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
-import { Filter } from "@/components/filter";
-import { InputBox } from "@/components/inputBox";
+// import { InputBox } from "@/components/inputBox";
 import { requestDB } from "@/services/axios";
 import { AccountType, type PaymentAccount } from "@/type/models";
 import { useContext, useEffect, useState } from "react";
 
-const AccountTypeString = ["普通", "当座"];
+// const AccountTypeString = ["普通", "当座"];
 
 const BankPage = () => {
 	const { userData, fetchUserData } = useContext(UserDataContext)!;
 	const animation = useContext(AnimationContext)!;
-	const [editingPaymentAccount, setEditingPaymentAccount] = useState<PaymentAccount>();
-	const [isEditing, setIsEditing] = useState(false);
+	const [editingPaymentAccount, setEditingPaymentAccount] = useState<Partial<PaymentAccount>>({
+		bankName: "",
+		branchName: "",
+		accountType: AccountType.Saving,
+		accountNumber: "",
+		accountHolder: "",
+	});
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
@@ -23,20 +27,16 @@ const BankPage = () => {
 		if (userData?.paymentAccount) {
 			setEditingPaymentAccount(userData.paymentAccount);
 		}
-	}, [userData]);
-
-	useEffect(() => {
-		if (userData) {
-			setIsLoading(false);
-			animation.endAnimation();
-		}
-	}, [userData]);
+		setIsLoading(false);
+		animation.endAnimation();
+	}, [userData, animation]);
 
 	if (!userData || isLoading) {
 		return (
 			<>
-				<div className="p-mypage__title">振込先設定</div>
+				<div className="p-mypage__title">入金用口座登録</div>
 				<Border />
+				<div className="p-mypage__loading">Loading...</div>
 			</>
 		);
 	}
@@ -49,7 +49,7 @@ const BankPage = () => {
 			!editingPaymentAccount?.accountNumber ||
 			!editingPaymentAccount?.accountHolder
 		) {
-			alert("Please fill all fields");
+			alert("全ての項目を入力してください");
 			return;
 		}
 
@@ -61,8 +61,8 @@ const BankPage = () => {
 			if (!response.success) {
 				alert("エラーが発生しました");
 			} else {
-				setIsEditing(false);
-				fetchUserData();
+				alert("口座情報を更新しました");
+				fetchUserData(true);
 			}
 			animation.endAnimation();
 		});
@@ -70,127 +70,127 @@ const BankPage = () => {
 
 	return (
 		<>
-			<div className="p-mypage__title">振込先設定</div>
+			<div className="p-mypage__title">入金用口座登録</div>
 			<Border />
 			
-			{userData.paymentAccount && !isEditing ? (
-				<div className="p-mypage__section">
-					<div className="p-mypage__subtitle">登録済み口座</div>
-					<div className="p-mypage__info">
-						<div>銀行名: {userData.paymentAccount.bankName}</div>
-						<div>支店名: {userData.paymentAccount.branchName}</div>
-						<div>口座種別: {AccountTypeString[userData.paymentAccount.accountType]}</div>
-						<div>口座番号: {userData.paymentAccount.accountNumber}</div>
-						<div>口座名義: {userData.paymentAccount.accountHolder}</div>
-					</div>
-					<Button 
-						className="p-mypage__button"
-						onClick={() => setIsEditing(true)}
-					>
-						編集
-					</Button>
-				</div>
-			) : (
-				<div className="p-mypage__section">
-					<div className="p-mypage__subtitle">
-						{userData.paymentAccount ? "口座情報の編集" : "口座情報の登録"}
-					</div>
-					
-					<div className="p-mypage__input-group">
-						<label>銀行名</label>
-						<InputBox
+			<div className="p-bank">
+				<div className="p-bank__form">
+					<div className="p-bank__input-group">
+						<label className="p-bank__label">
+							金融機関名（銀行・信用金庫）
+						</label>
+						<input
+							type="text"
+							className="p-bank__input"
 							value={editingPaymentAccount?.bankName || ""}
 							onChange={(e) => {
 								setEditingPaymentAccount((prev) => ({
-									...prev!,
+									...prev,
 									bankName: e.target.value,
 								}));
 							}}
 						/>
 					</div>
 
-					<div className="p-mypage__input-group">
-						<label>支店名</label>
-						<InputBox
+					<div className="p-bank__input-group">
+						<label className="p-bank__label">支店名</label>
+						<input
+							type="text"
+							className="p-bank__input"
 							value={editingPaymentAccount?.branchName || ""}
 							onChange={(e) => {
 								setEditingPaymentAccount((prev) => ({
-									...prev!,
+									...prev,
 									branchName: e.target.value,
 								}));
 							}}
 						/>
 					</div>
 
-					<div className="p-mypage__input-group">
-						<label>口座種別</label>
-						<Filter
-							includeDefault
-							label="口座種別を選択"
-							selectedValue={editingPaymentAccount?.accountType}
-							options={Object.values(AccountType)
-								.filter((value) => typeof value === "number")
-								.map((a) => ({
-									label: AccountTypeString[a],
-									value: a,
-								}))}
-							onChange={(value: any) => {
-								setEditingPaymentAccount((prev) => ({
-									...prev!,
-									accountType: Number.parseInt(value),
-								}));
-							}}
-						/>
-					</div>
-
-					<div className="p-mypage__input-group">
-						<label>口座番号</label>
-						<InputBox
-							value={editingPaymentAccount?.accountNumber || ""}
+					<div className="p-bank__input-group">
+						<label className="p-bank__label">口座番号</label>
+						<input
 							type="text"
+							className="p-bank__input"
+							value={editingPaymentAccount?.accountNumber || ""}
 							onChange={(e) => {
 								setEditingPaymentAccount((prev) => ({
-									...prev!,
+									...prev,
 									accountNumber: e.target.value,
 								}));
 							}}
 						/>
 					</div>
 
-					<div className="p-mypage__input-group">
-						<label>口座名義</label>
-						<InputBox
-							value={editingPaymentAccount?.accountHolder || ""}
-							onChange={(e) => {
-								setEditingPaymentAccount((prev) => ({
-									...prev!,
-									accountHolder: e.target.value,
-								}));
-							}}
-						/>
+					<div className="p-bank__input-row">
+						<div className="p-bank__input-group -half">
+							<label className="p-bank__label">姓（カタカナ）</label>
+							<input
+								type="text"
+								className="p-bank__input"
+								value={editingPaymentAccount?.accountHolder?.split(" ")[0] || ""}
+								onChange={(e) => {
+									const lastName = e.target.value;
+									const firstName = editingPaymentAccount?.accountHolder?.split(" ")[1] || "";
+									setEditingPaymentAccount((prev) => ({
+										...prev,
+										accountHolder: lastName + (firstName ? " " + firstName : ""),
+									}));
+								}}
+							/>
+						</div>
+						<div className="p-bank__input-group -half">
+							<label className="p-bank__label">名（カタカナ）</label>
+							<input
+								type="text"
+								className="p-bank__input"
+								value={editingPaymentAccount?.accountHolder?.split(" ")[1] || ""}
+								onChange={(e) => {
+									const firstName = e.target.value;
+									const lastName = editingPaymentAccount?.accountHolder?.split(" ")[0] || "";
+									setEditingPaymentAccount((prev) => ({
+										...prev,
+										accountHolder: (lastName ? lastName + " " : "") + firstName,
+									}));
+								}}
+							/>
+						</div>
 					</div>
 
-					<div className="p-mypage__button-group">
+					<div className="p-bank__button-container">
 						<Button 
-							className="p-mypage__button"
+							className="p-bank__button"
 							onClick={handleSubmit}
 						>
-							保存
+							登録する
 						</Button>
-						{isEditing && (
-							<Button 
-								className="p-mypage__button -secondary"
-								onClick={() => {
-									setIsEditing(false);
-									setEditingPaymentAccount(userData.paymentAccount);
-								}}
-							>
-								キャンセル
-							</Button>
-						)}
 					</div>
 				</div>
-			)}
+
+				<div className="p-bank__footer">
+					<div className="p-bank__footer-item">
+						<a href="#">TOP</a>
+						<span className="p-bank__separator">｜</span>
+						<a href="#">コーチから選ぶ</a>
+						<span className="p-bank__separator">｜</span>
+						<a href="#">講座を検索する</a>
+						<span className="p-bank__separator">｜</span>
+					</div>
+					<div className="p-bank__footer-item">
+						<a href="#">ログイン</a>
+						<span className="p-bank__separator">｜</span>
+						<a href="#">新規会員登録</a>
+					</div>
+					<div className="p-bank__footer-item">
+						<a href="#">利用規約</a>
+						<span className="p-bank__separator">｜</span>
+						<a href="#">プライバシーポリシー</a>
+					</div>
+					<div className="p-bank__copyright">
+						© はるmチャンネル managed by EVOLISS
+					</div>
+				</div>
+			</div>
 		</>
 	);
 };

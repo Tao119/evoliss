@@ -12,6 +12,13 @@ import type { Course, User } from "@/type/models";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useEffect, useRef, useState } from "react";
 
+
+import youtubeIcon from "@/assets/image/youtube.svg"
+import xIcon from "@/assets/image/x.svg"
+import noteIcon from "@/assets/image/note.svg"
+import Link from "next/link";
+import { BackButton } from "@/components/backbutton";
+
 const Page = () => {
 	const { userData, fetchUserData } = useContext(UserDataContext)!;
 	const [coachData, setCoachData] = useState<User>();
@@ -142,25 +149,25 @@ const Page = () => {
 
 	const averageRating: number =
 		coachData.courses &&
-		coachData.courses.length > 0 &&
-		coachData.courses.reduce(
-			(totalCount, course) =>
-				totalCount + (course.reviews ? course.reviews.length : 0),
-			0,
-		) != 0
+			coachData.courses.length > 0 &&
+			coachData.courses.reduce(
+				(totalCount, course) =>
+					totalCount + (course.reviews ? course.reviews.length : 0),
+				0,
+			) != 0
 			? coachData.courses.reduce(
-					(totalScore, course) =>
-						totalScore +
-						(course.reviews
-							? course.reviews.reduce((sum, review) => sum + review.rating, 0)
-							: 0),
-					0,
-				) /
-				coachData.courses.reduce(
-					(totalCount, course) =>
-						totalCount + (course.reviews ? course.reviews.length : 0),
-					0,
-				)
+				(totalScore, course) =>
+					totalScore +
+					(course.reviews
+						? course.reviews.reduce((sum, review) => sum + review.rating, 0)
+						: 0),
+				0,
+			) /
+			coachData.courses.reduce(
+				(totalCount, course) =>
+					totalCount + (course.reviews ? course.reviews.length : 0),
+				0,
+			)
 			: 0;
 
 	const reviewNum = coachData.courses.reduce(
@@ -170,6 +177,7 @@ const Page = () => {
 
 	return (
 		<div className="p-courses l-page">
+			<BackButton className="p-courses__back" back={() => router.push("/courses/coach")} />
 			<div className="p-courses__section">
 				<div className="p-courses__title">コーチ詳細</div>
 				<Border />
@@ -193,7 +201,35 @@ const Page = () => {
 							/>
 							({reviewNum}件)
 						</div>
-						<div className="p-courses__coach-sns"></div>
+						<div className="p-courses__coach-sns">
+							{coachData.youtube && (
+								<Link href={coachData.youtube} target="_blank" rel="noopener noreferrer">
+									<ImageBox
+										className="p-courses__coach-sns-icon"
+										src={youtubeIcon}
+										alt="YouTube"
+									/>
+								</Link>
+							)}
+							{coachData.x && (
+								<Link href={coachData.x} target="_blank" rel="noopener noreferrer">
+									<ImageBox
+										className="p-courses__coach-sns-icon"
+										src={xIcon}
+										alt="X"
+									/>
+								</Link>
+							)}
+							{coachData.note && (
+								<Link href={coachData.note} target="_blank" rel="noopener noreferrer">
+									<ImageBox
+										className="p-courses__coach-sns-icon"
+										src={noteIcon}
+										alt="note"
+									/>
+								</Link>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>

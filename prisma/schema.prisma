@@ -15,6 +15,9 @@ model User {
   updatedAt        DateTime          @updatedAt
   bio              String?
   icon             String?
+  youtube             String?
+  x                String?
+  note             String?
   gameId           Int?
   game             Game?     @relation(fields: [gameId], references: [id])
   isAdmin          Boolean           @default(false)
@@ -26,7 +29,6 @@ model User {
   coachMessageRooms    MessageRoom[] @relation("CoachMessageRooms")
   payments         Payment[]
   paymentAccount   PaymentAccount?
-  refunds          Refund[]
   reservations     Reservation[]
   searchHistories  SearchHistory[]
   userPayment      UserPayment[]
@@ -95,14 +97,10 @@ model TimeSlot {
 
 model Refund {
   id            Int          @id @default(autoincrement())
-  customerId    Int?
   reservationId Int?
   status        Int
-  text          String
-  customer      User?        @relation(fields: [customerId], references: [id])
   reservation   Reservation? @relation(fields: [reservationId], references: [id])
 
-  @@index([customerId], map: "Refund_customerId_fkey")
   @@index([reservationId], map: "Refund_reservationId_fkey")
 }
 
@@ -114,10 +112,12 @@ model Reservation {
   updatedAt  DateTime @updatedAt
   refunds    Refund[]
   status     Int
-  course     Course   @relation("CourseReservations", fields: [courseId], references: [id], onDelete: Cascade)
+  courseTime String?  // YYYY/MM/dd HH:mm~HH:mm形式で保存
+  course     Course   @relation("CourseReservations", fields: [courseId], references: [id])
   customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
   timeSlots   TimeSlot[]
   payment         Payment?
+  review      Review?
   roomId   Int?
   room     MessageRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
@@ -176,8 +176,12 @@ model Review {
   comment    String?
   createdAt  DateTime @default(now())
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  customer   User   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer   User   @relation(fields: [customerId], references: [id])
 
+  reservationId   Int @unique
+  reservation    Reservation   @relation(fields: [reservationId], references: [id])
+
+  @@index([reservationId], map: "Review_reservationId_fkey")
   @@index([courseId], map: "Review_courseId_fkey")
   @@index([customerId], map: "Review_customerId_fkey")
 }
@@ -212,9 +216,9 @@ model Tag {
 model TagCourse {
   id        Int        @id @default(autoincrement())
   tagId     Int
-  tag       Tag       @relation(fields: [tagId], references: [id])
+  tag       Tag       @relation(fields: [tagId], references: [id],onDelete:Cascade)
   courseId  Int
-  course    Course    @relation(fields: [courseId], references: [id])
+  course    Course    @relation(fields: [courseId], references: [id], onDelete:Cascade)
 }
 
 model CourseAccess {
@@ -227,5 +231,15 @@ model CourseAccess {
 
   @@index([courseId], map: "CourseAccess_courseId_fkey")
   @@index([userId], map: "CourseAccess_userId_fkey")
+}
+
+model Contact {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String   @db.Text
+  status    Int      @default(0) // 0: 未対応, 1: 対応中, 2: 対応済み
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
