@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo "Installing nodemailer and types..."
-npm install nodemailer
-npm install --save-dev @types/nodemailer
-
-echo "Installation complete!"
