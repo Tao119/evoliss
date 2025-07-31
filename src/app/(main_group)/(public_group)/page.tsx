@@ -116,6 +116,7 @@ const Page = () => {
 	const fetchGames = async () => {
 		try {
 			const response = await requestDB("game", "readAllGames");
+			console.log(response)
 			if (response.success) {
 				setGames(response.data);
 			} else {
@@ -129,6 +130,7 @@ const Page = () => {
 	const fetchTags = async () => {
 		try {
 			const response = await requestDB("tag", "readTags");
+			console.log(response)
 			if (response.success) {
 				setTags(response.data);
 			} else {
