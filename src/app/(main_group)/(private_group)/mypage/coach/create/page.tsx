@@ -260,6 +260,7 @@ const CoachCreatePage = () => {
 								<ImageBox
 									src={imageIcon}
 									className="p-create__camera-icon"
+									onClick={() => imageInputRef.current?.click()}
 								/>
 							</div>
 						)}

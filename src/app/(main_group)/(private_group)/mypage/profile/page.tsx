@@ -287,6 +287,7 @@ const ProfilePage = () => {
 						src={tempIconPreview || userData.icon || defaultIcon}
 						objectFit="cover"
 						round
+						onClick={() => iconInputRef.current?.click()}
 					/>
 					<ImageBox
 						src={editIcon}
