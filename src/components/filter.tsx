@@ -122,7 +122,6 @@ export const Filter = (props: Props) => {
 						</option>
 					))}
 				</select>
-				<ImageBox src={upArrow} className="c-filter__image" />
 			</div>
 		);
 	}
