@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { redis } from '@/lib/redis';
+import { getRedisClient } from '@/lib/cache/redis';
 import { CACHE_PREFIX } from '@/lib/cache';
 
 export async function POST(req: Request) {
@@ -9,6 +9,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'This endpoint is only available in development' }, { status: 403 });
     }
 
+    const redis = getRedisClient();
+    
     // すべてのゲームとタグのキャッシュをクリア
     const gameKeys = await redis.keys(`${CACHE_PREFIX.GAME}*`);
     const tagKeys = await redis.keys(`${CACHE_PREFIX.TAG}*`);
