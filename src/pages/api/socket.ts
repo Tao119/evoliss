@@ -17,8 +17,8 @@ export default function handler(
 	req: NextApiRequest,
 	res: NextApiResponseWithSocket,
 ) {
-	if (res.socket.server.io && res.socket.server.io.engine.clientsCount > 0) {
-		console.log("⚡ Socket.io is already running with active clients.");
+	if (res.socket.server.io) {
+		console.log("⚡ Socket.io is already running.");
 		res.end();
 		return;
 	}
