@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";
-import { useContext, useEffect, useState, useCallback } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import Border from "@/components/border";
@@ -24,39 +24,39 @@ const MyCalendarPage = () => {
 	const [coachReservations, setCoachReservations] = useState<Reservation[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 
-	const fetchReservations = useCallback(async () => {
-		if (!userData) return;
-
-		try {
-			setIsLoading(true);
-
-			// コーチとしての予約を取得
-			const coachReservations: Reservation[] = [];
-			for (const course of userData.courses) {
-				const response = await requestDB("reservation", "readReservationsByCourseId", {
-					courseId: course.id,
-				});
-
-				if (response.success && response.data) {
-					coachReservations.push(...response.data);
-				}
-			}
-			setCoachReservations(coachReservations);
-
-		} catch (error) {
-			console.error("Error fetching reservations:", error);
-		} finally {
-			setIsLoading(false);
-			animation.endAnimation();
-		}
-	}, [userData, animation]);
-
 	useEffect(() => {
 		animation.startAnimation();
 		if (userData) {
-			fetchReservations();
+			// 関数を直接実行
+			(async () => {
+				if (!userData) return;
+
+				try {
+					setIsLoading(true);
+
+					// コーチとしての予約を取得
+					const coachReservations: Reservation[] = [];
+					for (const course of userData.courses) {
+						const response = await requestDB("reservation", "readReservationsByCourseId", {
+							courseId: course.id,
+						});
+
+						if (response.success && response.data) {
+							coachReservations.push(...response.data);
+						}
+					}
+					setCoachReservations(coachReservations);
+
+				} catch (error) {
+					console.error("Error fetching reservations:", error);
+				} finally {
+					setIsLoading(false);
+					animation.endAnimation();
+				}
+			})();
 		}
-	}, [userData, animation, fetchReservations]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [userData]);
 
 	// 選択された日付の予約を取得
 	const getReservationsForDate = (dateStr: string) => {

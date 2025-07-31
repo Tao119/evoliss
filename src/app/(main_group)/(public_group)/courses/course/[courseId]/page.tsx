@@ -45,6 +45,7 @@ const Page = () => {
 		}
 	}, [courseData]);
 
+
 	useEffect(() => {
 		if (onReady) {
 			animation.endAnimation();
@@ -79,6 +80,7 @@ const Page = () => {
 					router.push("/courses");
 					return;
 				}
+				console.log(response.data)
 				setCourseData(response.data);
 			} else {
 				animation.endAnimation();
@@ -121,7 +123,7 @@ const Page = () => {
 	};
 
 	const averageRating: number =
-		coach.courses &&
+		coach?.courses &&
 			coach.courses.length > 0 &&
 			coach.courses.reduce(
 				(totalCount, course) =>
@@ -143,10 +145,13 @@ const Page = () => {
 			)
 			: 0;
 
-	const reviewNum = coach.courses.reduce(
-		(total, course) => total + (course.reviews?.length || 0),
-		0,
-	);
+
+	const reviewNum = coach?.courses
+		? coach.courses.reduce(
+			(total, course) => total + (course.reviews?.length || 0),
+			0,
+		)
+		: 0;
 
 	const handleLogin = () => {
 		if (userData) { return }

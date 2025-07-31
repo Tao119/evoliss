@@ -100,17 +100,120 @@ const Page = () => {
 			setIsLoading(false);
 
 			// 新しい検索を実行
-			fetchCourseNum();
-			fetchCourses(1);
+			// 関数を直接定義して呼び出す
+			(async () => {
+				try {
+					setIsLoading(true);
+
+					const gameIds = Array.from(appliedGames);
+					const tagIds = Array.from(appliedTags);
+
+					const params: any = {};
+					if (appliedQuery) params.query = appliedQuery;
+					if (gameIds.length > 0) params.gameIds = gameIds;
+					if (tagIds.length > 0) params.tagIds = tagIds;
+
+					const response = await requestDB(
+						"course",
+						"readCoursesNumByQuery",
+						params,
+					);
+					if (response.success) {
+						setCourseNum(response.data);
+					} else {
+						console.error("コース数取得エラー:", response);
+						setCourseNum(0);
+					}
+				} catch (error) {
+					console.error("Error fetching course count:", error);
+					setCourseNum(0);
+				}
+			})();
+
+			// コースデータを取得
+			(async () => {
+				try {
+					animation.startAnimation();
+
+					const params: any = {
+						page: 1,
+						total,
+						sortMethod,
+					};
+					if (appliedQuery) params.query = appliedQuery;
+					if (appliedGames.size) params.gameIds = Array.from(appliedGames);
+					if (appliedTags.size) params.tagIds = Array.from(appliedTags);
+
+					const response = await requestDB("course", "readCoursesByQuery", params);
+					if (response.success) {
+						setCourseData({
+							1: response.data,
+						});
+					} else {
+						console.error("コース取得エラー:", response);
+						setCourseData({
+							1: [],
+						});
+					}
+				} catch (error) {
+					console.error("Error fetching courses:", error);
+					setCourseData({
+						1: [],
+					});
+				} finally {
+					setIsLoading(false);
+					animation.endAnimation();
+				}
+			})();
 		}
-	}, [appliedQuery, appliedGames, appliedTags, onReady]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [appliedQuery, appliedGames, appliedTags, onReady, sortMethod]);
 
 	// ページ変更時
 	useEffect(() => {
 		if (currentPage > 1 && onReady && !courseData[currentPage] && !isLoading) {
-			fetchCourses(currentPage);
+			// 直接非同期関数を実行
+			(async () => {
+				try {
+					setIsLoading(true);
+					animation.startAnimation();
+
+					const params: any = {
+						page: currentPage,
+						total,
+						sortMethod,
+					};
+					if (appliedQuery) params.query = appliedQuery;
+					if (appliedGames.size) params.gameIds = Array.from(appliedGames);
+					if (appliedTags.size) params.tagIds = Array.from(appliedTags);
+
+					const response = await requestDB("course", "readCoursesByQuery", params);
+					if (response.success) {
+						setCourseData((prev) => ({
+							...prev,
+							[currentPage]: response.data,
+						}));
+					} else {
+						console.error("コース取得エラー:", response);
+						setCourseData((prev) => ({
+							...prev,
+							[currentPage]: [],
+						}));
+					}
+				} catch (error) {
+					console.error("Error fetching courses:", error);
+					setCourseData((prev) => ({
+						...prev,
+						[currentPage]: [],
+					}));
+				} finally {
+					setIsLoading(false);
+					animation.endAnimation();
+				}
+			})();
 		}
-	}, [currentPage, onReady, isLoading]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentPage, onReady, isLoading, courseData, appliedQuery, appliedGames, appliedTags, sortMethod]);
 
 	useEffect(() => {
 		if (onReady && !isLoading) {
@@ -118,16 +221,7 @@ const Page = () => {
 		}
 	}, [onReady, isLoading]);
 
-	useEffect(() => {
-		if (!onReady) return;
-		setCourseData({});
-		setCourseNum(0);
-		setCurrentPage(1);
-		setIsLoading(false);
-
-		fetchCourseNum();
-		fetchCourses(1);
-	}, [sortMethod]);
+	// sortMethodのuseEffectは削除（appliedQuery等のuseEffectで処理されるため）
 
 	const fetchGames = async () => {
 		try {
@@ -157,75 +251,7 @@ const Page = () => {
 		}
 	};
 
-	const fetchCourseNum = async () => {
-		try {
-			setIsLoading(true);
-
-			const gameIds = Array.from(appliedGames);
-			const tagIds = Array.from(appliedTags);
-
-			const params: any = {};
-			if (appliedQuery) params.query = appliedQuery;
-			if (gameIds.length > 0) params.gameIds = gameIds;
-			if (tagIds.length > 0) params.tagIds = tagIds;
-
-			const response = await requestDB(
-				"course",
-				"readCoursesNumByQuery",
-				params,
-			);
-			if (response.success) {
-				setCourseNum(response.data);
-			} else {
-				console.error("コース数取得エラー:", response);
-				setCourseNum(0);
-			}
-		} catch (error) {
-			console.error("Error fetching course count:", error);
-			setCourseNum(0);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	const fetchCourses = async (page: number = currentPage) => {
-		try {
-			setIsLoading(true);
-			animation.startAnimation();
-
-			const params: any = {
-				page,
-				total,
-				sortMethod,
-			};
-			if (appliedQuery) params.query = appliedQuery;
-			if (appliedGames.size) params.gameIds = Array.from(appliedGames);
-			if (appliedTags.size) params.tagIds = Array.from(appliedTags);
-
-			const response = await requestDB("course", "readCoursesByQuery", params);
-			if (response.success) {
-				setCourseData((prev) => ({
-					...prev,
-					[page]: response.data,
-				}));
-			} else {
-				console.error("コース取得エラー:", response);
-				setCourseData((prev) => ({
-					...prev,
-					[page]: [],
-				}));
-			}
-		} catch (error) {
-			console.error("Error fetching courses:", error);
-			setCourseData((prev) => ({
-				...prev,
-				[page]: [],
-			}));
-		} finally {
-			setIsLoading(false);
-			animation.endAnimation();
-		}
-	};
+	// 不要な関数を削除（useEffect内で直接実行しているため）
 
 	const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setSearchText(event.target.value);

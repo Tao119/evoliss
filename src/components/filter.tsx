@@ -24,10 +24,6 @@ export const Filter = (props: Props) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
-	/* 初期値を計算するヘルパ */
-	const getDefaultValue = (opts: { value: any }[] = []) =>
-		props.includeDefault ? "" : opts[0]?.value ?? "";
-
 	/* options を組み立てる */
 	useEffect(() => {
 		let opts: { value: any; label: string | StaticImageData }[] = [];
@@ -44,24 +40,12 @@ export const Filter = (props: Props) => {
 		}
 
 		setOptions(opts);
-		// options が変わったら defaultValue も再計算
-		setSelectedValue((prev: any) =>
-			prev ?? getDefaultValue(opts as any)
-		);
-	}, [props.data, props.options]);
+	}, [props.data, props.options, props.generate, props.name]);
 
 	/* 外部から選択値が変わったとき */
 	useEffect(() => {
-		if (
-			props.selectedValue === undefined ||
-			props.selectedValue === null ||
-			props.selectedValue === ""
-		) {
-			setSelectedValue(getDefaultValue(options as any));
-		} else {
-			setSelectedValue(props.selectedValue);
-		}
-	}, [props.selectedValue, options]);
+		setSelectedValue(props.selectedValue ?? "");
+	}, [props.selectedValue]);
 
 	/* クリックイベントでドロップダウンを閉じる */
 	useEffect(() => {

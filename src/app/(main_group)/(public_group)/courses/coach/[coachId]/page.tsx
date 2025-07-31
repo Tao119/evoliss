@@ -149,12 +149,12 @@ const Page = () => {
 
 	const averageRating: number =
 		coachData.courses &&
-			coachData.courses.length > 0 &&
-			coachData.courses.reduce(
-				(totalCount, course) =>
-					totalCount + (course.reviews ? course.reviews.length : 0),
-				0,
-			) != 0
+		coachData.courses.length > 0 &&
+		coachData.courses.reduce(
+			(totalCount, course) =>
+				totalCount + (course.reviews ? course.reviews.length : 0),
+			0,
+		) != 0
 			? coachData.courses.reduce(
 				(totalScore, course) =>
 					totalScore +
@@ -170,10 +170,12 @@ const Page = () => {
 			)
 			: 0;
 
-	const reviewNum = coachData.courses.reduce(
-		(total, course) => total + (course.reviews?.length || 0),
-		0,
-	);
+	const reviewNum = coachData.courses && coachData.courses.length > 0
+		? coachData.courses.reduce(
+			(total, course) => total + (course.reviews?.length || 0),
+			0,
+		)
+		: 0;
 
 	return (
 		<div className="p-courses l-page">

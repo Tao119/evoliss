@@ -113,12 +113,11 @@
     }
 
     &__list {
+        width: 860px;
+        margin-bottom: 100px;
+        justify-content: space-between;
         @include list-container;
-        & {
-            width: 860px;
-            margin-bottom: 100px;
-            justify-content: space-between;
-        }
+
 
         &.-wrap {
             flex-wrap: nowrap;

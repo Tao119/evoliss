@@ -38,6 +38,7 @@ const MyCalendarRegisterPage = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 
+	// 月表示を初期化する関数
 	const initializeMonthView = useCallback((slots: TimeSlot[]) => {
 		const daysInMonth = currentMonth.daysInMonth();
 		const monthDays: DayTimeSlots[] = [];
@@ -109,7 +110,6 @@ const MyCalendarRegisterPage = () => {
 
 	const fetchTimeSlots = useCallback(async () => {
 		if (!userData || !userData.id) return;
-
 		try {
 			setIsLoading(true);
 			const response = await requestDB("coach", "readTimeSlotsByCoachId", {
@@ -126,60 +126,7 @@ const MyCalendarRegisterPage = () => {
 			setIsLoading(false);
 			animation.endAnimation();
 		}
-	}, [userData, animation, initializeMonthView]);
-
-	useEffect(() => {
-		animation.startAnimation();
-		if (userData) {
-			fetchTimeSlots();
-		}
-	}, [userData, currentMonth, animation, fetchTimeSlots]);
-
-	const handlePrevMonth = () => {
-		const prevMonth = currentMonth.subtract(1, "month");
-		// 今月より前には戻れない
-		if (prevMonth.isBefore(dayjs().startOf('month'))) {
-			return;
-		}
-		setCurrentMonth(prevMonth);
-	};
-
-	const handleNextMonth = () => {
-		setCurrentMonth(currentMonth.add(1, "month"));
-	};
-
-	const isPrevMonthDisabled = currentMonth.isSameOrBefore(dayjs().startOf('month'), "month");
-
-	const addTimeSlot = (dayIndex: number) => {
-		const newMonthTimeSlots = [...monthTimeSlots];
-		newMonthTimeSlots[dayIndex].timeSlots.push({
-			startTime: "",
-			endTime: "",
-			hasReservation: false
-		});
-		setMonthTimeSlots(newMonthTimeSlots);
-	};
-
-	const removeTimeSlot = (dayIndex: number, slotIndex: number) => {
-		const newMonthTimeSlots = [...monthTimeSlots];
-		newMonthTimeSlots[dayIndex].timeSlots.splice(slotIndex, 1);
-		setMonthTimeSlots(newMonthTimeSlots);
-	};
-
-	const updateTimeSlot = (dayIndex: number, slotIndex: number, field: 'startTime' | 'endTime', value: string) => {
-		const newMonthTimeSlots = [...monthTimeSlots];
-		newMonthTimeSlots[dayIndex].timeSlots[slotIndex][field] = value;
-
-		// 開始時間を変更した場合、終了時間が開始時間以前ならリセット
-		if (field === 'startTime' && value) {
-			const slot = newMonthTimeSlots[dayIndex].timeSlots[slotIndex];
-			if (slot.endTime && slot.endTime <= value) {
-				slot.endTime = '';
-			}
-		}
-
-		setMonthTimeSlots(newMonthTimeSlots);
-	};
+	}, [userData, initializeMonthView]);
 
 	const handleSave = async () => {
 		if (!userData) return;
@@ -273,6 +220,58 @@ const MyCalendarRegisterPage = () => {
 			setIsSaving(false);
 		}
 	};
+
+	useEffect(() => {
+		animation.startAnimation();
+		fetchTimeSlots();
+	}, [fetchTimeSlots]);
+
+	const handlePrevMonth = () => {
+		const prevMonth = currentMonth.subtract(1, "month");
+		// 今月より前には戻れない
+		if (prevMonth.isBefore(dayjs().startOf('month'))) {
+			return;
+		}
+		setCurrentMonth(prevMonth);
+	};
+
+	const handleNextMonth = () => {
+		setCurrentMonth(currentMonth.add(1, "month"));
+	};
+
+	const isPrevMonthDisabled = currentMonth.isSameOrBefore(dayjs().startOf('month'), "month");
+
+	const addTimeSlot = (dayIndex: number) => {
+		const newMonthTimeSlots = [...monthTimeSlots];
+		newMonthTimeSlots[dayIndex].timeSlots.push({
+			startTime: "",
+			endTime: "",
+			hasReservation: false
+		});
+		setMonthTimeSlots(newMonthTimeSlots);
+	};
+
+	const removeTimeSlot = (dayIndex: number, slotIndex: number) => {
+		const newMonthTimeSlots = [...monthTimeSlots];
+		newMonthTimeSlots[dayIndex].timeSlots.splice(slotIndex, 1);
+		setMonthTimeSlots(newMonthTimeSlots);
+	};
+
+	const updateTimeSlot = (dayIndex: number, slotIndex: number, field: 'startTime' | 'endTime', value: string) => {
+		const newMonthTimeSlots = [...monthTimeSlots];
+		newMonthTimeSlots[dayIndex].timeSlots[slotIndex][field] = value;
+
+		// 開始時間を変更した場合、終了時間が開始時間以前ならリセット
+		if (field === 'startTime' && value) {
+			const slot = newMonthTimeSlots[dayIndex].timeSlots[slotIndex];
+			if (slot.endTime && slot.endTime <= value) {
+				slot.endTime = '';
+			}
+		}
+
+		setMonthTimeSlots(newMonthTimeSlots);
+	};
+
 
 	if (!userData || isLoading) {
 		return (

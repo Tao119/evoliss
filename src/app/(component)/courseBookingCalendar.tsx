@@ -91,7 +91,7 @@ const CourseBookingCalendar: React.FC<BookingCalendarProps> = ({
 
 	useEffect(() => {
 		setChosenSchedule(undefined);
-	}, [selectedDate, setChosenSchedule]);
+	}, [selectedDate]);
 
 	const availableSlots = availableTimeSlots
 		.filter((slot) => {
@@ -238,7 +238,7 @@ const CourseBookingCalendar: React.FC<BookingCalendarProps> = ({
 				<BookingSlot
 					availableTimeSlots={availableSlots}
 					startTime={
-						chosenSchedule != undefined
+						chosenSchedule !== undefined && chosenSchedule !== ""
 							? dayjs(chosenSchedule).format("HH:mm")
 							: undefined
 					}

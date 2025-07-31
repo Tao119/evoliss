@@ -40,14 +40,14 @@ const CoachCreatePage = () => {
 	useEffect(() => {
 		animation.startAnimation();
 		fetchInitialData();
-	}, [animation]);
+	}, []);
 
 	useEffect(() => {
 		if (userData && games.length > 0 && tags.length > 0) {
 			setIsLoading(false);
 			animation.endAnimation();
 		}
-	}, [userData, games, tags, animation]);
+	}, [userData, games, tags]);
 
 	if (!userData) return <></>
 

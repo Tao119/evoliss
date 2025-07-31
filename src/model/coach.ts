@@ -365,11 +365,11 @@ async function updateTimeSlots({
 	const result = await withTransaction(async (tx) => {
 		// 指定された日付範囲の既存のタイムスロットを削除（予約済みを除く）
 		const dates = [...new Set(timeSlots.map(ts => ts.split(' ')[0]))];
-		
+
 		if (dates.length > 0) {
 			const startDate = dates[0] + ' 00:00:00';
 			const endDate = dates[dates.length - 1] + ' 23:59:59';
-			
+
 			// 予約のないタイムスロットのみ削除
 			await tx.timeSlot.deleteMany({
 				where: {
@@ -382,7 +382,7 @@ async function updateTimeSlots({
 				},
 			});
 		}
-		
+
 		// 新しいタイムスロットを作成
 		if (timeSlots.length > 0) {
 			const createResult = await tx.timeSlot.createMany({
@@ -392,13 +392,13 @@ async function updateTimeSlots({
 				})),
 				skipDuplicates: true,
 			});
-			
+
 			return {
 				created: createResult.count,
 				coachId,
 			};
 		}
-		
+
 		return {
 			created: 0,
 			coachId,
@@ -438,7 +438,7 @@ async function updateTimeSlotsMonthly({
 				},
 			});
 		}
-		
+
 		// 新しいタイムスロットを作成
 		let created = 0;
 		if (timeSlots.length > 0) {
@@ -471,7 +471,7 @@ async function updateTimeSlotsMonthly({
 				created = createResult.count;
 			}
 		}
-		
+
 		return {
 			created,
 			deleted: deleteSlotIds.length,

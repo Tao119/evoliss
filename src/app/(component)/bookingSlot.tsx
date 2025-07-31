@@ -36,11 +36,12 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
 
 	getAvailableTimeRange();
 
-	const centerTime = duration
+	const centerTime = startTime && duration
 		? dayjs(`2000-01-01 ${startTime}`).add(duration / 2, "minute")
 		: undefined;
-	const centerTimeNum =
-		(centerTime?.hour() ?? 0) + (centerTime?.minute() ?? 0) / 60;
+	const centerTimeNum = centerTime
+		? centerTime.hour() + centerTime.minute() / 60
+		: 0;
 
 	// 時間が利用可能かチェック
 	const isTimeAvailable = (checkTime: string) => {

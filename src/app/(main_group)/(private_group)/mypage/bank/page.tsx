@@ -29,7 +29,7 @@ const BankPage = () => {
 		}
 		setIsLoading(false);
 		animation.endAnimation();
-	}, [userData, animation]);
+	}, [userData]);
 
 	if (!userData || isLoading) {
 		return (
@@ -72,7 +72,7 @@ const BankPage = () => {
 		<>
 			<div className="p-mypage__title">入金用口座登録</div>
 			<Border />
-			
+
 			<div className="p-bank">
 				<div className="p-bank__form">
 					<div className="p-bank__input-group">
@@ -158,7 +158,7 @@ const BankPage = () => {
 					</div>
 
 					<div className="p-bank__button-container">
-						<Button 
+						<Button
 							className="p-bank__button"
 							onClick={handleSubmit}
 						>
