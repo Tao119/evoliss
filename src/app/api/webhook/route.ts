@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 				where: {
 					customerId: parsedUserId,
 					coachId: course.coachId,
-				} as any,  // 一時的な回避策
+				}
 			});
 
 			if (!messageRoom) {
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
 					}
 				}
 
-				messageRoom = await prisma.messageRoom.create({
+				messageRoom = await (prisma.messageRoom).create({
 					data: {
 						roomKey,
 						customerId: parsedUserId,
