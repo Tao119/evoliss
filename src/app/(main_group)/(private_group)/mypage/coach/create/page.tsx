@@ -43,7 +43,7 @@ const CoachCreatePage = () => {
 	}, []);
 
 	useEffect(() => {
-		if (userData && games.length > 0 && tags.length > 0) {
+		if (userData && games && tags) {
 			setIsLoading(false);
 			animation.endAnimation();
 		}
