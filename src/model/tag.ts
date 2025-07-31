@@ -15,8 +15,10 @@ async function readTags() {
 	return withCache(
 		cacheKey,
 		async () => {
-			console.log(prisma.tag);
+			console.log('Fetching tags from database...');
 			const data = await prisma.tag.findMany({});
+			console.log('readTags result:', data.length, 'tags found');
+			console.log('Tags:', data);
 			return data;
 		},
 		CACHE_TTL.VERY_LONG // タグは変更頻度が低いので24時間キャッシュ

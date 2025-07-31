@@ -12,6 +12,7 @@ import editIcon from "@/assets/image/camera.svg";
 import defaultIcon from "@/assets/image/user_icon.svg";
 import { Filter } from "@/components/filter";
 import { Game } from "@/type/models";
+import { optimizeImage } from "@/utils/imageResize";
 
 import youtubeIcon from "@/assets/image/youtube.svg"
 import xIcon from "@/assets/image/x.svg"
@@ -221,16 +222,24 @@ const ProfilePage = () => {
 		animation.endAnimation();
 	};
 
-	const handleIconFileSelect = (file: File) => {
-		// ファイルを一時保存
-		setTempIconFile(file);
+	const handleIconFileSelect = async (file: File) => {
+		try {
+			// 画像を最適化（最大1MBに圧縮）
+			const optimizedFile = await optimizeImage(file, 1);
+			
+			// ファイルを一時保存
+			setTempIconFile(optimizedFile);
 
-		// プレビュー用のURLを生成
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			setTempIconPreview(e.target?.result as string);
-		};
-		reader.readAsDataURL(file);
+			// プレビュー用のURLを生成
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				setTempIconPreview(e.target?.result as string);
+			};
+			reader.readAsDataURL(optimizedFile);
+		} catch (error) {
+			console.error("画像の最適化に失敗しました:", error);
+			alert("画像の処理に失敗しました。別の画像をお試しください。");
+		}
 	};
 
 	const uploadImage = async (file: File, type: "header" | "icon"): Promise<string | null> => {

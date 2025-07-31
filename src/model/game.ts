@@ -38,17 +38,13 @@ async function readGameById({ id }: { id: number }) {
 }
 
 async function readAllGames() {
-	const cacheKey = `${CACHE_PREFIX.GAME}all-with-courses`;
+	const cacheKey = `${CACHE_PREFIX.GAME}all`;
 
 	return withCache(
 		cacheKey,
 		async () => {
+			// すべてのゲームを取得（coursesの有無に関わらず）
 			const data = await prisma.game.findMany({
-				where: {
-					courses: {
-						some: {},
-					},
-				},
 				include: {
 					courses: {
 						include: {
@@ -58,6 +54,7 @@ async function readAllGames() {
 					},
 				},
 			});
+			console.log('readAllGames result:', data.length, 'games found');
 			return data;
 		},
 		CACHE_TTL.LONG

@@ -2,6 +2,10 @@ import { s3Client } from "@/lib/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { type NextRequest, NextResponse } from "next/server";
 
+// APIルートの設定
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60秒のタイムアウト
+
 export async function POST(req: NextRequest) {
 	try {
 		const { fileName, fileType, fileBase64, keyPrefix } = await req.json();

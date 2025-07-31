@@ -13,6 +13,7 @@ import { ImageBox } from "@/components/imageBox";
 import imageIcon from "@/assets/image/image.svg";
 import cameraIcon from "@/assets/image/camera.svg";
 import type { Game, Tag } from "@/type/models";
+import { optimizeImage } from "@/utils/imageResize";
 
 const CoachCreatePage = () => {
 	const { userData, fetchUserData } = useContext(UserDataContext)!;
@@ -73,14 +74,10 @@ const CoachCreatePage = () => {
 		}
 	};
 
-	const handleImageSelect = (file: File) => {
-		if (!file) return;
 
-		// ファイルサイズチェック（5MB以下）
-		if (file.size > 5 * 1024 * 1024) {
-			alert("画像サイズは5MB以下にしてください");
-			return;
-		}
+
+	const handleImageSelect = async (file: File) => {
+		if (!file) return;
 
 		// ファイルタイプチェック
 		if (!file.type.startsWith("image/")) {
@@ -88,12 +85,20 @@ const CoachCreatePage = () => {
 			return;
 		}
 
-		setTempImageFile(file);
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			setTempImagePreview(e.target?.result as string);
-		};
-		reader.readAsDataURL(file);
+		try {
+			// 画像を最適化（最大1MBに圧縮）
+			const optimizedFile = await optimizeImage(file, 1);
+
+			setTempImageFile(optimizedFile);
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				setTempImagePreview(e.target?.result as string);
+			};
+			reader.readAsDataURL(optimizedFile);
+		} catch (error) {
+			console.error('画像の最適化に失敗しました:', error);
+			alert('画像の処理に失敗しました。別の画像をお試しください。');
+		}
 	};
 
 	const uploadImage = async (file: File): Promise<string | null> => {
