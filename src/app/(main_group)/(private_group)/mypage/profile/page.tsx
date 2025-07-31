@@ -13,6 +13,7 @@ import defaultIcon from "@/assets/image/user_icon.svg";
 import { Filter } from "@/components/filter";
 import { Game } from "@/type/models";
 import { optimizeImage } from "@/utils/imageResize";
+import { uploadImage } from "@/utils/imageUpload";
 
 import youtubeIcon from "@/assets/image/youtube.svg"
 import xIcon from "@/assets/image/x.svg"
@@ -176,18 +177,18 @@ const ProfilePage = () => {
 
 
 		try {
-			let newIconUrl = icon;
+		let newIconUrl = icon;
 
-			if (tempIconFile) {
-				const uploadResult = await uploadImage(tempIconFile, "icon");
-				if (uploadResult) {
-					newIconUrl = uploadResult;
-				} else {
-					alert("画像のアップロードに失敗しました。");
-					animation.endAnimation();
-					return;
-				}
-			}
+		if (tempIconFile) {
+		const uploadResult = await uploadImage(tempIconFile, "icon", userData.id);
+		if (uploadResult) {
+		newIconUrl = uploadResult;
+		} else {
+		alert("画像のアップロードに失敗しました。");
+		animation.endAnimation();
+		return;
+		}
+		}
 
 
 			// SNS URLを正規化（完全なURLに変換）
@@ -242,38 +243,7 @@ const ProfilePage = () => {
 		}
 	};
 
-	const uploadImage = async (file: File, type: "header" | "icon"): Promise<string | null> => {
-		try {
-			const fileName = `${userData.id}/${type}/${Date.now()}.${file.type.split("/")[1]}`;
-			const fileBase64 = await fileToBase64(file);
-			const keyPrefix = type;
 
-			const response = await Axios.post("/api/s3/upload", {
-				fileName,
-				fileType: file.type,
-				fileBase64,
-				keyPrefix,
-			});
-
-			if (response.data.success) {
-				return response.data.url;
-			} else {
-				return null;
-			}
-		} catch (error) {
-			console.error("Error uploading image:", error);
-			return null;
-		}
-	};
-
-	const fileToBase64 = (file: File): Promise<string> => {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = () => resolve(reader.result!.toString().split(",")[1]);
-			reader.onerror = (error) => reject(error);
-		});
-	};
 
 
 	return (

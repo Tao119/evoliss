@@ -14,6 +14,7 @@ import imageIcon from "@/assets/image/image.svg";
 import cameraIcon from "@/assets/image/camera.svg";
 import type { Game, Tag, Course } from "@/type/models";
 import { optimizeImage } from "@/utils/imageResize";
+import { uploadImage } from "@/utils/imageUpload";
 
 const CoachEditPage = () => {
 	const { userData, fetchUserData } = useContext(UserDataContext)!;
@@ -140,38 +141,7 @@ const CoachEditPage = () => {
 		}
 	};
 
-	const uploadImage = async (file: File): Promise<string | null> => {
-		try {
-			const fileName = `${userData?.id}/course/${Date.now()}.${file.type.split("/")[1]}`;
-			const fileBase64 = await fileToBase64(file);
-			const keyPrefix = "course";
 
-			const response = await Axios.post("/api/s3/upload", {
-				fileName,
-				fileType: file.type,
-				fileBase64,
-				keyPrefix,
-			});
-
-			if (response.data.success) {
-				return response.data.url;
-			} else {
-				return null;
-			}
-		} catch (error) {
-			console.error("Error uploading image:", error);
-			return null;
-		}
-	};
-
-	const fileToBase64 = (file: File): Promise<string> => {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = () => resolve(reader.result!.toString().split(",")[1]);
-			reader.onerror = (error) => reject(error);
-		});
-	};
 
 	const validateForm = () => {
 		if (!title.trim()) {
@@ -223,7 +193,7 @@ const CoachEditPage = () => {
 
 			// 新しい画像がアップロードされた場合
 			if (tempImageFile) {
-				const uploadedUrl = await uploadImage(tempImageFile);
+				const uploadedUrl = await uploadImage(tempImageFile, "course", userData?.id!);
 				if (!uploadedUrl) {
 					alert("画像のアップロードに失敗しました");
 					animation.endAnimation();
