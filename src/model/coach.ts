@@ -61,7 +61,7 @@ async function readTopCoaches() {
 					courses: {
 						include: {
 							reviews: true,
-							accesses: true,
+							reservations: true,
 						},
 					},
 				},
@@ -69,17 +69,17 @@ async function readTopCoaches() {
 			const sortedCoaches = coaches
 				.map((coach) => ({
 					...coach,
-					accessCount: coach.courses.reduce(
-						(sum, course) => sum + (course.accesses?.length || 0),
+					reservationCount: coach.courses.reduce(
+						(sum, course) => sum + (course.reservations?.length || 0),
 						0,
 					),
 				}))
-				.sort((a, b) => b.accessCount - a.accessCount)
+				.sort((a, b) => b.reservationCount - a.reservationCount)
 				.slice(0, 6);
 
 			return sortedCoaches;
 		},
-		CACHE_TTL.MEDIUM // 30分キャッシュ
+		CACHE_TTL.MEDIUM
 	);
 }
 
@@ -111,7 +111,6 @@ async function readCoachesByQuery({
 				include: {
 					reservations: true,
 					reviews: true,
-					accesses: true,
 				},
 			},
 			game: true
@@ -136,8 +135,8 @@ async function readCoachesByQuery({
 		return {
 			...c,
 			totalReservations,
-			accessCount: c.courses.reduce(
-				(sum, course) => sum + (course.accesses?.length || 0),
+			reservationCount: c.courses.reduce(
+				(sum, course) => sum + (course.reservations?.length || 0),
 				0,
 			),
 			reviewCount: c.courses.reduce(
@@ -210,9 +209,9 @@ function calculateRelevanceScore(coach: any, query?: string): number {
 		score += 20;
 	}
 
-	const accessCount =
+	const reservationCount =
 		coach.courses?.reduce(
-			(sum: number, course: any) => sum + (course.accesses?.length || 0),
+			(sum: number, course: any) => sum + (course.reservations?.length || 0),
 			0,
 		) || 0;
 	const reviewCount =
@@ -221,7 +220,7 @@ function calculateRelevanceScore(coach: any, query?: string): number {
 			0,
 		) || 0;
 
-	score += Math.min(accessCount * 0.1, 10);
+	score += Math.min(reservationCount * 0.1, 10);
 	score += Math.min(reviewCount * 0.5, 15);
 
 	return score;
