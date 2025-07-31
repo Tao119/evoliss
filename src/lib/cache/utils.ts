@@ -10,6 +10,11 @@ export interface CacheOptions {
  * キャッシュから値を取得
  */
 export async function getCachedData<T>(key: string): Promise<T | null> {
+  // 環境変数でキャッシュを完全に無効化
+  if (process.env.DISABLE_CACHE === 'true') {
+    return null;
+  }
+
   try {
     const client = getRedisClient();
     const data = await client.get(key);
@@ -36,6 +41,11 @@ export async function setCachedData<T>(
   data: T, 
   ttl: number = CACHE_TTL.MEDIUM
 ): Promise<void> {
+  // 環境変数でキャッシュを完全に無効化
+  if (process.env.DISABLE_CACHE === 'true') {
+    return;
+  }
+
   try {
     const client = getRedisClient();
     await client.setex(key, ttl, JSON.stringify(data));
@@ -51,6 +61,11 @@ export async function setCachedData<T>(
  * キャッシュを削除
  */
 export async function deleteCachedData(key: string | string[]): Promise<void> {
+  // 環境変数でキャッシュを完全に無効化
+  if (process.env.DISABLE_CACHE === 'true') {
+    return;
+  }
+
   try {
     const client = getRedisClient();
     if (Array.isArray(key)) {
@@ -96,6 +111,11 @@ export async function withCache<T>(
   fetchFn: () => Promise<T>,
   ttl: number = CACHE_TTL.MEDIUM
 ): Promise<T> {
+  // 環境変数でキャッシュを完全に無効化
+  if (process.env.DISABLE_CACHE === 'true') {
+    return await fetchFn();
+  }
+
   // キャッシュから取得を試みる
   const cached = await getCachedData<T>(key);
   if (cached !== null) {

@@ -40,23 +40,6 @@ async function readGameById({ id }: { id: number }) {
 async function readAllGames() {
 	const cacheKey = `${CACHE_PREFIX.GAME}all`;
 
-	// デバッグ用: キャッシュをバイパス
-	if (process.env.BYPASS_CACHE === 'true') {
-		console.log('Bypassing cache for readAllGames');
-		const data = await prisma.game.findMany({
-			include: {
-				courses: {
-					include: {
-						coach: true,
-						accesses: true,
-					},
-				},
-			},
-		});
-		console.log('readAllGames direct DB result:', data.length, 'games found');
-		return data;
-	}
-
 	return withCache(
 		cacheKey,
 		async () => {

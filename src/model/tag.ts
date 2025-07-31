@@ -12,15 +12,6 @@ const tagCacheInvalidator = createCacheInvalidator(CACHE_PREFIX.TAG);
 async function readTags() {
 	const cacheKey = `${CACHE_PREFIX.TAG}all`;
 	
-	// デバッグ用: キャッシュをバイパス
-	if (process.env.BYPASS_CACHE === 'true') {
-		console.log('Bypassing cache for readTags');
-		const data = await prisma.tag.findMany({});
-		console.log('readTags direct DB result:', data.length, 'tags found');
-		console.log('Tags:', data);
-		return data;
-	}
-	
 	return withCache(
 		cacheKey,
 		async () => {
