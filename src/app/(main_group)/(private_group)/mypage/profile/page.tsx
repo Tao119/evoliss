@@ -106,7 +106,7 @@ const ProfilePage = () => {
 		const channelIdPattern = /^UC[a-zA-Z0-9_-]{22}$/;
 		// @ハンドルパターン
 		const handlePattern = /^@[a-zA-Z0-9_-]+$/;
-		
+
 		return urlPattern.test(url) || channelIdPattern.test(url) || handlePattern.test(url);
 	};
 
@@ -127,7 +127,7 @@ const ProfilePage = () => {
 		const urlPattern = /^(https?:\/\/)?(www\.)?(twitter\.com\/|x\.com\/)([a-zA-Z0-9_]{1,15})$/;
 		// ユーザー名パターン
 		const usernamePattern = /^@?[a-zA-Z0-9_]{1,15}$/;
-		
+
 		return urlPattern.test(input) || usernamePattern.test(input);
 	};
 
@@ -147,7 +147,7 @@ const ProfilePage = () => {
 		const urlPattern = /^(https?:\/\/)?(note\.com\/)([\w-]+)$/;
 		// ユーザー名パターン
 		const usernamePattern = /^[\w-]+$/;
-		
+
 		return urlPattern.test(input) || usernamePattern.test(input);
 	};
 
@@ -226,7 +226,7 @@ const ProfilePage = () => {
 		try {
 			// 画像を最適化（最大1MBに圧縮）
 			const optimizedFile = await optimizeImage(file, 1);
-			
+
 			// ファイルを一時保存
 			setTempIconFile(optimizedFile);
 
@@ -325,35 +325,41 @@ const ProfilePage = () => {
 			<div className="p-profile__item">
 				<div className="p-profile__item-label">メインゲーム</div>
 				<div className="p-profile__item-input-outline">
-					<Filter className="p-profile__item-input -filter" options={games.map((g) => ({ label: g.name, value: g.id }))} selectedValue={userData.gameId} onChange={(e: any) => setGameId(e)} /></div>
+					<Filter
+						className="p-profile__item-input -filter"
+						options={games.map((g) => ({ label: g.name, value: g.id }))}
+						includeDefault
+						label="選択して下さい"
+						selectedValue={userData.gameId}
+						onChange={(e: any) => setGameId(e)} /></div>
 			</div>
 			<div className="p-profile__item">
 				<div className="p-profile__item-label">SNS連携</div>
 				<div className="p-profile__sns">
 					<ImageBox src={youtubeIcon} className="p-profile__sns-icon" />
-					<InputBox 
-						className="p-profile__sns-input" 
-						placeholder="URL、チャンネルID、または@ハンドル" 
-						value={youtubeLink} 
-						onChange={(e) => setYoutubeLink(e.target.value)} 
+					<InputBox
+						className="p-profile__sns-input"
+						placeholder="URL、チャンネルID、または@ハンドル"
+						value={youtubeLink}
+						onChange={(e) => setYoutubeLink(e.target.value)}
 					/>
 				</div>
 				<div className="p-profile__sns">
 					<ImageBox src={xIcon} className="p-profile__sns-icon" />
-					<InputBox 
-						className="p-profile__sns-input" 
-						value={xLink} 
-						placeholder="URL、またはユーザー名（@付きも可）" 
-						onChange={(e) => setXLink(e.target.value)} 
+					<InputBox
+						className="p-profile__sns-input"
+						value={xLink}
+						placeholder="URL、またはユーザー名（@付きも可）"
+						onChange={(e) => setXLink(e.target.value)}
 					/>
 				</div>
 				<div className="p-profile__sns">
 					<ImageBox src={noteIcon} className="p-profile__sns-icon" />
-					<InputBox 
-						className="p-profile__sns-input" 
-						value={noteLink} 
-						placeholder="URL、またはユーザー名" 
-						onChange={(e) => setNoteLink(e.target.value)} 
+					<InputBox
+						className="p-profile__sns-input"
+						value={noteLink}
+						placeholder="URL、またはユーザー名"
+						onChange={(e) => setNoteLink(e.target.value)}
 					/>
 				</div>
 			</div>
