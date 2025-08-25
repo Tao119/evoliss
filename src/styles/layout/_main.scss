@@ -56,6 +56,11 @@
         height: 100dvh;
     }
 
+    @include mq(sp) {
+        height: calc(100vh - 64px);
+        height: calc(100dvh - 64px);
+    }
+
 }
 
 .l-top {
@@ -150,7 +155,7 @@
     }
 
     &__link {
-        font-size: $fs-medium;
+        font-size: $fs-text;
         width: auto;
         font-weight: $fw-bold;
     }

@@ -19,6 +19,7 @@ export default function RootLayout({
 						rel="stylesheet"
 						href="https://cdn.jsdelivr.net/npm/destyle.css@1.0.15/destyle.css"
 					/>
+					<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"></meta>
 				</head>
 				<body>
 					<div className="l-main">

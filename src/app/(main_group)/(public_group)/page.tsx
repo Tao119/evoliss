@@ -7,7 +7,7 @@ import {
 	useHeader,
 } from "@/app/contextProvider";
 import chartIcon from "@/assets/image/chart.svg";
-import harunIcon from "@/assets/image/harun_logo.svg";
+import harunIcon from "@/assets/image/harun_logo.jpg";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
@@ -192,26 +192,7 @@ const Page = () => {
 					playsInline
 					muted
 				/>
-				{!orLower("sp") && (<><div className="p-about__top-panel-phrase-container animation-hidden animate-fade-in-up">
-					<div className="p-about__top-panel-phrase">
-						もっと強くなりたい人と、
-					</div>
-					<div className="p-about__top-panel-phrase">
-						そのサポートをしたい人を繋ぐ。
-					</div>
-				</div>
-
-					<div className="p-about__top-panel-support-container animation-hidden animate-fade-in animate-delay-300">
-						<div className="p-about__top-panel-support">
-							supported by はるnチャンネル
-						</div>
-						<ImageBox
-							className="p-about__top-panel-support-logo"
-							src={harunIcon}
-						/>
-					</div></>)}
-			</div>
-			{orLower("sp") && (<>
+				{/* {!orLower("sp") && (<> */}
 				<div className="p-about__top-panel-phrase-container animation-hidden animate-fade-in-up">
 					<div className="p-about__top-panel-phrase">
 						もっと強くなりたい人と、
@@ -229,7 +210,28 @@ const Page = () => {
 						className="p-about__top-panel-support-logo"
 						src={harunIcon}
 					/>
-				</div></>)}
+				</div>
+				{/* </>)} */}
+			</div>
+			{/* {orLower("sp") && (<>
+				<div className="p-about__top-panel-phrase-container animation-hidden animate-fade-in-up">
+					<div className="p-about__top-panel-phrase">
+						もっと強くなりたい人と、
+					</div>
+					<div className="p-about__top-panel-phrase">
+						そのサポートをしたい人を繋ぐ。
+					</div>
+				</div>
+
+				<div className="p-about__top-panel-support-container animation-hidden animate-fade-in animate-delay-300">
+					<div className="p-about__top-panel-support">
+						supported by はるnチャンネル
+					</div>
+					<ImageBox
+						className="p-about__top-panel-support-logo"
+						src={harunIcon}
+					/>
+				</div></>)} */}
 			<div className="p-about__content">
 				{!userData && (
 					<div ref={loginPanelRef} className={`p-about__login-panel animation-hidden ${visibleSections.has('login') ? 'animate-scale-in' : ''}`}>
@@ -237,7 +239,7 @@ const Page = () => {
 							まずは会員登録から！
 						</div>
 						<div className="p-about__login-panel-text">
-							※コーチングを受ける・コーチになるには、会員登録が必要です。
+							※コーチングを受ける・コーチになるには、<br />会員登録が必要です。
 						</div>
 						<Button
 							onClick={() => router.push("/sign-up")}
