@@ -129,6 +129,10 @@
         height: 20px;
         color: $black;
         font-weight: $fw-bold;
+
+        &.-no-bold {
+            font-weight: normal;
+        }
     }
 
     &__forgot {
@@ -159,6 +163,8 @@
 
     &__checkbox-label {
         font-size: $fs-text;
+        align-items: center;
+        display: flex;
     }
 
     &__checkbox-link {

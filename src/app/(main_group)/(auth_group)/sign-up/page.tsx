@@ -119,7 +119,7 @@ const Page = () => {
 			<span className="p-sign-in__title">新規会員登録</span>
 			<span className="p-sign-in__err">{err}</span>
 
-			<div className="p-sign-in__item u-mb24">
+			<div className="p-sign-in__item u-mb16">
 				<ImageBox className="p-sign-in__input-icon" src={mailIcon} />
 				<input
 					className={`p-sign-in__input -with-icon`}
@@ -130,7 +130,7 @@ const Page = () => {
 				/>
 			</div>
 
-			<div className="p-sign-in__item u-mb24">
+			<div className="p-sign-in__item u-mb16">
 				<ImageBox className="p-sign-in__input-icon" src={lockIcon} />
 				<input
 					className={`p-sign-in__input -with-icon`}
@@ -140,15 +140,14 @@ const Page = () => {
 					placeholder="パスワード"
 				/>
 				<ImageBox
-					className={`p-sign-in__input-password-icon ${
-						showPassword ? "-show" : ""
-					}`}
+					className={`p-sign-in__input-password-icon ${showPassword ? "-show" : ""
+						}`}
 					src={eyeIcon}
 					onClick={() => setShowPassword(!showPassword)}
 				/>
 			</div>
 
-			<div className="p-sign-in__item u-mb24">
+			<div className="p-sign-in__item u-mb16">
 				<ImageBox className="p-sign-in__input-icon" src={lockIcon} />
 				<input
 					className={`p-sign-in__input -with-icon`}
@@ -158,9 +157,8 @@ const Page = () => {
 					placeholder="パスワード確認"
 				/>
 				<ImageBox
-					className={`p-sign-in__input-password-icon ${
-						showPasswordConfirm ? "-show" : ""
-					}`}
+					className={`p-sign-in__input-password-icon ${showPasswordConfirm ? "-show" : ""
+						}`}
 					src={eyeIcon}
 					onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
 				/>
@@ -202,16 +200,15 @@ const Page = () => {
 			</div>
 
 			<Button
-				className={`p-sign-in__submit ${
-					!email ||
-					!password ||
-					!passwordConfirm ||
-					!policyChecked ||
-					!termsChecked ||
-					loading
+				className={`p-sign-in__submit ${!email ||
+						!password ||
+						!passwordConfirm ||
+						!policyChecked ||
+						!termsChecked ||
+						loading
 						? "-disabled"
 						: ""
-				}`}
+					}`}
 				disabled={
 					!email ||
 					!password ||
@@ -232,10 +229,9 @@ const Page = () => {
 				className="p-sign-in__submit"
 				onClick={() =>
 					router.push(
-						`/sign-in${
-							callbackPath
-								? "?callback=" + encodeURIComponent(callbackPath)
-								: ""
+						`/sign-in${callbackPath
+							? "?callback=" + encodeURIComponent(callbackPath)
+							: ""
 						}`,
 					)
 				}

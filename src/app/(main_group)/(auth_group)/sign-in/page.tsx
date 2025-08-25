@@ -53,10 +53,9 @@ const Page = () => {
 				if (error === "UserNotConfirmedException") {
 					// メールアドレス未確認の場合は確認ページにリダイレクト
 					router.push(
-						`/confirm?email=${encodeURIComponent(email)}${
-							callbackPath
-								? "&callback=" + encodeURIComponent(callbackPath)
-								: ""
+						`/confirm?email=${encodeURIComponent(email)}${callbackPath
+							? "&callback=" + encodeURIComponent(callbackPath)
+							: ""
 						}`,
 					);
 					return;
@@ -84,7 +83,7 @@ const Page = () => {
 			<span className="p-sign-in__title">ログイン</span>
 			<span className="p-sign-in__err">{err}</span>
 
-			<div className="p-sign-in__item u-mb24">
+			<div className="p-sign-in__item u-mb16">
 				<ImageBox className="p-sign-in__input-icon" src={mailIcon} />
 				<input
 					className={`p-sign-in__input -with-icon`}
@@ -100,7 +99,7 @@ const Page = () => {
 				/>
 			</div>
 
-			<div className="p-sign-in__item u-mb24">
+			<div className="p-sign-in__item u-mb16">
 				<ImageBox className="p-sign-in__input-icon" src={lockIcon} />
 				<input
 					className={`p-sign-in__input -with-icon`}
@@ -115,18 +114,16 @@ const Page = () => {
 					}}
 				/>
 				<ImageBox
-					className={`p-sign-in__input-password-icon ${
-						showPassword ? "-show" : ""
-					}`}
+					className={`p-sign-in__input-password-icon ${showPassword ? "-show" : ""
+						}`}
 					src={eyeIcon}
 					onClick={() => setShowPassword(!showPassword)}
 				/>
 			</div>
 
 			<Button
-				className={`p-sign-in__submit ${
-					!email || !password || loading ? "-disabled" : ""
-				}`}
+				className={`p-sign-in__submit ${!email || !password || loading ? "-disabled" : ""
+					}`}
 				disabled={!email || !password || loading}
 				onClick={handleSignIn}
 			>
@@ -137,10 +134,9 @@ const Page = () => {
 				className="p-sign-in__link"
 				onClick={() =>
 					router.push(
-						`/forgot-password${
-							callbackPath
-								? "?callback=" + encodeURIComponent(callbackPath)
-								: ""
+						`/forgot-password${callbackPath
+							? "?callback=" + encodeURIComponent(callbackPath)
+							: ""
 						}`,
 					)
 				}
@@ -155,10 +151,9 @@ const Page = () => {
 				className="p-sign-in__submit"
 				onClick={() =>
 					router.push(
-						`/sign-up${
-							callbackPath
-								? "?callback=" + encodeURIComponent(callbackPath)
-								: ""
+						`/sign-up${callbackPath
+							? "?callback=" + encodeURIComponent(callbackPath)
+							: ""
 						}`,
 					)
 				}

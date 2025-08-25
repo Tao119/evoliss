@@ -45,8 +45,7 @@ const Page = () => {
 
 			if (data.success) {
 				router.push(
-					`/reset-password?email=${encodeURIComponent(email)}${
-						callbackPath ? "&callback=" + encodeURIComponent(callbackPath) : ""
+					`/reset-password?email=${encodeURIComponent(email)}${callbackPath ? "&callback=" + encodeURIComponent(callbackPath) : ""
 					}`,
 				);
 			} else {
@@ -64,10 +63,10 @@ const Page = () => {
 			<span className="p-sign-in__title">パスワードを忘れた方へ</span>
 			<span className="p-sign-in__err">{err}</span>
 
-			<div className="p-sign-in__item u-mb24">
+			<div className="p-sign-in__item u-mb16">
 				<ImageBox className="p-sign-in__input-icon" src={mailIcon} />
 				<input
-					className={`p-sign-in__input`}
+					className={`p-sign-in__input -with-icon`}
 					type="email"
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}

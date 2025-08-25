@@ -88,10 +88,9 @@ const Page = () => {
 					if (result?.error) {
 						setTimeout(() => {
 							router.push(
-								`/sign-in${
-									callbackPath
-										? "?callback=" + encodeURIComponent(callbackPath)
-										: ""
+								`/sign-in${callbackPath
+									? "?callback=" + encodeURIComponent(callbackPath)
+									: ""
 								}`,
 							);
 						}, 2000);
@@ -102,10 +101,9 @@ const Page = () => {
 					console.error("Auto login failed:", loginError);
 					setTimeout(() => {
 						router.push(
-							`/sign-in${
-								callbackPath
-									? "?callback=" + encodeURIComponent(callbackPath)
-									: ""
+							`/sign-in${callbackPath
+								? "?callback=" + encodeURIComponent(callbackPath)
+								: ""
 							}`,
 						);
 					}, 2000);
@@ -115,10 +113,9 @@ const Page = () => {
 			} else {
 				setTimeout(() => {
 					router.push(
-						`/sign-in${
-							callbackPath
-								? "?callback=" + encodeURIComponent(callbackPath)
-								: ""
+						`/sign-in${callbackPath
+							? "?callback=" + encodeURIComponent(callbackPath)
+							: ""
 						}`,
 					);
 				}, 2000);
@@ -189,25 +186,24 @@ const Page = () => {
 			<div className="p-sign-in__err">{error}</div>
 			<div className="p-sign-in__text">{email} に確認コードを送信しました</div>
 
-			<div className="p-sign-in__item u-mb24">
+			<div className="p-sign-in__item u-mb16">
 				<InputBox
 					className="p-sign-in__input"
 					placeholder="確認コード"
 					value={code}
 					onChange={(e) => setCode(e.target.value)}
-					//   onKeyPress={(e) => {
-					//     if (e.key === "Enter" && code.trim() && !loading) {
-					//       handleConfirm();
-					//     }
-					//   }}
+				//   onKeyPress={(e) => {
+				//     if (e.key === "Enter" && code.trim() && !loading) {
+				//       handleConfirm();
+				//     }
+				//   }}
 				/>
 			</div>
 
 			<Button
 				disabled={!code.trim() || loading}
-				className={`p-sign-in__submit u-mb24 ${
-					!code.trim() || loading ? "-disabled" : ""
-				}`}
+				className={`p-sign-in__submit u-mb16 ${!code.trim() || loading ? "-disabled" : ""
+					}`}
 				onClick={handleConfirm}
 			>
 				{loading ? "確認中..." : "確認する"}

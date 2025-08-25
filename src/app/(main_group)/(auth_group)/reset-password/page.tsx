@@ -128,10 +128,9 @@ const Page = () => {
 					<span className="p-sign-in__title">パスワードをリセット</span>
 					<span className="p-sign-in__err">{err}</span>
 
-					<div className="p-sign-in__item u-mb24">
-						<ImageBox className="p-sign-in__input-icon" src={mailIcon} />
+					<div className="p-sign-in__item u-mb16">
 						<input
-							className={`p-sign-in__input`}
+							className={`p-sign-in__input -with-icon`}
 							type="email"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
@@ -144,9 +143,8 @@ const Page = () => {
 					</div>
 
 					<Button
-						className={`p-sign-in__submit ${
-							!email || loading ? "-disabled" : ""
-						}`}
+						className={`p-sign-in__submit ${!email || loading ? "-disabled" : ""
+							}`}
 						disabled={!email || loading}
 						onClick={sendResetCode}
 					>
@@ -178,8 +176,7 @@ const Page = () => {
 						{email} にリセットコードを送信しました
 					</div>
 
-					<div className="p-sign-in__item u-mb24">
-						<ImageBox className="p-sign-in__input-icon" src={mailIcon} />
+					<div className="p-sign-in__item u-mb16">
 						<input
 							className={`p-sign-in__input`}
 							type="text"
@@ -189,37 +186,35 @@ const Page = () => {
 						/>
 					</div>
 
-					<div className="p-sign-in__item u-mb24">
+					<div className="p-sign-in__item u-mb16">
 						<ImageBox className="p-sign-in__input-icon" src={lockIcon} />
 						<input
-							className={`p-sign-in__input`}
+							className={`p-sign-in__input -with-icon`}
 							type={showPassword ? "text" : "password"}
 							value={newPassword}
 							onChange={(e) => setNewPassword(e.target.value)}
 							placeholder="新しいパスワード"
 						/>
 						<ImageBox
-							className={`p-sign-in__input-password-icon ${
-								showPassword ? "-show" : ""
-							}`}
+							className={`p-sign-in__input-password-icon ${showPassword ? "-show" : ""
+								}`}
 							src={eyeIcon}
 							onClick={() => setShowPassword(!showPassword)}
 						/>
 					</div>
 
-					<div className="p-sign-in__item u-mb24">
+					<div className="p-sign-in__item u-mb16">
 						<ImageBox className="p-sign-in__input-icon" src={lockIcon} />
 						<input
-							className={`p-sign-in__input`}
+							className={`p-sign-in__input -with-icon`}
 							type={showConfirmPassword ? "text" : "password"}
 							value={confirmPassword}
 							onChange={(e) => setConfirmPassword(e.target.value)}
 							placeholder="パスワード確認"
 						/>
 						<ImageBox
-							className={`p-sign-in__input-password-icon ${
-								showConfirmPassword ? "-show" : ""
-							}`}
+							className={`p-sign-in__input-password-icon ${showConfirmPassword ? "-show" : ""
+								}`}
 							src={eyeIcon}
 							onClick={() => setShowConfirmPassword(!showConfirmPassword)}
 						/>
@@ -230,11 +225,10 @@ const Page = () => {
 					</div>
 
 					<Button
-						className={`p-sign-in__submit u-mb24 ${
-							!code || !newPassword || !confirmPassword || loading
-								? "-disabled"
-								: ""
-						}`}
+						className={`p-sign-in__submit u-mb16 ${!code || !newPassword || !confirmPassword || loading
+							? "-disabled"
+							: ""
+							}`}
 						disabled={!code || !newPassword || !confirmPassword || loading}
 						onClick={confirmPasswordReset}
 					>
@@ -251,7 +245,7 @@ const Page = () => {
 				<>
 					<span className="p-sign-in__title">パスワードリセット完了</span>
 
-					<div className="p-sign-in__text">
+					<div className="p-sign-in__text -no-bold">
 						パスワードが正常にリセットされました。
 						<br />
 						新しいパスワードでログインしてください。
