@@ -7,9 +7,11 @@
     justify-content: flex-start;
     width: 100%;
     height: auto;
-    padding: 50px;
+    padding: 15px;
     color: $black;
     background-color: $soft-gray;
+    border-radius: 10px;
+
 
     gap: 30px;
 
@@ -30,6 +32,10 @@
 
         @include mq(sp) {
             width: 100%;
+        }
+
+        &.-padding {
+            padding: 0 35px;
         }
     }
 

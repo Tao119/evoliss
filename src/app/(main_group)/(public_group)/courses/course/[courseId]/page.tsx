@@ -313,7 +313,7 @@ const Page = () => {
 				</div>
 			</div>
 			<div className="p-course">
-				<div className="p-course__content">
+				<div className="p-course__content -padding">
 					<ImageBox
 						src={courseData.image ?? defaultImage}
 						className="p-course__image"
@@ -336,6 +336,8 @@ const Page = () => {
 					<div className="p-course__description u-mt36 u-mb48">
 						{courseData.description}
 					</div>
+				</div>
+				<div className="p-course__content">
 
 					<div className="p-course__section u-mb64">
 						<CourseBookingCalendar

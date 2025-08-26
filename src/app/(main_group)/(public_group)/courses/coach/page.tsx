@@ -120,72 +120,78 @@ const Page = () => {
 			<Border />
 
 			{/* ---------------- フリーワード検索 ---------------- */}
-			<div className="p-coaches__input-title">フリーワード検索</div>
-			<div className="p-coaches__input-outline">
-				<input
-					className="p-coaches__input"
-					type="text"
-					value={searchText}
-					placeholder="コーチ名や自己紹介で検索"
-					onChange={(e) => setSearchText(e.target.value)}
-					onKeyDown={(e) => e.key === "Enter" && search()}
-				/>
-			</div>
-			<Button className="p-coaches__search u-mb48" onClick={search}>
-				検索
-			</Button>
 
-			{query && (
-				<div className="p-coaches__text">
-					「{query}」の検索結果: {coachNum}件
-				</div>
-			)}
-
-			{/* ---------------- 並び順 ---------------- */}
-			<div className="p-coaches__sort">
-				<div className="p-coaches__sort-label">並び順</div>
-				<Filter
-					className="p-coaches__sort-input"
-					selectedValue={sortMethod}
-					options={[
-						{ label: "人気順", value: 0 },
-						{ label: "新着順", value: 1 },
-					]}
-					onChange={setSortMethod}
-				/>
-			</div>
-
-			{/* ---------------- ローディング・結果表示 ---------------- */}
-			{isLoading && <div className="p-coaches__text">検索中...</div>}
-
-			{showNoResults && (
-				<div className="p-coaches__no-results">
-					<div className="p-coaches__text">
-						{query
-							? `「${query}」に一致するコーチが見つかりませんでした。`
-							: "コーチが見つかりませんでした。"}
-					</div>
-				</div>
-			)}
-
-			{currentCoaches.length > 0 && (
-				<div className="p-coaches__list">
-					{currentCoaches.map((coach, i) => (
-						<CoachCard key={coach.id || i} coach={coach} big />
-					))}
-				</div>
-			)}
-
-			{coachNum > total && (
-				<div className="p-coaches__pagination">
-					<Pagination
-						all={coachNum}
-						total={total}
-						page={currentPage}
-						updatePage={setCurrentPage}
+			<div className="p-coaches__section">
+				<div className="p-coaches__input-title">フリーワード検索</div>
+				<div className="p-coaches__input-outline">
+					<input
+						className="p-coaches__input"
+						type="text"
+						value={searchText}
+						placeholder="コーチ名や自己紹介で検索"
+						onChange={(e) => setSearchText(e.target.value)}
+						onKeyDown={(e) => e.key === "Enter" && search()}
 					/>
 				</div>
-			)}
+				<Button className="p-coaches__search u-mb48" onClick={search}>
+					検索
+				</Button>
+			</div>
+
+			<div className="p-coaches__section">
+
+				{query && (
+					<div className="p-coaches__text">
+						「{query}」の検索結果: {coachNum}件
+					</div>
+				)}
+
+				{/* ---------------- 並び順 ---------------- */}
+				<div className="p-coaches__sort">
+					<div className="p-coaches__sort-label">並び順</div>
+					<Filter
+						className="p-coaches__sort-input"
+						selectedValue={sortMethod}
+						options={[
+							{ label: "人気順", value: 0 },
+							{ label: "新着順", value: 1 },
+						]}
+						onChange={setSortMethod}
+					/>
+				</div>
+
+				{/* ---------------- ローディング・結果表示 ---------------- */}
+				{isLoading && <div className="p-coaches__text">検索中...</div>}
+
+				{showNoResults && (
+					<div className="p-coaches__no-results">
+						<div className="p-coaches__text">
+							{query
+								? `「${query}」に一致するコーチが見つかりませんでした。`
+								: "コーチが見つかりませんでした。"}
+						</div>
+					</div>
+				)}
+
+				{currentCoaches.length > 0 && (
+					<div className="p-coaches__list">
+						{currentCoaches.map((coach, i) => (
+							<CoachCard key={coach.id || i} coach={coach} big />
+						))}
+					</div>
+				)}
+
+				{coachNum > total && (
+					<div className="p-coaches__pagination">
+						<Pagination
+							all={coachNum}
+							total={total}
+							page={currentPage}
+							updatePage={setCurrentPage}
+						/>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 };
