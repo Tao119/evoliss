@@ -1,0 +1,31 @@
+module.exports = {
+  apps: [
+    {
+      name: 'evoliss',
+      script: 'npm',
+      args: 'start',
+      cwd: '/home/ubuntu/evoliss',  // サーバー上のプロジェクトパスに変更してください
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000
+      },
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      error_file: './logs/error.log',
+      out_file: './logs/output.log',
+      log_file: './logs/combined.log',
+      time: true,
+      merge_logs: true,
+      // クラッシュした場合の再起動設定
+      min_uptime: '10s',
+      max_restarts: 5,
+      // 環境変数の設定（必要に応じて追加）
+      env_production: {
+        NODE_ENV: 'production',
+        PORT: 3000
+      }
+    }
+  ]
+};
