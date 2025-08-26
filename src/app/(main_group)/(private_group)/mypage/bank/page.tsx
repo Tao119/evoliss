@@ -79,53 +79,60 @@ const BankPage = () => {
 						<label className="p-bank__label">
 							金融機関名（銀行・信用金庫）
 						</label>
-						<input
-							type="text"
-							className="p-bank__input"
-							value={editingPaymentAccount?.bankName || ""}
-							onChange={(e) => {
-								setEditingPaymentAccount((prev) => ({
-									...prev,
-									bankName: e.target.value,
-								}));
-							}}
-						/>
+
+						<div className="p-bank__input-outline">
+							<input
+								type="text"
+								className="p-bank__input"
+								value={editingPaymentAccount?.bankName || ""}
+								onChange={(e) => {
+									setEditingPaymentAccount((prev) => ({
+										...prev,
+										bankName: e.target.value,
+									}));
+								}}
+							/></div>
 					</div>
 
 					<div className="p-bank__input-group">
 						<label className="p-bank__label">支店名</label>
-						<input
-							type="text"
-							className="p-bank__input"
-							value={editingPaymentAccount?.branchName || ""}
-							onChange={(e) => {
-								setEditingPaymentAccount((prev) => ({
-									...prev,
-									branchName: e.target.value,
-								}));
-							}}
-						/>
+
+						<div className="p-bank__input-outline">
+							<input
+								type="text"
+								className="p-bank__input"
+								value={editingPaymentAccount?.branchName || ""}
+								onChange={(e) => {
+									setEditingPaymentAccount((prev) => ({
+										...prev,
+										branchName: e.target.value,
+									}));
+								}}
+							/>
+						</div>
 					</div>
 
 					<div className="p-bank__input-group">
 						<label className="p-bank__label">口座番号</label>
-						<input
-							type="text"
-							className="p-bank__input"
-							value={editingPaymentAccount?.accountNumber || ""}
-							onChange={(e) => {
-								setEditingPaymentAccount((prev) => ({
-									...prev,
-									accountNumber: e.target.value,
-								}));
-							}}
-						/>
+						<div className="p-bank__input-outline">
+							<input
+								type="text"
+								className="p-bank__input"
+								value={editingPaymentAccount?.accountNumber || ""}
+								onChange={(e) => {
+									setEditingPaymentAccount((prev) => ({
+										...prev,
+										accountNumber: e.target.value,
+									}));
+								}}
+							/></div>
 					</div>
 
 					<div className="p-bank__input-row">
 						<div className="p-bank__input-group -half">
 							<label className="p-bank__label">姓（カタカナ）</label>
-							<input
+
+							<div className="p-bank__input-outline"><input
 								type="text"
 								className="p-bank__input"
 								value={editingPaymentAccount?.accountHolder?.split(" ")[0] || ""}
@@ -138,10 +145,12 @@ const BankPage = () => {
 									}));
 								}}
 							/>
+							</div>
 						</div>
 						<div className="p-bank__input-group -half">
 							<label className="p-bank__label">名（カタカナ）</label>
-							<input
+
+							<div className="p-bank__input-outline"><input
 								type="text"
 								className="p-bank__input"
 								value={editingPaymentAccount?.accountHolder?.split(" ")[1] || ""}
@@ -154,6 +163,7 @@ const BankPage = () => {
 									}));
 								}}
 							/>
+							</div>
 						</div>
 					</div>
 

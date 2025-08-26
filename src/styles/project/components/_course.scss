@@ -109,14 +109,21 @@
 
     &__image {
         width: 160px;
-        height: 120px;
+        aspect-ratio: 4 / 3;
         border-radius: 10px;
         object-fit: cover;
+
 
         @include mq(sp) {
             min-width: 120px;
             width: 100%;
             aspect-ratio: 4 / 3;
+
+            &.-delete {
+                height: calc(100% - 60px);
+                aspect-ratio: 4 / 3;
+                width: auto;
+            }
         }
     }
 

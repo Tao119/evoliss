@@ -20,7 +20,7 @@ export const CourseCardDelete: React.FC<Props> = ({ course, children }) => {
 
 			<div className="p-course-card">
 				<div
-					className="p-course-card__item -low"
+					className="p-course-card__item"
 				// onClick={() => router.push(`/courses/course/${course.id}`)}
 				>
 					<div className="p-course-card__center"
@@ -28,7 +28,7 @@ export const CourseCardDelete: React.FC<Props> = ({ course, children }) => {
 
 
 						<ImageBox
-							className="p-course-card__image"
+							className="p-course-card__image -delete"
 							src={course.image ?? defaultImage}
 							objectFit="cover"
 						/>

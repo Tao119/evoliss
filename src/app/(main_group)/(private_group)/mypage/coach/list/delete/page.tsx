@@ -50,7 +50,7 @@ const CoachDeletePage = () => {
 			setIsLoading(false);
 			animation.endAnimation();
 		}
-	}, [courseId, userData?.id, router, animation]);
+	}, [courseId, userData?.id]);
 	useEffect(() => {
 		animation.startAnimation();
 		if (!courseId) {
@@ -59,7 +59,7 @@ const CoachDeletePage = () => {
 			return;
 		}
 		fetchCourse();
-	}, [courseId, animation, fetchCourse, router]);
+	}, [courseId]);
 
 	const handleDelete = async () => {
 		if (!confirm("本当に完全削除してよろしいですか？\nこの操作は取り消せません。")) {
