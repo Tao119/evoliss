@@ -5,7 +5,7 @@ import { Button } from "@/components/button";
 import { InputBox } from "@/components/inputBox";
 import { MultilineInput } from "@/components/multilineInput";
 import { Filter } from "@/components/filter";
-import { requestDB, Axios } from "@/services/axios";
+import { requestDB } from "@/services/axios";
 import { useContext, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Border from "@/components/border";

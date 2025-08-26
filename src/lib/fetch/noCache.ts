@@ -42,7 +42,6 @@ export async function fetchNoCache(
 if (typeof globalThis.fetch !== 'undefined' && process.env.DISABLE_CACHE === 'true') {
   const originalFetch = globalThis.fetch;
   
-  // @ts-ignore
   globalThis.fetch = async function(
     url: string | URL | Request, 
     options?: FetchOptions

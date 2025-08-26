@@ -5,8 +5,8 @@ import { Button } from "@/components/button";
 import { InputBox } from "@/components/inputBox";
 import { MultilineInput } from "@/components/multilineInput";
 import { Filter } from "@/components/filter";
-import { requestDB, Axios } from "@/services/axios";
-import { useContext, useState, useEffect, useRef, useCallback } from "react";
+import { requestDB } from "@/services/axios";
+import { useContext, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Border from "@/components/border";
 import { ImageBox } from "@/components/imageBox";
@@ -193,7 +193,7 @@ const CoachEditPage = () => {
 
 			// 新しい画像がアップロードされた場合
 			if (tempImageFile) {
-				const uploadedUrl = await uploadImage(tempImageFile, "course", userData?.id!);
+				const uploadedUrl = await uploadImage(tempImageFile, "course", userData!.id);
 				if (!uploadedUrl) {
 					alert("画像のアップロードに失敗しました");
 					animation.endAnimation();
