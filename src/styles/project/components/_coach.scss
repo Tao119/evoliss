@@ -112,6 +112,10 @@
             left: 70px;
             margin-left: 0;
         }
+
+        &.-big {
+            width: calc(100% - 200px);
+        }
     }
 
     &__game {

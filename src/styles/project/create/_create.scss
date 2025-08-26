@@ -92,7 +92,7 @@
         @include gradient-border;
         background-color: $white;
         position: relative;
-        width: 80%;
+        width: 100%;
 
         &.-textarea {
             height: auto;
@@ -174,14 +174,10 @@
         cursor: pointer;
         transition: all 0.3s ease;
 
-        &:hover {
-            background-color: $soft-gray;
-        }
-
         &.-selected {
-            background-color: $theme;
-            color: $white;
-            border-color: $theme;
+            border: 1px solid $black;
+            color: $black;
+            font-weight: $fw-bold;
         }
     }
 

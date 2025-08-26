@@ -11,6 +11,28 @@
     color: $black;
     font-weight: $fw-bold;
 
+    &__sort-input {
+        border-radius: 10px;
+        height: 40px;
+        color: $dark-gray;
+        border-color: $dark-gray;
+        position: relative;
+
+        &::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-top: 1.5px solid $dark-gray;
+            border-right: 1.5px solid $dark-gray;
+            position: absolute;
+            top: calc(50% - 2px);
+            right: 10px;
+            translate: -50% -50%;
+            rotate: 135deg;
+            // cursor: pointer;
+        }
+    }
+
     &__title {
         height: 30px;
         font-size: $fs-medium;

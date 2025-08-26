@@ -328,6 +328,7 @@ const CoachEditPage = () => {
 						<ImageBox
 							src={cameraIcon}
 							className="p-create__camera-icon-outer"
+							onClick={() => imageInputRef.current?.click()}
 						/>
 						<input
 							ref={imageInputRef}

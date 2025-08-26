@@ -22,7 +22,7 @@ export const CoachCard: React.FC<Props> = ({ coach, big }) => {
 			onClick={() => router.push(`/courses/coach/${coach.id}`)}
 		>
 
-			{orLower("sp") && <div className="p-coach-card__name">{coach.name}</div>
+			{orLower("sp") && <div className={`p-coach-card__name ${big ? "-big" : ""}`}>{coach.name}</div>
 			}
 			{big && (
 				<div className="p-coach-card__game">

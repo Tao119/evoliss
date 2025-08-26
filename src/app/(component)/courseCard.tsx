@@ -17,15 +17,16 @@ export const CourseCard: React.FC<Props> = ({ course, children, big }) => {
 		<div className="p-course-card">
 			{big && (
 				<div className="p-course-card__coach">
-					<div className="p-course-card__coach-name">
-						コーチ：{course.coach.name}
-					</div>
+
 					<ImageBox
 						className="p-course-card__coach-icon"
 						src={course.coach.icon ?? defaultImage}
 						objectFit="cover"
 						round
 					/>
+					<div className="p-course-card__coach-name">
+						{course.coach.name}
+					</div>
 				</div>
 			)}
 			<div

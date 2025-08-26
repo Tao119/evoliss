@@ -187,6 +187,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    &.-no-padding {
+      margin-bottom: 24px;
+    }
   }
 
   &__coach-list {

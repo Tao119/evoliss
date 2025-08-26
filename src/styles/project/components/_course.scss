@@ -20,11 +20,11 @@
 
     &__coach-name {
         @include coach-name;
-        margin-top: 16px;
     }
 
     &__coach-icon {
-        @include icon-size(48px);
+        @include icon-size(64px);
+        z-index: 2;
     }
 
     &__item {

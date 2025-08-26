@@ -18,7 +18,7 @@ export const CourseCardList: React.FC<Props> = ({ course, children }) => {
 	return (
 		<>
 
-			<div className="p-course-card">
+			<div className="p-course-card" onClick={() => router.push(`/courses/course/${course.id}`)}>
 				<div
 					className="p-course-card__item -low"
 				// onClick={() => router.push(`/courses/course/${course.id}`)}
@@ -44,12 +44,15 @@ export const CourseCardList: React.FC<Props> = ({ course, children }) => {
 						<div className={`p-course-card__box -text ${course.isPublic ? "u-bg-lb" : "u-bg-gy"} u-mt16`}>{course.isPublic ? "公開中" : "非公開"}</div>
 						<div
 							className={`p-course-card__button`}
-							onClick={() => router.push(`/mypage/coach/list/edit?courseId=${course.id}`)}>
+							onClick={(e) => {
+								e.stopPropagation()
+								router.push(`/mypage/coach/list/edit?courseId=${course.id}`)
+							}}>
 							<div className="p-course-card__tag-text">編集する</div>
 						</div>
 					</div>
 				</div>
 				{children}
-			</div></>
+			</div ></>
 	);
 };
