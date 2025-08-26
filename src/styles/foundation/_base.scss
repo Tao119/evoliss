@@ -64,3 +64,33 @@ image {
 .-hidden {
   display: none;
 }
+
+// iOSでの自動ズームを防ぐためのグローバル設定
+@media screen and (max-width: 768px) {
+  input,
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    // タッチデバイスでのタップ遅延を無効化
+    touch-action: manipulation;
+  }
+  
+  // フォーカス時もズームを防ぐ
+  input:focus,
+  textarea:focus,
+  select:focus {
+    font-size: 16px !important;
+  }
+}

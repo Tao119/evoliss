@@ -224,9 +224,28 @@ const ProfilePage = () => {
 	};
 
 	const handleIconFileSelect = async (file: File) => {
+		const fileSizeInMB = file.size / (1024 * 1024);
+		
+		// ファイルサイズのチェック
+		if (fileSizeInMB > 1000) { // 1GB以上
+			alert(`画像サイズが大きすぎます（${fileSizeInMB.toFixed(2)}MB）。1GB未満の画像をアップロードしてください。`);
+			return;
+		}
+
 		try {
+			// 画像タイプのチェック
+			if (!file.type.startsWith('image/')) {
+				alert('画像ファイルを選択してください。');
+				return;
+			}
+
+			console.log(`Processing image: ${file.name} (${fileSizeInMB.toFixed(2)}MB)`);
+			
 			// 画像を最適化（最大1MBに圧縮）
 			const optimizedFile = await optimizeImage(file, 1);
+			
+			const optimizedSizeInMB = optimizedFile.size / (1024 * 1024);
+			console.log(`Image optimized: ${optimizedSizeInMB.toFixed(2)}MB`);
 
 			// ファイルを一時保存
 			setTempIconFile(optimizedFile);
@@ -237,9 +256,16 @@ const ProfilePage = () => {
 				setTempIconPreview(e.target?.result as string);
 			};
 			reader.readAsDataURL(optimizedFile);
-		} catch (error) {
+		} catch (error: any) {
 			console.error("画像の最適化に失敗しました:", error);
-			alert("画像の処理に失敗しました。別の画像をお試しください。");
+			
+			if (error.message?.includes('画像のサイズが大きすぎる')) {
+				alert(error.message);
+			} else if (fileSizeInMB > 100) {
+				alert(`画像サイズが大きすぎるため処理できませんでした（${fileSizeInMB.toFixed(2)}MB）。100MB未満の画像をお試しください。`);
+			} else {
+				alert("画像の処理に失敗しました。別の画像をお試しください。");
+			}
 		}
 	};
 

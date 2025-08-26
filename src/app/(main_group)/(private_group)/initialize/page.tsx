@@ -32,16 +32,25 @@ const Page = () => {
 	const onReady = userData;
 
 	useEffect(() => {
-		if (userData && userData.isInitialized) {
-			router.push(callbackPath ?? "/");
+		if (userData) {
+			if (userData.isInitialized) {
+				router.push(callbackPath ?? "/");
+			} else {
+				setName(userData.name ?? "")
+				setIcon(userData.icon ?? "")
+				setBio(userData.bio ?? "")
+				setYoutubeUrl(userData.youtube ?? "")
+				setNoteUrl(userData.note ?? "")
+				setXUrl(userData.x ?? "")
+			}
 		}
-	}, [userData, router, callbackPath]);
+	}, [userData]);
 
 	useEffect(() => {
 		if (onReady) {
 			animation.endAnimation();
 		}
-	}, [onReady, animation]);
+	}, [onReady]);
 
 	if (!onReady) {
 		return <div className="p-sign-in l-page"></div>;
@@ -127,22 +136,23 @@ const Page = () => {
 				updateData.icon = icon;
 			}
 
-			// SNS情報を追加（現在のスキーマにない場合はコメントアウトのまま）
-			// if (youtubeUrl.trim()) {
-			//   // @を除去して保存
-			//   updateData.youtubeUrl = youtubeUrl.trim();
-			// }
-			// if (xUrl.trim()) {
-			//   // @を除去して保存
-			//   updateData.xUrl = xUrl.trim().replace(/^@/, '');
-			// }
-			// if (noteUrl.trim()) {
-			//   updateData.noteUrl = noteUrl.trim();
-			// }
+			if (youtubeUrl.trim()) {
+				// @を除去して保存
+				updateData.youtubeUrl = youtubeUrl.trim();
+			}
+			if (xUrl.trim()) {
+				// @を除去して保存
+				updateData.xUrl = xUrl.trim().replace(/^@/, '');
+			}
+			if (noteUrl.trim()) {
+				updateData.noteUrl = noteUrl.trim();
+			}
 
-			const { success } = await requestDB("user", "initializeUser", updateData);
+			const response = await requestDB("user", "initializeUser", updateData);
 
-			if (success) {
+			console.log(response)
+
+			if (response.success) {
 				await fetchUserData();
 
 				router.push(callbackPath ?? "/");

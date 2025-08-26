@@ -17,6 +17,11 @@
         text-align: left;
         padding: 10px 20px;
 
+        // iOSでの自動ズームを防ぐ
+        @media screen and (max-width: 768px) {
+            font-size: 16px !important;
+        }
+
         &:placeholder-shown {
             display: flex;
             align-items: center;

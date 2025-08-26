@@ -7,7 +7,7 @@ import {
 	useHeader,
 } from "@/app/contextProvider";
 import chartIcon from "@/assets/image/chart.svg";
-import harunIcon from "@/assets/image/harun_logo.jpg";
+import harunIcon from "@/assets/image/harun_logo.png";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";

@@ -13,16 +13,17 @@ export const resizeImage = async (
   quality: number = 0.8
 ): Promise<Blob> => {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+    // メモリ効率的な処理のため、createObjectURLを使用
+    const url = URL.createObjectURL(file);
+    const img = new Image();
     
-    reader.onload = (e) => {
-      const img = new Image();
-      
-      img.onload = () => {
+    img.onload = () => {
+      try {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
         if (!ctx) {
+          URL.revokeObjectURL(url);
           reject(new Error('Canvas context not available'));
           return;
         }
@@ -50,6 +51,9 @@ export const resizeImage = async (
         // 画像を描画
         ctx.drawImage(img, 0, 0, width, height);
         
+        // メモリを解放
+        URL.revokeObjectURL(url);
+        
         // Blobに変換
         canvas.toBlob(
           (blob) => {
@@ -62,20 +66,18 @@ export const resizeImage = async (
           file.type === 'image/png' ? 'image/png' : 'image/jpeg',
           quality
         );
-      };
-      
-      img.onerror = () => {
-        reject(new Error('Failed to load image'));
-      };
-      
-      img.src = e.target?.result as string;
+      } catch (error) {
+        URL.revokeObjectURL(url);
+        reject(error);
+      }
     };
     
-    reader.onerror = () => {
-      reject(new Error('Failed to read file'));
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image'));
     };
     
-    reader.readAsDataURL(file);
+    img.src = url;
   });
 };
 
@@ -88,6 +90,61 @@ export const resizeImage = async (
 export const needsResize = (file: File, maxSizeInMB: number = 1): boolean => {
   const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
   return file.size > maxSizeInBytes;
+};
+
+/**
+ * 大きな画像に対して段階的にサイズを削減
+ * @param file - 処理する画像ファイル  
+ * @param targetSizeInMB - 目標サイズ（MB単位）
+ * @returns 処理された画像ファイル
+ */
+const progressiveResize = async (
+  file: File,
+  targetSizeInMB: number
+): Promise<File> => {
+  const fileSizeInMB = file.size / (1024 * 1024);
+  
+  // 初期パラメータの設定（ファイルサイズに応じて調整）
+  let maxDimension: number;
+  let quality: number;
+  
+  if (fileSizeInMB > 100) {
+    // 100MB以上の場合は大幅に縮小
+    maxDimension = 800;
+    quality = 0.6;
+  } else if (fileSizeInMB > 50) {
+    // 50-100MBの場合
+    maxDimension = 1200;
+    quality = 0.7;
+  } else if (fileSizeInMB > 10) {
+    // 10-50MBの場合
+    maxDimension = 1600;
+    quality = 0.75;
+  } else {
+    // 10MB以下の場合
+    maxDimension = 1920;
+    quality = 0.8;
+  }
+  
+  try {
+    const blob = await resizeImage(file, maxDimension, maxDimension, quality);
+    
+    // BlobをFileに変換
+    const resizedFile = new File([blob], file.name, {
+      type: blob.type,
+      lastModified: Date.now(),
+    });
+    
+    // まだ目標サイズより大きい場合は再帰的に処理
+    if (resizedFile.size > targetSizeInMB * 1024 * 1024 && quality > 0.3) {
+      return progressiveResize(resizedFile, targetSizeInMB);
+    }
+    
+    return resizedFile;
+  } catch (error) {
+    console.error('Progressive resize failed:', error);
+    throw error;
+  }
 };
 
 /**
@@ -105,38 +162,36 @@ export const optimizeImage = async (
     return file;
   }
   
-  let quality = 0.9;
-  let maxDimension = 1920;
-  let blob: Blob = file;
-  let attempts = 0;
-  const maxAttempts = 5;
-  const targetSizeInBytes = targetSizeInMB * 1024 * 1024;
+  const fileSizeInMB = file.size / (1024 * 1024);
+  console.log(`Original file size: ${fileSizeInMB.toFixed(2)}MB`);
   
-  // 品質と寸法を調整しながら目標サイズに近づける
-  while (blob.size > targetSizeInBytes && attempts < maxAttempts) {
-    try {
-      blob = await resizeImage(file, maxDimension, maxDimension, quality);
-      
-      if (blob.size > targetSizeInBytes) {
-        // まだ大きい場合は品質を下げる
-        quality -= 0.1;
-        // 品質が低くなりすぎたら寸法も小さくする
-        if (quality < 0.5) {
-          maxDimension = Math.floor(maxDimension * 0.8);
-          quality = 0.7; // 品質をリセット
-        }
-      }
-      
-      attempts++;
-    } catch (error) {
-      console.error('Error resizing image:', error);
-      throw error;
-    }
+  // ファイルサイズが非常に大きい場合の警告
+  if (fileSizeInMB > 500) {
+    console.warn(`Very large image detected (${fileSizeInMB.toFixed(2)}MB). Processing may take time...`);
   }
   
-  // BlobをFileに変換
-  return new File([blob], file.name, {
-    type: blob.type,
-    lastModified: Date.now(),
-  });
+  try {
+    // 段階的なリサイズを実行
+    const optimizedFile = await progressiveResize(file, targetSizeInMB);
+    
+    const optimizedSizeInMB = optimizedFile.size / (1024 * 1024);
+    console.log(`Optimized file size: ${optimizedSizeInMB.toFixed(2)}MB`);
+    
+    return optimizedFile;
+  } catch (error) {
+    console.error('Error optimizing image:', error);
+    
+    // エラーが発生した場合、より保守的な設定で再試行
+    try {
+      console.log('Retrying with conservative settings...');
+      const blob = await resizeImage(file, 640, 640, 0.5);
+      return new File([blob], file.name, {
+        type: blob.type,
+        lastModified: Date.now(),
+      });
+    } catch (retryError) {
+      console.error('Retry also failed:', retryError);
+      throw new Error('画像の処理に失敗しました。画像のサイズが大きすぎる可能性があります。');
+    }
+  }
 };
