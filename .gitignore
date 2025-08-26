@@ -44,3 +44,5 @@ next-env.d.ts
 /.sh/ 
 /.sql/
 /.log/
+
+package-lock.json
