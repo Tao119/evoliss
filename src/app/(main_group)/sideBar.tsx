@@ -74,17 +74,18 @@ const Sidebar = ({ setShowSideBar }: Prop) => {
 	return (
 		<>
 			<div className="p-side-bar">
-				<div className="p-side-bar__icon" onClick={() => router.push("/")}>
+				<div className="p-side-bar__icon" >
 					<ImageBox
 						src={logoImage}
 						alt="Profile"
 						objectFit="cover"
 						className="p-side-bar__logo-icon"
+						onClick={() => router.push("/")}
 					/>
 					<ImageBox
 						src={closeIcon}
 						className="p-side-bar__close"
-						onClick={() => setShowSideBar(false)}
+						onClick={() => { setShowSideBar(false) }}
 					/>
 				</div>
 

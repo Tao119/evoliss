@@ -65,7 +65,6 @@ export const MultilineInput: React.FC<Props> = ({
 				disabled={disabled}
 				style={{
 					height: `${height}px`,
-					padding: "10px 0",
 				}}
 			/>
 			{children}
