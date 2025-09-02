@@ -2,7 +2,7 @@
 
 import Border from "@/components/border";
 import { ImageBox } from "@/components/imageBox";
-import logoImage from "@/assets/image/logo_long.png";
+import logoImage from "@/assets/logo/png/Evoliss-Logo_Type-4-white_L.png";
 
 const AboutPage = () => {
 	return (
@@ -12,8 +12,8 @@ const AboutPage = () => {
 				<Border />
 
 				<div className="p-about__hero">
-					<ImageBox 
-						src={logoImage} 
+					<ImageBox
+						src={logoImage}
 						className="p-about__logo"
 						alt="Evoliss"
 					/>

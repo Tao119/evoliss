@@ -2,9 +2,7 @@
 
 import chartIcon from "@/assets/image/chart.svg";
 import closeIcon from "@/assets/image/close.svg";
-import logoImage from "@/assets/image/logo_long.png";
-import messageIcon from "@/assets/image/mail.svg";
-import notificationIcon from "@/assets/image/notification.svg";
+import logoImage from "@/assets/logo/png/Evoliss-Logo_Type-4-white_L.png";
 import defaultIcon from "@/assets/image/user_icon.svg";
 import { ImageBox } from "@/components/imageBox";
 import Link from "next/link";

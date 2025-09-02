@@ -1,7 +1,6 @@
 "use client";
 
 import footerImage from "@/assets/image/footer.png";
-import logoIcon from "@/assets/image/logo.png";
 import { ImageBox } from "@/components/imageBox";
 import { OverLay } from "@/components/overlay";
 import useAnimation from "@/hooks/useAnimation";
