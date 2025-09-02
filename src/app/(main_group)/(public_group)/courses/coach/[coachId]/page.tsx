@@ -149,12 +149,12 @@ const Page = () => {
 
 	const averageRating: number =
 		coachData.courses &&
-		coachData.courses.length > 0 &&
-		coachData.courses.reduce(
-			(totalCount, course) =>
-				totalCount + (course.reviews ? course.reviews.length : 0),
-			0,
-		) != 0
+			coachData.courses.length > 0 &&
+			coachData.courses.reduce(
+				(totalCount, course) =>
+					totalCount + (course.reviews ? course.reviews.length : 0),
+				0,
+			) != 0
 			? coachData.courses.reduce(
 				(totalScore, course) =>
 					totalScore +
@@ -200,8 +200,10 @@ const Page = () => {
 							<StarRating
 								className="p-courses__coach-rating-star"
 								score={averageRating}
+								useGradientImage={true}
 							/>
-							({reviewNum}件)
+							<div className="p-courses__coach-rating-text">
+								({reviewNum}件)</div>
 						</div>
 						<div className="p-courses__coach-sns">
 							{coachData.youtube && (

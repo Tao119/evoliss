@@ -88,15 +88,22 @@ async function readCoachesByQuery({
 	page,
 	total,
 	sortMethod = 0,
+	onlyWithPublicCourses = false,
 }: {
 	query?: string;
 	page: number;
 	total: number;
 	sortMethod?: number;
+	onlyWithPublicCourses?: boolean;
 }) {
 	const skip = (page - 1) * total;
 
-	const AND: any[] = [{ courses: { some: {} } }];
+	// 公開中の講座があるコーチのみに絞り込むかどうか
+	const coursesCondition = onlyWithPublicCourses 
+		? { courses: { some: { isPublic: true } } }
+		: { courses: { some: {} } };
+
+	const AND: any[] = [coursesCondition];
 	if (query?.trim()) {
 		const q = query.trim();
 		AND.push({
@@ -168,11 +175,18 @@ async function readCoachesByQuery({
 
 async function readCoachesNumByQuery({
 	query,
+	onlyWithPublicCourses = false,
 }: {
 	query?: string;
+	onlyWithPublicCourses?: boolean;
 }) {
+	// 公開中の講座があるコーチのみに絞り込むかどうか
+	const coursesCondition = onlyWithPublicCourses 
+		? { courses: { some: { isPublic: true } } }
+		: { courses: { some: {} } };
+
 	const whereConditions: any = {
-		AND: [{ courses: { some: {} } }],
+		AND: [coursesCondition],
 	};
 
 	if (query && query.trim()) {

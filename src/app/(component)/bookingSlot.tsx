@@ -62,15 +62,15 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
 			const currentTime = dayjs().hour(startHour).minute(0).add(i, "minute");
 			const timeStr = currentTime.format("HH:mm");
 			const isAvailable = isTimeAvailable(timeStr);
-			
+
 			let isSelected = false;
 			if (startTime && duration) {
 				const startDayjs = dayjs(`2000-01-01 ${startTime}`);
 				const endDayjs = startDayjs.add(duration, "minute");
 				const currentDayjs = dayjs(`2000-01-01 ${timeStr}`);
-				
-				isSelected = currentDayjs.isSameOrAfter(startDayjs) && 
-				            currentDayjs.isBefore(endDayjs);
+
+				isSelected = currentDayjs.isSameOrAfter(startDayjs) &&
+					currentDayjs.isBefore(endDayjs);
 			}
 
 			segments.push({
@@ -93,7 +93,7 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
 		timeBarData.forEach((segment, idx) => {
 			const position = (idx / timeBarData.length) * 100;
 			const nextPosition = ((idx + 1) / timeBarData.length) * 100;
-			
+
 			let color = '#666666'; // dark-gray
 			if (segment.isSelected) {
 				color = '#ffa500'; // orange

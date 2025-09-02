@@ -1,13 +1,49 @@
 import type { JSX } from "react";
+import star5 from "@/assets/image/star_5.png";
+import { ImageBox } from "./imageBox";
 
-type Props = { score: number; showsScore?: boolean; className?: string };
+type Props = {
+	score: number;
+	showsScore?: boolean;
+	className?: string;
+	useGradientImage?: boolean;  // グラデーション画像を使用するかどうか
+};
 const MAX_STAR_COUNT = 5;
 
 export default function StarRating({
 	score,
 	showsScore = false,
 	className,
+	useGradientImage = false,
 }: Props) {
+	// グラデーション画像を使用する場合
+	if (useGradientImage) {
+		// スコアを0-5の範囲に制限
+		const clampedScore = Math.min(5, Math.max(0, score));
+		// パーセンテージを計算（5つ星が100%）
+		const widthPercentage = (clampedScore / 5) * 100;
+
+		return (
+			<div className={`c-star-rating ${className ?? ""}`}>
+				<div className="c-star-rating__gradient-container">
+					<ImageBox 
+						className="c-star-rating__gradient-image" 
+						src={star5}
+						alt={`${clampedScore.toFixed(1)}つ星評価`}
+					/>
+					<div 
+						className="c-star-rating__gradient-cover"
+						style={{ width: `${100 - widthPercentage}%` }}
+					/>
+				</div>
+				{showsScore && (
+					<span className="c-star-rating__score">{score.toFixed(1)}</span>
+				)}
+			</div>
+		);
+	}
+
+	// 従来のSVGパス方式
 	const starPaths: JSX.Element[] = [];
 
 	for (let i = 0; i < MAX_STAR_COUNT; i++) {

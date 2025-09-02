@@ -1,0 +1,57 @@
+// セーフエリアサポート用のグローバルスタイル
+@use '../foundation/variable' as *;
+
+// iPhone横画面でのセーフエリア対応
+@supports (padding: env(safe-area-inset-left)) {
+  // HTML要素全体に背景を適用
+  html {
+    background-color: $white;
+  }
+  
+  // body要素でもセーフエリアに背景を拡張
+  body {
+    // 背景を画面全体に拡張
+    background-color: $white;
+    min-height: 100vh;
+    min-height: 100dvh;
+    
+    // セーフエリア外まで背景を拡張する設定
+    &::after {
+      content: '';
+      position: fixed;
+      top: -50px;
+      left: -50px;
+      right: -50px;
+      bottom: -50px;
+      background-color: $white;
+      z-index: -2;
+      pointer-events: none;
+    }
+  }
+  
+  // メインコンテナ
+  .l-main {
+    // 背景色を設定
+    background-color: $light-gray;
+    position: relative;
+    
+    // セーフエリア外まで背景を拡張
+    &::after {
+      content: '';
+      position: fixed;
+      top: -50px;
+      left: -50px;
+      right: -50px;
+      bottom: -50px;
+      background-color: $light-gray;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    // コンテンツはセーフエリア内に配置
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

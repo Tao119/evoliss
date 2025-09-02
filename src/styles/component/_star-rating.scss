@@ -6,6 +6,7 @@
     align-items: center;
     justify-content: space-around;
     height: 100%;
+    width: 100%;
 
     &__stars {
         height: 100%;
@@ -17,5 +18,28 @@
 
     &__score {
         line-height: 1;
+    }
+
+    // グラデーション画像用のスタイル
+    &__gradient-container {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    &__gradient-image {
+        height: 100%;
+        width: 100%;
+        display: block;
+    }
+
+    &__gradient-cover {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        background-color: $light-gray;
+        transition: width 0.3s ease;
     }
 }

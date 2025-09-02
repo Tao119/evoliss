@@ -51,6 +51,7 @@ async function readCourseById({ id }: { id: number }) {
 									dateTime: "asc",
 								},
 							},
+							game: true
 						},
 					},
 					reviews: {

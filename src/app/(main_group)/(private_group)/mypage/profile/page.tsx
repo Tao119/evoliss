@@ -177,18 +177,18 @@ const ProfilePage = () => {
 
 
 		try {
-		let newIconUrl = icon;
+			let newIconUrl = icon;
 
-		if (tempIconFile) {
-		const uploadResult = await uploadImage(tempIconFile, "icon", userData.id);
-		if (uploadResult) {
-		newIconUrl = uploadResult;
-		} else {
-		alert("画像のアップロードに失敗しました。");
-		animation.endAnimation();
-		return;
-		}
-		}
+			if (tempIconFile) {
+				const uploadResult = await uploadImage(tempIconFile, "icon", userData.id);
+				if (uploadResult) {
+					newIconUrl = uploadResult;
+				} else {
+					alert("画像のアップロードに失敗しました。");
+					animation.endAnimation();
+					return;
+				}
+			}
 
 
 			// SNS URLを正規化（完全なURLに変換）
@@ -225,7 +225,7 @@ const ProfilePage = () => {
 
 	const handleIconFileSelect = async (file: File) => {
 		const fileSizeInMB = file.size / (1024 * 1024);
-		
+
 		// ファイルサイズのチェック
 		if (fileSizeInMB > 1000) { // 1GB以上
 			alert(`画像サイズが大きすぎます（${fileSizeInMB.toFixed(2)}MB）。1GB未満の画像をアップロードしてください。`);
@@ -240,10 +240,10 @@ const ProfilePage = () => {
 			}
 
 			console.log(`Processing image: ${file.name} (${fileSizeInMB.toFixed(2)}MB)`);
-			
+
 			// 画像を最適化（最大1MBに圧縮）
 			const optimizedFile = await optimizeImage(file, 1);
-			
+
 			const optimizedSizeInMB = optimizedFile.size / (1024 * 1024);
 			console.log(`Image optimized: ${optimizedSizeInMB.toFixed(2)}MB`);
 
@@ -258,7 +258,7 @@ const ProfilePage = () => {
 			reader.readAsDataURL(optimizedFile);
 		} catch (error: any) {
 			console.error("画像の最適化に失敗しました:", error);
-			
+
 			if (error.message?.includes('画像のサイズが大きすぎる')) {
 				alert(error.message);
 			} else if (fileSizeInMB > 100) {

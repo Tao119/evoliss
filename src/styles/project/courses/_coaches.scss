@@ -17,6 +17,8 @@
         color: $dark-gray;
         border-color: $dark-gray;
         position: relative;
+        font-weight: normal;
+        font-size: $fs-small;
 
         &::after {
             content: "";
@@ -60,7 +62,7 @@
         padding: 1px;
 
         @include mq(sp) {
-            width: 80%;
+            width: 100%;
         }
     }
 
@@ -112,21 +114,30 @@
 
         @include mq(sp) {
             width: 100%;
-            padding: 50px 20px;
+            padding: 50px 0;
         }
     }
 
     &__sort {
-        align-self: flex-end;
+        align-self: flex-start;
         display: flex;
         flex-direction: row;
         gap: 10px;
         align-items: center;
+
     }
 
     &__sort-label {
         color: $black;
         font-size: $fs-text;
         font-weight: $fw-bold;
+    }
+
+    &__checkbox-label {
+        font-size: $fs-text;
+        align-items: center;
+        display: flex;
+
+        align-self: flex-start;
     }
 }

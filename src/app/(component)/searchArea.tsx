@@ -30,9 +30,8 @@ export const SearchArea = ({
 					{games.map((g, i) => (
 						<div
 							key={i}
-							className={`p-search-area__row-item ${
-								selectedGames.has(g.id) ? "-active" : ""
-							}`}
+							className={`p-search-area__row-item ${selectedGames.has(g.id) ? "-active" : ""
+								}`}
 							onClick={() => {
 								const newSelectedGames = new Set(selectedGames);
 								if (newSelectedGames.has(g.id)) {
@@ -54,9 +53,8 @@ export const SearchArea = ({
 					{tags.map((t, i) => (
 						<div
 							key={i}
-							className={`p-search-area__row-item -round ${
-								selectedTags.has(t.id) ? "-active" : ""
-							}`}
+							className={`p-search-area__row-item -round ${selectedTags.has(t.id) ? "-active" : ""
+								}`}
 							onClick={() => {
 								const newSelectedTags = new Set(selectedTags);
 								if (newSelectedTags.has(t.id)) {
@@ -74,12 +72,13 @@ export const SearchArea = ({
 			</div>
 			<div className="p-search-area__row">
 				<div className="p-search-area__row-title">フリーワード</div>
-				<input
-					className="p-search-area__row-input"
-					type="text"
-					onChange={onInputChange}
-					value={searchText}
-				/>
+				<div className="p-search-area__input-outline">
+					<input
+						className="p-search-area__row-input"
+						type="text"
+						onChange={onInputChange}
+						value={searchText}
+					/></div>
 			</div>
 		</div>
 	);

@@ -320,7 +320,7 @@ const Page = () => {
 	return (
 		<div className="p-courses l-page">
 			<div className="p-about__panel -no-padding">
-				<div className="p-about__section-title">講座を検索する</div>
+				<div className="p-about__section-title">講座から探す</div>
 				<Border />
 
 				<SearchArea

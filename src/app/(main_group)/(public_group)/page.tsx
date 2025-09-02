@@ -251,7 +251,7 @@ const Page = () => {
 				)}
 
 				<div ref={coachSectionRef} className={`p-about__panel animation-hidden ${visibleSections.has('coach') ? 'animate-fade-in-up' : ''}`}>
-					<div className="p-about__section-title">コーチから選ぶ</div>
+					<div className="p-about__section-title">コーチから探す</div>
 					<Border />
 					<div className="p-about__section-sub-title">
 						<ImageBox className="p-about__section-icon" src={chartIcon} />
@@ -271,7 +271,7 @@ const Page = () => {
 				</div>
 
 				<div ref={searchSectionRef} className={`p-about__panel animation-hidden ${visibleSections.has('search') ? 'animate-fade-in-up' : ''}`}>
-					<div className="p-about__section-title">講座を検索する</div>
+					<div className="p-about__section-title">講座から探す</div>
 					<Border />
 					<SearchArea
 						games={games}
@@ -310,7 +310,7 @@ const Page = () => {
 					) : (
 						<>
 							<div className="p-about__become-text">
-								会員登録後、マイページから講座情報を入力してください
+								会員登録後、マイページから<br />講座情報を入力してください
 							</div>
 							<Button
 								onClick={() => router.push("/sign-in?callback=mypage")}

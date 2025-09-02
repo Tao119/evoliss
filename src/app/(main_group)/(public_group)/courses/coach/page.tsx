@@ -23,6 +23,9 @@ const Page = () => {
 	const [searchText, setSearchText] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 
+
+	const [checked, setChecked] = useState(false);
+
 	const router = useRouter();
 	const param = useSearchParams()!;
 	const query = param.get("query");
@@ -42,10 +45,10 @@ const Page = () => {
 		resetAndFetch();
 	}, [query]);
 
-	/* ------------------------------ 並び順変更時 ------------------------------ */
+	/* ------------------------------ 並び順・チェックボックス変更時 ------------------------------ */
 	useEffect(() => {
 		resetAndFetch(); // ページとキャッシュをリセット
-	}, [sortMethod]);
+	}, [sortMethod, checked]);
 
 	/* ------------------------------ ページ変更時 ------------------------------ */
 	useEffect(() => {
@@ -67,6 +70,7 @@ const Page = () => {
 			setIsLoading(true);
 			const res = await requestDB("coach", "readCoachesNumByQuery", {
 				query: query || undefined,
+				onlyWithPublicCourses: checked, // 公開中の講座があるコーチのみ
 			});
 			setCoachNum(res.success ? res.data : 0);
 		} catch (e) {
@@ -87,6 +91,7 @@ const Page = () => {
 				total,
 				query: query || undefined,
 				sortMethod, // ★ 並び順を送信
+				onlyWithPublicCourses: checked, // 公開中の講座があるコーチのみ
 			});
 
 			setCoachData((prev) => ({
@@ -116,7 +121,7 @@ const Page = () => {
 
 	return (
 		<div className="p-coaches l-page">
-			<div className="p-coaches__title">コーチから選ぶ</div>
+			<div className="p-coaches__title">コーチから探す</div>
 			<Border />
 
 			{/* ---------------- フリーワード検索 ---------------- */}
@@ -145,7 +150,14 @@ const Page = () => {
 						「{query}」の検索結果: {coachNum}件
 					</div>
 				)}
-
+				<div className="p-coaches__checkbox-label">
+					<input
+						type="checkbox"
+						className="c-checkbox-list__checkbox"
+						checked={checked}
+						onChange={() => setChecked((prev) => !prev)}
+					/>受講可能な講座があるコーチのみ表示
+				</div>
 				{/* ---------------- 並び順 ---------------- */}
 				<div className="p-coaches__sort">
 					<div className="p-coaches__sort-label">並び順</div>

@@ -50,7 +50,7 @@ const Sidebar = ({ setShowSideBar }: Prop) => {
 	const mainRoutes = [
 		{ path: "/", text: "TOP" },
 		{ path: "/courses/coach", text: "コーチから探す" },
-		{ path: "/courses", text: "講座を検索する" },
+		{ path: "/courses", text: "講座から探す" },
 	];
 	const iconRoutes = [
 		{

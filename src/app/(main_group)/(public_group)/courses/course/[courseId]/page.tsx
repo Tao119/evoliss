@@ -277,8 +277,10 @@ const Page = () => {
 							<StarRating
 								className="p-courses__coach-rating-star"
 								score={averageRating}
+								useGradientImage={true}
 							/>
-							({reviewNum}件)
+							<div className="p-courses__coach-rating-text">
+								({reviewNum}件)</div>
 						</div>
 						<div className="p-courses__coach-sns">
 							{coach.youtube && (

@@ -47,7 +47,7 @@ const Header = ({ setShowSideBar }: Prop) => {
 
 	const mainRoutes = [
 		{ path: "/courses/coach", text: "コーチから探す" },
-		{ path: "/courses", text: "講座を検索する" },
+		{ path: "/courses", text: "講座から探す" },
 	];
 
 	const pushRoute = (path: string) => {

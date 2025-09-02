@@ -129,6 +129,7 @@
     &__confirm-message {
         white-space: pre-wrap;
         word-break: break-word;
+        text-align: start;
     }
 
     &__confirm-notice {
@@ -145,7 +146,7 @@
     // 完了画面
     &__complete {
         text-align: center;
-        padding: 60px 0;
+        padding-bottom: 30px;
     }
 
     &__complete-message {

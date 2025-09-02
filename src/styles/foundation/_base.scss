@@ -3,6 +3,8 @@
 html {
   font-size: 62.5%;
   min-width: 320px;
+  // HTML要素にも背景色を設定
+  background-color: $white;
 }
 
 body {
@@ -23,32 +25,17 @@ body {
   cursor: default;
 
   overflow: hidden;
-  
+
   // セーフエリアに背景を拡張
   padding: 0;
   margin: 0;
-  
+
   // iOS横画面でのセーフエリア対応
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  
-  // 背景色をセーフエリア全体に適用
-  &::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: $white;
-    z-index: -1;
-    // セーフエリア外まで拡張
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
+  // パディングを削除してコンテンツがセーフエリアまで広がるように
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 #root {
@@ -93,6 +80,7 @@ image {
 
 // iOSでの自動ズームを防ぐためのグローバル設定
 @media screen and (max-width: 768px) {
+
   input,
   input[type="text"],
   input[type="number"],
@@ -108,11 +96,11 @@ image {
   input[type="search"],
   textarea,
   select {
-    font-size: 16px !important;
+    font-size: 16px;
     // タッチデバイスでのタップ遅延を無効化
     touch-action: manipulation;
   }
-  
+
   // フォーカス時もズームを防ぐ
   input:focus,
   textarea:focus,

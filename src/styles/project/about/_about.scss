@@ -46,6 +46,7 @@
     // padding: 0 30px;
     align-items: flex-start;
     justify-content: flex-start;
+    gap: 6px;
 
     @include mq(sp) {
       margin-top: 60%;
@@ -241,6 +242,7 @@
   &__become-text {
     font-size: $fs-input;
     font-weight: $fw-bold;
+    line-height: 24px;
     height: 100px;
     padding: 20px;
   }

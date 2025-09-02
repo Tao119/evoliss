@@ -30,6 +30,8 @@
         color: $dark-gray;
         border-color: $dark-gray;
         position: relative;
+        font-weight: normal;
+        font-size: $fs-text;
 
         &::after {
             content: "";
@@ -232,6 +234,14 @@
         align-items: center;
         justify-content: flex-start;
         height: 15px;
+        width: 100%;
+    }
+
+    &__coach-rating-text {
+        font-size: $fs-medium;
+        font-weight: $fw-bold;
+        width: auto;
+        flex-shrink: 0;
     }
 
     &__load-more-button {
