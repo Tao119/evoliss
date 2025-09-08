@@ -97,51 +97,22 @@ async function readCoachesByQuery({
 	onlyWithPublicCourses?: boolean;
 }) {
 	const skip = (page - 1) * total;
-	const currentDateTime = getFormattedDate(new Date(), "YYYY-MM-dd HH:mm");
-	console.log('[Coach Query] Current DateTime:', currentDateTime);
-	console.log('[Coach Query] onlyWithPublicCourses:', onlyWithPublicCourses);
 
-	// WHERE条件の構築
-	let whereCondition: any = {
-		courses: { some: onlyWithPublicCourses ? { isPublic: true } : {} }
-	};
+	// 公開中の講座があるコーチのみに絞り込むかどうか
+	const coursesCondition = onlyWithPublicCourses 
+		? { courses: { some: { isPublic: true } } }
+		: { courses: { some: {} } };
 
-	// クエリ条件を追加
+	const AND: any[] = [coursesCondition];
 	if (query?.trim()) {
-		whereCondition = {
-			AND: [
-				whereCondition,
-				{
-					OR: [
-						{ name: { contains: query.trim() } },
-						{ bio: { contains: query.trim() } },
-					]
-				}
-			]
-		};
-	}
-
-	// TimeSlotの条件を追加（受講可能な講座があるコーチのみ）
-	if (onlyWithPublicCourses) {
-		whereCondition = {
-			AND: [
-				whereCondition,
-				{
-					timeSlots: {
-						some: {
-							AND: [
-								{ dateTime: { gte: currentDateTime } },
-								{ reservationId: null }
-							]
-						}
-					}
-				}
-			]
-		};
+		const q = query.trim();
+		AND.push({
+			OR: [{ name: { contains: q } }, { bio: { contains: q } }],
+		});
 	}
 
 	const coachesRaw = await prisma.user.findMany({
-		where: whereCondition,
+		where: { AND },
 		include: {
 			courses: {
 				include: {
@@ -149,35 +120,9 @@ async function readCoachesByQuery({
 					reviews: true,
 				},
 			},
-			game: true,
-			// 今後の予約可能なスケジュール数を取得（表示用）
-			timeSlots: {
-				where: {
-					AND: [
-						{ dateTime: { gte: currentDateTime } },
-						{ reservationId: null }
-					]
-				},
-				select: {
-					id: true,
-					dateTime: true,
-					reservationId: true
-				}
-			}
+			game: true
 		},
-		skip,
-		take: total,
 	});
-
-	console.log('[Coach Query] Total coaches found:', coachesRaw.length);
-	if (coachesRaw.length > 0) {
-		console.log('[Coach Query] Sample coach:', {
-			name: coachesRaw[0].name,
-			timeSlotsCount: coachesRaw[0].timeSlots?.length || 0,
-			timeSlotsSample: coachesRaw[0].timeSlots?.slice(0, 3)
-		});
-	}
-
 
 	const decorated = coachesRaw.map((c) => {
 		const totalReservations = c.courses.reduce(
@@ -194,8 +139,6 @@ async function readCoachesByQuery({
 			}, 0) / c.courses.length
 			: 0;
 
-		const availableSlotsCount = c.timeSlots?.length || 0;
-
 		return {
 			...c,
 			totalReservations,
@@ -209,7 +152,6 @@ async function readCoachesByQuery({
 			),
 			averageRating,
 			relevanceScore: calculateRelevanceScore(c, query),
-			availableTimeSlots: availableSlotsCount,
 		};
 	});
 
@@ -228,7 +170,7 @@ async function readCoachesByQuery({
 		});
 	}
 
-	return sorted;
+	return sorted.slice(skip, skip + total);
 }
 
 async function readCoachesNumByQuery({
@@ -238,49 +180,27 @@ async function readCoachesNumByQuery({
 	query?: string;
 	onlyWithPublicCourses?: boolean;
 }) {
-	const currentDateTime = getFormattedDate(new Date(), "YYYY-MM-dd HH:mm");
-	
-	// WHERE条件の構築（readCoachesByQueryと同じロジック）
-	let whereCondition: any = {
-		courses: { some: onlyWithPublicCourses ? { isPublic: true } : {} }
+	// 公開中の講座があるコーチのみに絞り込むかどうか
+	const coursesCondition = onlyWithPublicCourses 
+		? { courses: { some: { isPublic: true } } }
+		: { courses: { some: {} } };
+
+	const whereConditions: any = {
+		AND: [coursesCondition],
 	};
 
-	// クエリ条件を追加
-	if (query?.trim()) {
-		whereCondition = {
-			AND: [
-				whereCondition,
-				{
-					OR: [
-						{ name: { contains: query.trim() } },
-						{ bio: { contains: query.trim() } },
-					]
-				}
-			]
-		};
-	}
-
-	// TimeSlotの条件を追加（受講可能な講座があるコーチのみ）
-	if (onlyWithPublicCourses) {
-		whereCondition = {
-			AND: [
-				whereCondition,
-				{
-					timeSlots: {
-						some: {
-							AND: [
-								{ dateTime: { gte: currentDateTime } },
-								{ reservationId: null }
-							]
-						}
-					}
-				}
-			]
-		};
+	if (query && query.trim()) {
+		const searchQuery = query.trim();
+		whereConditions.AND.push({
+			OR: [
+				{ name: { contains: searchQuery } },
+				{ bio: { contains: searchQuery } },
+			],
+		});
 	}
 
 	const count = await prisma.user.count({
-		where: whereCondition,
+		where: whereConditions,
 	});
 
 	return count;
@@ -378,12 +298,10 @@ async function readTimeSlotsByCoachId({
 						select: {
 							title: true,
 							duration: true,
-							price: true,
 						},
 					},
 					customer: {
 						select: {
-							id: true,
 							name: true,
 							icon: true,
 						},
@@ -405,7 +323,6 @@ async function createTimeSlots({
 	timeSlots: string[];
 }) {
 	const result = await withTransaction(async (tx) => {
-		// 既存のタイムスロットを確認
 		const existingSlots = await tx.timeSlot.findMany({
 			where: {
 				coachId,
@@ -424,30 +341,26 @@ async function createTimeSlots({
 		);
 
 		if (newTimeSlots.length === 0) {
-			return {
-				created: 0,
-				skipped: timeSlots.length,
-				coachId,
-			};
+			return { created: 0, skipped: timeSlots.length, coachId };
 		}
 
-		// 新しいタイムスロットを作成
 		const createResult = await tx.timeSlot.createMany({
 			data: newTimeSlots.map((dateTime) => ({
 				coachId,
 				dateTime,
 			})),
+			skipDuplicates: true,
 		});
 
 		return {
 			created: createResult.count,
-			skipped: existingDateTimes.length,
-			coachId,
+			skipped: timeSlots.length - createResult.count,
+			coachId
 		};
 	});
 
 	// キャッシュの無効化
-	if (result) {
+	if (result && result.created > 0) {
 		// コーチキャッシュを無効化
 		await invalidateCoachCache(result.coachId);
 	}
@@ -458,68 +371,55 @@ async function createTimeSlots({
 async function updateTimeSlots({
 	coachId,
 	timeSlots,
-	deleteSlotIds,
 }: {
 	coachId: number;
 	timeSlots: string[];
-	deleteSlotIds: number[];
 }) {
 	const result = await withTransaction(async (tx) => {
-		// 削除対象のスロットを削除（予約がないもののみ）
-		if (deleteSlotIds.length > 0) {
+		// 指定された日付範囲の既存のタイムスロットを削除（予約済みを除く）
+		const dates = [...new Set(timeSlots.map(ts => ts.split(' ')[0]))];
+
+		if (dates.length > 0) {
+			const startDate = dates[0] + ' 00:00:00';
+			const endDate = dates[dates.length - 1] + ' 23:59:59';
+
+			// 予約のないタイムスロットのみ削除
 			await tx.timeSlot.deleteMany({
 				where: {
-					id: {
-						in: deleteSlotIds,
-					},
 					coachId,
+					dateTime: {
+						gte: startDate,
+						lte: endDate,
+					},
 					reservationId: null,
 				},
 			});
 		}
 
 		// 新しいタイムスロットを作成
-		let created = 0;
 		if (timeSlots.length > 0) {
-			// 既存のスロットと重複しないようにフィルタリング
-			const existingSlots = await tx.timeSlot.findMany({
-				where: {
+			const createResult = await tx.timeSlot.createMany({
+				data: timeSlots.map((dateTime) => ({
 					coachId,
-					dateTime: {
-						in: timeSlots,
-					},
-				},
-				select: {
-					dateTime: true,
-				},
+					dateTime,
+				})),
+				skipDuplicates: true,
 			});
 
-			const existingDateTimes = existingSlots.map((slot) => slot.dateTime);
-			const newTimeSlots = timeSlots.filter(
-				(dateTime) => !existingDateTimes.includes(dateTime),
-			);
-
-			if (newTimeSlots.length > 0) {
-				const createResult = await tx.timeSlot.createMany({
-					data: newTimeSlots.map((dateTime) => ({
-						coachId,
-						dateTime,
-					})),
-					skipDuplicates: true,
-				});
-				created = createResult.count;
-			}
+			return {
+				created: createResult.count,
+				coachId,
+			};
 		}
 
 		return {
-			created,
-			deleted: deleteSlotIds.length,
+			created: 0,
 			coachId,
 		};
 	});
 
 	// キャッシュの無効化
-	if (result) {
+	if (result && result.created >= 0) {
 		// コーチキャッシュを無効化
 		await invalidateCoachCache(result.coachId);
 	}

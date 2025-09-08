@@ -31,23 +31,36 @@ const Page = () => {
 	const [allCourses, setAllCourses] = useState<Course[]>([]);
 	const [courseNum, setCourseNum] = useState(0);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [isDataFetched, setIsDataFetched] = useState(false); // データ取得完了フラグ
 	const total = 10;
 
 	const onReady = coachData !== undefined;
 	const hasMoreCourses = allCourses.length < courseNum;
 
 	useEffect(() => {
-		fetchCoursesNum();
-		fetchCoach();
-		fetchCourses(1);
-		animation.startAnimation();
+		const fetchInitialData = async () => {
+			animation.startAnimation();
+			try {
+				// すべての初回データ取得を並列で実行
+				await Promise.all([
+					fetchCoursesNum(),
+					fetchCoach(),
+					fetchCourses(1)
+				]);
+			} finally {
+				// データ取得が完了したら（成功/失敗に関わらず）フラグを立てる
+				setIsDataFetched(true);
+			}
+		};
+		fetchInitialData();
 	}, []);
 
 	useEffect(() => {
-		if (onReady && allCourses.length > 0) {
+		// コーチデータが読み込まれ、かつ初回データ取得が完了したらアニメーション終了
+		if (onReady && isDataFetched) {
 			animation.endAnimation();
 		}
-	}, [onReady, allCourses]);
+	}, [onReady, isDataFetched]);
 
 	useEffect(() => {
 		const intervalId = setInterval(() => {
@@ -99,6 +112,7 @@ const Page = () => {
 			const response = await requestDB("coach", "readCoachById", {
 				id: coachIdNumber,
 			});
+			console.log(response.data)
 			if (response.success) {
 				setCoachData(response.data);
 			} else {
@@ -147,35 +161,27 @@ const Page = () => {
 		return <div></div>;
 	}
 
+	// coursesが存在しない場合も考慮したレビュー計算
+	const courses = coachData.courses || [];
+	const totalReviews = courses.reduce(
+		(totalCount, course) =>
+			totalCount + (course.reviews ? course.reviews.length : 0),
+		0,
+	);
+
 	const averageRating: number =
-		coachData.courses &&
-			coachData.courses.length > 0 &&
-			coachData.courses.reduce(
-				(totalCount, course) =>
-					totalCount + (course.reviews ? course.reviews.length : 0),
-				0,
-			) != 0
-			? coachData.courses.reduce(
+		totalReviews > 0
+			? courses.reduce(
 				(totalScore, course) =>
 					totalScore +
 					(course.reviews
 						? course.reviews.reduce((sum, review) => sum + review.rating, 0)
 						: 0),
 				0,
-			) /
-			coachData.courses.reduce(
-				(totalCount, course) =>
-					totalCount + (course.reviews ? course.reviews.length : 0),
-				0,
-			)
+			) / totalReviews
 			: 0;
 
-	const reviewNum = coachData.courses && coachData.courses.length > 0
-		? coachData.courses.reduce(
-			(total, course) => total + (course.reviews?.length || 0),
-			0,
-		)
-		: 0;
+	const reviewNum = totalReviews;
 
 	return (
 		<div className="p-courses l-page">

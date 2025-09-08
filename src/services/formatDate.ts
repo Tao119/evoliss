@@ -4,11 +4,11 @@ export const getFormattedDate = (date: Date, format: string): string => {
 	}
 
 	const symbol = {
-		M: date.getUTCMonth() + 1,
-		d: date.getUTCDate(),
-		h: date.getUTCHours(),
-		m: date.getUTCMinutes(),
-		s: date.getUTCSeconds(),
+		M: date.getMonth() + 1,  // getMonth()を使用（ローカル時刻）
+		d: date.getDate(),        // getDate()を使用
+		h: date.getHours(),       // getHours()を使用
+		m: date.getMinutes(),     // getMinutes()を使用
+		s: date.getSeconds(),     // getSeconds()を使用
 	};
 
 	const formatted = format.replace(/(M+|d+|h+|m+|s+)/g, (v) =>

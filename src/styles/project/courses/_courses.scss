@@ -166,7 +166,9 @@
         display: flex;
         height: 40px;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
     &__coach-sns-icon {
@@ -196,15 +198,20 @@
         @include flex-row;
         justify-content: space-around;
         width: 500px;
+        max-width: 100%;
 
         @include mq(sp) {
             width: 100%;
             gap: 30px;
+            justify-content: flex-start;
         }
     }
 
     &__coach-game {
         @include game-badge;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        width: 100%;
     }
 
     &__coach-detail {
@@ -212,29 +219,48 @@
         width: 200px;
         align-items: flex-start;
         gap: 10px;
+        flex-shrink: 1;
+        min-width: 0;
+
+        @include mq(sp) {
+            width: auto;
+            flex: 1;
+        }
     }
 
     &__coach-name {
         @include coach-name;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        width: 100%;
     }
 
     &__coach-icon {
         @include icon-size(200px);
+        flex-shrink: 0;
 
         @include mq(sp) {
-            @include icon-size(150px);
+            @include icon-size(120px);
         }
     }
 
     &__coach-rating {
         @include flex-row;
-        gap: 10px;
+        gap: 5px;
         font-size: $fs-medium;
         font-weight: $fw-bold;
         align-items: center;
         justify-content: flex-start;
-        height: 15px;
+        height: 20px;
         width: 100%;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    &__coach-rating-star {
+        width: 90px;
+        height: 18px;
+        flex-shrink: 0;
     }
 
     &__coach-rating-text {
@@ -242,6 +268,7 @@
         font-weight: $fw-bold;
         width: auto;
         flex-shrink: 0;
+        white-space: nowrap;
     }
 
     &__load-more-button {
