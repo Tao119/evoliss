@@ -256,7 +256,7 @@ export default function GuestLayout({
 									</Link>
 									<div className="l-footer__separator"></div>
 									<Link className="l-footer__link" href="/courses">
-										講座を探す
+										講座から探す
 									</Link>
 								</div>
 								<div className="l-footer__column">
