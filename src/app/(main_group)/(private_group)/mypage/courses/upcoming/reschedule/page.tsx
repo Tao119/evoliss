@@ -2,7 +2,6 @@
 
 import CourseBookingCalendar from "@/app/(component)/courseBookingCalendar";
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";
-import defaultImage from "@/assets/image/picture-icon.svg";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";
-import defaultImage from "@/assets/image/picture-icon.svg";
+import defaultImage from "@/assets/image/user_icon.svg";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
@@ -163,7 +163,7 @@ const Page = () => {
 				<div className="p-cancel__warning">
 					<div className="p-cancel__warning-text">
 						本当にキャンセルして<br />よろしいですか？<br /><br />
-						※既にお支払い済みの場合も、返金はございません。<br />
+						※既にお支払い済みの場合も、<br />返金はございません。<br />
 						ご了承の上、キャンセルをお願いします。
 					</div>
 				</div>

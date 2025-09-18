@@ -176,30 +176,6 @@ const BankPage = () => {
 						</Button>
 					</div>
 				</div>
-
-				<div className="p-bank__footer">
-					<div className="p-bank__footer-item">
-						<a href="#">TOP</a>
-						<span className="p-bank__separator">｜</span>
-						<a href="#">コーチから選ぶ</a>
-						<span className="p-bank__separator">｜</span>
-						<a href="#">講座を検索する</a>
-						<span className="p-bank__separator">｜</span>
-					</div>
-					<div className="p-bank__footer-item">
-						<a href="#">ログイン</a>
-						<span className="p-bank__separator">｜</span>
-						<a href="#">新規会員登録</a>
-					</div>
-					<div className="p-bank__footer-item">
-						<a href="#">利用規約</a>
-						<span className="p-bank__separator">｜</span>
-						<a href="#">プライバシーポリシー</a>
-					</div>
-					<div className="p-bank__copyright">
-						© はるmチャンネル managed by EVOLISS
-					</div>
-				</div>
 			</div>
 		</>
 	);

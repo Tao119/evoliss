@@ -2,7 +2,8 @@
 
 import CourseBookingCalendar from "@/app/(component)/courseBookingCalendar";
 import { AnimationContext, UserDataContext } from "@/app/contextProvider";
-import defaultImage from "@/assets/image/picture-icon.svg";
+import defaultImage from "@/assets/image/user_icon.svg";
+import defaultIcon from "@/assets/image/picture-icon.svg";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
@@ -317,7 +318,7 @@ const Page = () => {
 			<div className="p-course">
 				<div className="p-course__content -padding">
 					<ImageBox
-						src={courseData.image ?? defaultImage}
+						src={courseData.image ?? defaultIcon}
 						className="p-course__image"
 						objectFit="cover"
 					/>

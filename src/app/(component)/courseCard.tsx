@@ -1,4 +1,4 @@
-import defaultImage from "@/assets/image/picture-icon.svg";
+import defaultImage from "@/assets/image/user_icon.svg";
 import { ImageBox } from "@/components/imageBox";
 import { formatMinutesToTime } from "@/services/formatMinutes";
 import type { Course } from "@/type/models";

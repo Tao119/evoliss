@@ -1,4 +1,4 @@
-import defaultImage from "@/assets/image/picture-icon.svg";
+import defaultImage from "@/assets/image/user_icon.svg";
 import { ImageBox } from "@/components/imageBox";
 import { reservationStatus, type Course, type Reservation } from "@/type/models";
 // import { useRouter } from "next/navigation";
@@ -115,15 +115,15 @@ export const CourseCardCoachCompleted: React.FC<Props> = ({ course, reservation,
 
 			<div className="p-course-card">
 				<div className="p-course-card__coach">
-					<div className="p-course-card__coach-name">
-						生徒：{reservation.customer.name || "Unknown"}
-					</div>
 					<ImageBox
 						className="p-course-card__coach-icon"
 						src={reservation.customer.icon ?? defaultImage}
 						objectFit="cover"
 						round
 					/>
+					<div className="p-course-card__coach-name">
+						{reservation.customer.name}
+					</div>
 				</div>
 				<div
 					className="p-course-card__item -low"

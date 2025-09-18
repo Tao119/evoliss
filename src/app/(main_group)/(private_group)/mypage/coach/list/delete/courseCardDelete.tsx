@@ -1,4 +1,4 @@
-import defaultImage from "@/assets/image/picture-icon.svg";
+import defaultImage from "@/assets/image/user_icon.svg";
 import { ImageBox } from "@/components/imageBox";
 import type { Course } from "@/type/models";
 // import { useRouter } from "next/navigation";

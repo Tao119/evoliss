@@ -79,11 +79,11 @@ const Page = () => {
 			<div className="p-success__text">
 				キャンセルが完了しました
 			</div>
-			<CourseCardReschedule reservation={reservationData} course={courseData} />
-			<ImageBox
+			{/* <CourseCardReschedule reservation={reservationData} course={courseData} /> */}
+			{/* <ImageBox
 				src={checkIcon}
 				className="p-success__icon"
-			/>
+			/> */}
 			<Button
 				className="p-success__button"
 				onClick={() => router.push("/mypage/courses/upcoming")}

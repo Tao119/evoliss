@@ -2,7 +2,7 @@
 
 import { UserDataContext } from "@/app/contextProvider";
 import checkIcon from "@/assets/image/check.svg";
-import defaultImage from "@/assets/image/picture-icon.svg";
+import defaultImage from "@/assets/image/user_icon.svg";
 import Border from "@/components/border";
 import { Button } from "@/components/button";
 import { ImageBox } from "@/components/imageBox";
