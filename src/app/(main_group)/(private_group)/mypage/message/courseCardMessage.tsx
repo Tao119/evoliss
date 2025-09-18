@@ -36,12 +36,6 @@ export const CourseCardMessage: React.FC<Props> = ({ course, reservation, childr
 
 			<div className="p-course-card">
 				<div className="p-course-card__coach">
-					<ImageBox
-						className="p-course-card__coach-icon"
-						src={course?.coach.icon ?? defaultImage}
-						objectFit="cover"
-						round
-					/>
 					<div className="p-course-card__coach-name">
 						{course?.coach.name}
 					</div>
