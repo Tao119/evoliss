@@ -100,7 +100,8 @@ model Refund {
   reservationId Int?
   status        Int
   reservation   Reservation? @relation(fields: [reservationId], references: [id])
-
+  createdAt        DateTime          @default(now())
+  
   @@index([reservationId], map: "Refund_reservationId_fkey")
 }
 
