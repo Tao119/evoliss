@@ -94,18 +94,7 @@ async function createReservation({
 
 		await scheduleReservationExpiry(reservation.id, 1);
 
-		// 購入ありがとうメッセージを送信
-		try {
-			const { messageFuncs } = await import("./message");
-			await messageFuncs.sendPurchaseMessage({
-				userId,
-				coachId: course.coachId,
-				courseTitle: course.title,
-			});
-		} catch (error) {
-			console.error("Failed to send purchase message:", error);
-			// メッセージ送信に失敗しても予約作成は継続
-		}
+		// 購入ありがとうメッセージは決済完了時に送信されるため、ここでは送信しない
 
 		return reservation;
 	});
