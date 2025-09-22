@@ -110,16 +110,11 @@
     &__course {
         width: 100%;
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 20px;
+        gap: 10px;
         height: auto;
-
-        @include mq(sp) {
-            gap: 0;
-            justify-content: space-between;
-        }
     }
 
     &__course-title {
@@ -160,11 +155,83 @@
         transform: scale(0.95);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
+        padding: 0 10px;
+        cursor: pointer;
 
         &.-active {
             opacity: 1;
             transform: scale(1);
             pointer-events: auto;
+        }
+
+        &.-animating {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        // クリック領域のヒント（PC画面でのホバー時に表示）
+        @media (hover: hover) and (pointer: fine) {
+
+            &:hover::before,
+            &:hover::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                width: 30%;
+                background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+                pointer-events: none;
+                z-index: 1;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            &:hover::before {
+                left: 10px;
+            }
+
+            &:hover::after {
+                right: 10px;
+                background: linear-gradient(-90deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+            }
+
+            &.-active:hover::before,
+            &.-active:hover::after {
+                opacity: 1;
+            }
+        }
+    }
+
+    // カルーセルインジケーター
+    &__carousel-indicators {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__carousel-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid $black;
+        background-color: transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+
+        &:hover {
+            background-color: rgba($white, 0.3);
+            transform: scale(1.1);
+        }
+
+        &.-active {
+            background-color: $black;
+            border-color: $black;
+        }
+
+        &:focus {
+            outline: 2px solid $theme;
+            outline-offset: 2px;
         }
     }
 

@@ -113,12 +113,6 @@ const Sidebar = ({ setShowSideBar }: Prop) => {
 				<ul className="p-side-bar__container -lower">
 					{userData?.isAdmin && (
 						<Link href={`/admin`} className="p-side-bar__list p-side-bar__glitch-btn">
-							<ImageBox
-								className="p-side-bar__page-icon"
-								src={chartIcon}
-								objectFit="cover"
-								round
-							/>
 							<div className="p-side-bar__glitch-label">
 								管理者ページ
 							</div>

@@ -46,3 +46,6 @@ next-env.d.ts
 /.log/
 
 package-lock.json
+
+/.kiro/
+/.claude/

@@ -10,12 +10,10 @@ import { useParams, useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import "dayjs/locale/ja";
 import { ImageBox } from "@/components/imageBox";
-import rightIcon from "@/assets/image/arrow2_right.svg";
-import leftIcon from "@/assets/image/arrow2_left.svg";
-import { CourseCardMessage } from "../courseCardMessage";
+import { CourseCarousel } from "../CourseCarousel";
 import type { MessageRoom, Message, Reservation } from "@/type/models";
 import Border from "@/components/border";
-import { IconButton } from "@/components/iconButton";
+
 import { MultilineInput } from "@/components/multilineInput";
 import { useSocket } from "@/hooks/useSocket";
 import { BackButton } from "@/components/backbutton";
@@ -32,7 +30,7 @@ const MessageRoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [reservations, setReservations] = useState<Reservation[]>([]);
 	const [currentReservationIndex, setCurrentReservationIndex] = useState(0);
-	const [isAnimating, setIsAnimating] = useState(false);
+
 	const router = useRouter()
 
 	// roomKeyからroom情報を取得
@@ -224,28 +222,8 @@ const MessageRoomPage = () => {
 		animation.endAnimation();
 	};
 
-	const handlePrevReservation = () => {
-		if (isAnimating || reservations.length <= 1) return;
-
-		setIsAnimating(true);
-		const newIndex = currentReservationIndex > 0 ? currentReservationIndex - 1 : reservations.length - 1;
+	const handleIndexChange = (newIndex: number) => {
 		setCurrentReservationIndex(newIndex);
-
-		setTimeout(() => {
-			setIsAnimating(false);
-		}, 300);
-	};
-
-	const handleNextReservation = () => {
-		if (isAnimating || reservations.length <= 1) return;
-
-		setIsAnimating(true);
-		const newIndex = currentReservationIndex < reservations.length - 1 ? currentReservationIndex + 1 : 0;
-		setCurrentReservationIndex(newIndex);
-
-		setTimeout(() => {
-			setIsAnimating(false);
-		}, 300);
 	};
 
 	const otherUser = room.coachId === userData.id ? room.customer : room.coach;
@@ -266,37 +244,12 @@ const MessageRoomPage = () => {
 			</div>
 
 			{reservations.length > 0 && currentReservation && (
-				<>
-					<div className="p-message__course-title">
-						{isCoach ? '開講予定の講座' : '受講予定の講座'}
-					</div>
-					<div className="p-message__course">
-						<IconButton className="p-message__course-button"
-							onClick={handlePrevReservation}
-							disabled={reservations.length <= 1 || isAnimating} src={leftIcon} />
-
-						<div className="p-message__course-container">
-							{reservations.map((reservation, index) => (
-								<div
-									key={reservation.id}
-									className={`p-message__course-slide ${index === currentReservationIndex ? '-active' : ''
-										}`}
-								>
-									<CourseCardMessage
-										course={reservation.course}
-										reservation={reservation}
-									/>
-								</div>
-							))}
-						</div>
-
-						<IconButton
-							className="p-message__course-button"
-							onClick={handleNextReservation}
-							disabled={reservations.length <= 1 || isAnimating}
-							src={rightIcon} />
-					</div>
-				</>
+				<CourseCarousel
+					reservations={reservations}
+					currentIndex={currentReservationIndex}
+					onIndexChange={handleIndexChange}
+					isCoach={isCoach}
+				/>
 			)}
 
 			<div className="p-message__input-area">

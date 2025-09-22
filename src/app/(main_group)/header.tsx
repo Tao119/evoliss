@@ -101,12 +101,6 @@ const Header = ({ setShowSideBar }: Prop) => {
 				<ul className="p-header__container -lower">
 					{userData?.isAdmin && (
 						<Link href={`/admin`} className="p-header__list">
-							<ImageBox
-								className="p-header__page-icon"
-								src={chartIcon}
-								objectFit="cover"
-								round
-							/>
 							<div
 								className={`p-header__page-text ${pathname.replace("/", "").split("/")[0] == "admin"
 									? "-active"

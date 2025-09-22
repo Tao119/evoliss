@@ -11,6 +11,7 @@ export const messageFuncs: { [funcName: string]: Function } = {
 	readRoomByKey,
 	sendMessage,
 	sendFirstMessage,
+	sendPurchaseMessage,
 	confirmUser,
 	markMessagesAsRead,
 	readMessageRoomByKey,
@@ -84,7 +85,7 @@ async function sendMessage({
 			include: { sender: true },
 		});
 	});
-	
+
 	// メッセージ送信後にキャッシュを無効化
 	if (result) {
 		// ルーム情報を取得してroomKeyを取得
@@ -105,7 +106,7 @@ async function sendMessage({
 			await invalidateUserCache(roomData.coachId);
 		}
 	}
-	
+
 	return result;
 }
 
@@ -221,6 +222,81 @@ async function sendFirstMessage({
 	});
 }
 
+async function sendPurchaseMessage({
+	userId,
+	coachId,
+	courseTitle,
+}: { userId: number; coachId: number; courseTitle: string }) {
+	return withTransaction(async (tx) => {
+		// 既存のメッセージルームを探す
+		const existingRoom = await tx.messageRoom.findFirst({
+			where: {
+				customerId: userId,
+				coachId,
+			},
+		});
+
+		const purchaseMessage = `${courseTitle}を購入いただき、ありがとうございます！講座に関してご質問がございましたら、お気軽にメッセージをお送りください。`;
+
+		if (existingRoom) {
+			// 既存のルームがある場合、そこにメッセージを送信
+			const message = await tx.message.create({
+				data: {
+					roomId: existingRoom.id,
+					senderId: coachId, // コーチからのメッセージ
+					content: purchaseMessage,
+				},
+				include: { sender: true },
+			});
+
+			// キャッシュを無効化
+			await invalidateMessageCache(existingRoom.roomKey);
+			await invalidateUserCache(userId);
+			await invalidateUserCache(coachId);
+
+			return { room: existingRoom, message };
+		} else {
+			// 新しいルームを作成
+			let roomKey = "";
+			let isUnique = false;
+
+			while (!isUnique) {
+				roomKey = nanoid(10);
+				const existingKey = await tx.messageRoom.findUnique({
+					where: { roomKey },
+				});
+
+				if (!existingKey) {
+					isUnique = true;
+				}
+			}
+
+			const newRoom = await tx.messageRoom.create({
+				data: {
+					roomKey,
+					customerId: userId,
+					coachId,
+				},
+			});
+
+			const message = await tx.message.create({
+				data: {
+					roomId: newRoom.id,
+					senderId: coachId, // コーチからのメッセージ
+					content: purchaseMessage,
+				},
+				include: { sender: true },
+			});
+
+			// キャッシュを無効化
+			await invalidateUserCache(userId);
+			await invalidateUserCache(coachId);
+
+			return { room: newRoom, message };
+		}
+	});
+}
+
 export async function markMessagesAsRead({
 	userId,
 	roomKey,
@@ -248,7 +324,7 @@ export async function markMessagesAsRead({
 
 async function readMessageRoomByKey({ roomKey }: { roomKey: string }) {
 	const cacheKey = `${CACHE_PREFIX.MESSAGE}room:${roomKey}`;
-	
+
 	return withCache(
 		cacheKey,
 		async () => {

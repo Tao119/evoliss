@@ -35,51 +35,80 @@ async function createReservation({
 	courseId: number;
 	timeSlotIds: number[];
 }) {
-	// まずタイムスロット情報を取得
-	const timeSlots = await prisma.timeSlot.findMany({
-		where: {
-			id: { in: timeSlotIds },
-		},
-		orderBy: {
-			dateTime: 'asc',
-		},
-	});
-
-	if (timeSlots.length === 0) {
-		throw new Error("タイムスロットが見つかりません");
-	}
-
-	// courseTimeを生成 (YYYY/MM/dd HH:mm~HH:mm形式)
-	const firstSlot = timeSlots[0];
-	const lastSlot = timeSlots[timeSlots.length - 1];
-	const courseTime = `${dayjs(firstSlot.dateTime).format('YYYY/MM/DD HH:mm')}~${dayjs(lastSlot.dateTime).add(30, 'minute').format('HH:mm')}`;
-
-	const reservation = await prisma.reservation.create({
-		data: {
-			customerId: userId,
-			courseId: courseId,
-			status: reservationStatus.Created,
-			courseTime: courseTime,
-		},
-	});
-
-	const reservationId = reservation.id;
-
-	// タイムスロットを予約に紐付け
-	await prisma.timeSlot.updateMany({
-		where: {
-			id: {
-				in: timeSlotIds,
+	return withTransaction(async (tx) => {
+		// まずタイムスロット情報を取得
+		const timeSlots = await tx.timeSlot.findMany({
+			where: {
+				id: { in: timeSlotIds },
 			},
-		},
-		data: {
-			reservationId,
-		},
+			orderBy: {
+				dateTime: 'asc',
+			},
+		});
+
+		if (timeSlots.length === 0) {
+			throw new Error("タイムスロットが見つかりません");
+		}
+
+		// コース情報を取得
+		const course = await tx.course.findUnique({
+			where: { id: courseId },
+			select: {
+				id: true,
+				title: true,
+				coachId: true,
+			},
+		});
+
+		if (!course) {
+			throw new Error("コースが見つかりません");
+		}
+
+		// courseTimeを生成 (YYYY/MM/dd HH:mm~HH:mm形式)
+		const firstSlot = timeSlots[0];
+		const lastSlot = timeSlots[timeSlots.length - 1];
+		const courseTime = `${dayjs(firstSlot.dateTime).format('YYYY/MM/DD HH:mm')}~${dayjs(lastSlot.dateTime).add(30, 'minute').format('HH:mm')}`;
+
+		const reservation = await tx.reservation.create({
+			data: {
+				customerId: userId,
+				courseId: courseId,
+				status: reservationStatus.Created,
+				courseTime: courseTime,
+			},
+		});
+
+		const reservationId = reservation.id;
+
+		// タイムスロットを予約に紐付け
+		await tx.timeSlot.updateMany({
+			where: {
+				id: {
+					in: timeSlotIds,
+				},
+			},
+			data: {
+				reservationId,
+			},
+		});
+
+		await scheduleReservationExpiry(reservation.id, 1);
+
+		// 購入ありがとうメッセージを送信
+		try {
+			const { messageFuncs } = await import("./message");
+			await messageFuncs.sendPurchaseMessage({
+				userId,
+				coachId: course.coachId,
+				courseTitle: course.title,
+			});
+		} catch (error) {
+			console.error("Failed to send purchase message:", error);
+			// メッセージ送信に失敗しても予約作成は継続
+		}
+
+		return reservation;
 	});
-
-	await scheduleReservationExpiry(reservation.id, 1);
-
-	return reservation;
 }
 
 async function createRefund({
