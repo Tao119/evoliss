@@ -232,7 +232,7 @@ export const CourseCarousel: React.FC<CourseCarouselProps> = ({
                             {...(index === safeCurrentIndex ? {
                                 ...handlers,
                                 onTouchEnd: (e: React.TouchEvent) => {
-                                    handlers.onTouchEnd?.(e);
+                                    handlers.onTouchEnd?.();
                                     handleCardClick(e);
                                 }
                             } : {
