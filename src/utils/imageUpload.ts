@@ -40,7 +40,7 @@ export async function uploadLargeFile(
           return fileUrl;
         }
       }
-    } catch (error) {
+    } catch {
       console.log("Presigned URL not available, falling back to chunk upload");
     }
 

@@ -228,9 +228,16 @@ export const CourseCarousel: React.FC<CourseCarouselProps> = ({
                             aria-hidden={index !== safeCurrentIndex}
                             aria-label={`講座 ${index + 1}: ${reservation.course?.title || '講座名未設定'}`}
                             onClick={handleCardClick}
-                            onTouchEnd={handleCardClick}
                             style={{ pointerEvents: index === safeCurrentIndex ? 'auto' : 'none' }}
-                            {...(index === safeCurrentIndex ? handlers : {})}
+                            {...(index === safeCurrentIndex ? {
+                                ...handlers,
+                                onTouchEnd: (e: React.TouchEvent) => {
+                                    handlers.onTouchEnd?.(e);
+                                    handleCardClick(e);
+                                }
+                            } : {
+                                onTouchEnd: handleCardClick
+                            })}
                         >
                             <CourseCardMessage
                                 course={reservation.course}
