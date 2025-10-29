@@ -3,7 +3,7 @@
 .p-search-area {
     width: 100%;
     max-width: 1000px;
-    height: 400px;
+    min-height: 400px;
     background-color: rgb(from $white r g b / 0.5);
     font-size: $fs-input;
     border-radius: 10px;

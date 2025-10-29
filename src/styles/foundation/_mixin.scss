@@ -119,17 +119,7 @@
     }
 }
 
-@mixin list-container {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 48px;
-    width: 100%;
 
-    @include mq(sp) {
-        width: 100%;
-    }
-}
 
 @mixin gradient-border($padding: 1px) {
     position: relative;

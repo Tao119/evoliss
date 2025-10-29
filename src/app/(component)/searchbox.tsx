@@ -35,14 +35,14 @@ export const SearchBox = ({ name, className }: Props) => {
 	const onReady = userData;
 
 	useEffect(() => {
-	animation.startAnimation();
+		animation.startAnimation();
 	}, [animation]);
 
 	useEffect(() => {
-	if (onReady) {
-	animation.endAnimation();
-	}
-	}, [onReady, animation]);
+		if (onReady) {
+			animation.endAnimation();
+		}
+	}, [onReady]);
 
 	const onInputChange = (event: { target: HTMLInputElement }) => {
 		setSearchText(event.target.value);
@@ -118,7 +118,7 @@ export const SearchBox = ({ name, className }: Props) => {
 							try {
 								search();
 							} catch {
-							alert("検索に失敗しました");
+								alert("検索に失敗しました");
 							}
 						}}
 					>

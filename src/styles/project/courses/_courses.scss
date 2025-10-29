@@ -137,10 +137,17 @@
     }
 
     &__list {
-        width: 860px;
         margin-bottom: 100px;
         justify-content: space-between;
-        @include list-container;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 48px;
+        width: 860px;
+
+        @include mq(sp) {
+            width: 100%;
+        }
 
 
         &.-wrap {

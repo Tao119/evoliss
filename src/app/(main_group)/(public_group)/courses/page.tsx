@@ -97,13 +97,12 @@ const Page = () => {
 			setCourseData({});
 			setCourseNum(0);
 			setCurrentPage(1);
-			setIsLoading(false);
 
 			// 新しい検索を実行
-			// 関数を直接定義して呼び出す
-			(async () => {
+			const fetchData = async () => {
 				try {
 					setIsLoading(true);
+					animation.startAnimation();
 
 					const gameIds = Array.from(appliedGames);
 					const tagIds = Array.from(appliedTags);
@@ -113,38 +112,28 @@ const Page = () => {
 					if (gameIds.length > 0) params.gameIds = gameIds;
 					if (tagIds.length > 0) params.tagIds = tagIds;
 
-					const response = await requestDB(
+					// コース数を取得
+					const countResponse = await requestDB(
 						"course",
 						"readCoursesNumByQuery",
 						params,
 					);
-					if (response.success) {
-						setCourseNum(response.data);
+					if (countResponse.success) {
+						setCourseNum(countResponse.data);
 					} else {
-						console.error("コース数取得エラー:", response);
+						console.error("コース数取得エラー:", countResponse);
 						setCourseNum(0);
 					}
-				} catch (error) {
-					console.error("Error fetching course count:", error);
-					setCourseNum(0);
-				}
-			})();
 
-			// コースデータを取得
-			(async () => {
-				try {
-					animation.startAnimation();
-
-					const params: any = {
+					// コースデータを取得
+					const courseParams = {
+						...params,
 						page: 1,
 						total,
 						sortMethod,
 					};
-					if (appliedQuery) params.query = appliedQuery;
-					if (appliedGames.size) params.gameIds = Array.from(appliedGames);
-					if (appliedTags.size) params.tagIds = Array.from(appliedTags);
 
-					const response = await requestDB("course", "readCoursesByQuery", params);
+					const response = await requestDB("course", "readCoursesByQuery", courseParams);
 					if (response.success) {
 						setCourseData({
 							1: response.data,
@@ -160,20 +149,31 @@ const Page = () => {
 					setCourseData({
 						1: [],
 					});
+					setCourseNum(0);
 				} finally {
 					setIsLoading(false);
 					animation.endAnimation();
 				}
-			})();
+			};
+
+			fetchData();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [appliedQuery, appliedGames, appliedTags, onReady, sortMethod]);
 
 	// ページ変更時
 	useEffect(() => {
-		if (currentPage > 1 && onReady && !courseData[currentPage] && !isLoading) {
-			// 直接非同期関数を実行
-			(async () => {
+		// 現在のページのデータが既に存在する場合は何もしない
+		if (courseData[currentPage]) {
+			return;
+		}
+
+		// 1ページ目は検索条件のuseEffectで処理されるのでスキップ
+		if (currentPage === 1) {
+			return;
+		}
+
+		if (onReady && !isLoading) {
+			const fetchPageData = async () => {
 				try {
 					setIsLoading(true);
 					animation.startAnimation();
@@ -210,16 +210,17 @@ const Page = () => {
 					setIsLoading(false);
 					animation.endAnimation();
 				}
-			})();
+			};
+
+			fetchPageData();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [currentPage, onReady, isLoading, courseData, appliedQuery, appliedGames, appliedTags, sortMethod]);
+	}, [currentPage, onReady, isLoading, appliedQuery, appliedGames, appliedTags, sortMethod]);
 
 	useEffect(() => {
 		if (onReady && !isLoading) {
 			animation.endAnimation();
 		}
-	}, [onReady, isLoading]);
+	}, [onReady, isLoading, animation]);
 
 	// sortMethodのuseEffectは削除（appliedQuery等のuseEffectで処理されるため）
 
