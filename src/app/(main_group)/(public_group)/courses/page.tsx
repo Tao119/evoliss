@@ -220,7 +220,7 @@ const Page = () => {
 		if (onReady && !isLoading) {
 			animation.endAnimation();
 		}
-	}, [onReady, isLoading, animation]);
+	}, [onReady, isLoading]);
 
 	// sortMethodのuseEffectは削除（appliedQuery等のuseEffectで処理されるため）
 

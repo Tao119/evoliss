@@ -40,7 +40,7 @@ const Page = () => {
 			animation.endAnimation();
 			alert("コース情報の取得中にエラーが発生しました");
 		}
-	}, [courseIdNumber, animation]);
+	}, [courseIdNumber]);
 
 	useEffect(() => {
 		fetchCourse();
@@ -51,7 +51,7 @@ const Page = () => {
 		if (onReady) {
 			animation.endAnimation();
 		}
-	}, [onReady, animation]);
+	}, [onReady]);
 
 	useEffect(() => {
 		if (onReady) {

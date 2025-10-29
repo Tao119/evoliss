@@ -75,18 +75,20 @@ const CoachCompletedPage = () => {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [userData]);
+	}, [userData?.id]);
 
 	useEffect(() => {
+		if (!userData) return;
+
 		animation.startAnimation();
 		fetchReservations();
-	}, [animation, fetchReservations]);
+	}, [userData?.id, fetchReservations]);
 
 	useEffect(() => {
 		if (!isLoading && reservations.length >= 0) {
 			animation.endAnimation();
 		}
-	}, [isLoading, reservations, animation]);
+	}, [isLoading, reservations]);
 
 
 

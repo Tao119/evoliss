@@ -25,38 +25,36 @@ const MyCalendarPage = () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		animation.startAnimation();
-		if (userData) {
-			// 関数を直接実行
-			(async () => {
-				if (!userData) return;
+		if (!userData) return;
 
-				try {
-					setIsLoading(true);
+		const fetchReservations = async () => {
+			try {
+				setIsLoading(true);
+				animation.startAnimation();
 
-					// コーチとしての予約を取得
-					const coachReservations: Reservation[] = [];
-					for (const course of userData.courses) {
-						const response = await requestDB("reservation", "readReservationsByCourseId", {
-							courseId: course.id,
-						});
+				// コーチとしての予約を取得
+				const coachReservations: Reservation[] = [];
+				for (const course of userData.courses) {
+					const response = await requestDB("reservation", "readReservationsByCourseId", {
+						courseId: course.id,
+					});
 
-						if (response.success && response.data) {
-							coachReservations.push(...response.data);
-						}
+					if (response.success && response.data) {
+						coachReservations.push(...response.data);
 					}
-					setCoachReservations(coachReservations);
-
-				} catch (error) {
-					console.error("Error fetching reservations:", error);
-				} finally {
-					setIsLoading(false);
-					animation.endAnimation();
 				}
-			})();
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [userData]);
+				setCoachReservations(coachReservations);
+
+			} catch (error) {
+				console.error("Error fetching reservations:", error);
+			} finally {
+				setIsLoading(false);
+				animation.endAnimation();
+			}
+		};
+
+		fetchReservations();
+	}, [userData?.id]);
 
 	// 選択された日付の予約を取得
 	const getReservationsForDate = (dateStr: string) => {
@@ -278,7 +276,7 @@ const MyCalendarPage = () => {
 								let isCompleted = false;
 
 								// ステータスで判定
-								if (reservation.status === reservationStatus.Done || 
+								if (reservation.status === reservationStatus.Done ||
 									reservation.status === reservationStatus.Reviewed) {
 									isCompleted = true;
 								} else if (reservation.status === reservationStatus.CanceledByCoach) {

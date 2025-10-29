@@ -21,7 +21,7 @@ export default function GuestLayout({
 			animation.endAnimation();
 			router.push(`/sign-in?callback=${path}`);
 		}
-	}, [userDataStatus, animation, path, router]);
+	}, [userDataStatus, path, router]);
 
 	return <>{children}</>;
 }
