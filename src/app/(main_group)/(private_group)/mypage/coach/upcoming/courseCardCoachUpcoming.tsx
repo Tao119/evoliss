@@ -63,9 +63,29 @@ export const CourseCardCoachUpcoming: React.FC<Props> = ({ course, reservation, 
         reservation.status === reservationStatus.CanceledByCoach ||
         reservation.status === reservationStatus.CancelRequestedByCoach;
 
+    // 未読通知があるかチェック
+    const hasUnread = reservation.hasUnreadNotification || reservation.room?.hasUnreadForCoach;
+
+    // メッセージボタンをクリックした際に未読フラグをクリア
+    const handleMessageClick = async () => {
+        if (hasUnread && reservation.id) {
+            try {
+                const { requestDB } = await import("@/services/axios");
+                await requestDB("reservation", "markReservationAsRead", {
+                    id: reservation.id,
+                    userId: reservation.course.coachId,
+                });
+            } catch (error) {
+                console.error("Failed to mark as read:", error);
+            }
+        }
+        router.push(`/mypage/message/${reservation.room?.roomKey}`);
+    };
+
     return (
         <>
             <div className={`p-course-card ${isCanceled ? '-canceled' : ''}`}>
+                {hasUnread && <div className="p-course-card__unread-badge" />}
 
                 <div className="p-course-card__coach">
                     <ImageBox
@@ -109,7 +129,7 @@ export const CourseCardCoachUpcoming: React.FC<Props> = ({ course, reservation, 
                             {reservation.status !== reservationStatus.Canceled && reservation.status !== reservationStatus.CanceledByCoach && (
                                 <>
                                     <div className="p-course-card__button"
-                                        onClick={() => router.push(`/mypage/message/${reservation.room?.roomKey}`)}>
+                                        onClick={handleMessageClick}>
                                         <div className="p-course-card__tag-text">メッセージ</div>
                                     </div>
                                     <div

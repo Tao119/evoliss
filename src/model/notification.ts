@@ -1,46 +1,83 @@
 import { prisma } from "@/lib/prisma";
+import { safeTransaction } from "@/lib/transaction";
 
 export const notificationFuncs: { [funcName: string]: Function } = {
 	createNotification,
-	readNotifications,
-	markAsRead,
+	readNotificationsByUserId,
+	markNotificationAsRead,
+	markAllNotificationsAsRead,
 	deleteNotification,
+	getUnreadNotificationCount,
 };
 
 async function createNotification({
 	userId,
+	type,
 	title,
 	message,
-	type,
+	relatedId,
 }: {
 	userId: number;
+	type: string;
 	title: string;
 	message: string;
-	type?: string;
+	relatedId?: number;
 }) {
-	// For now, return a mock response since Notification model doesn't exist in schema
-	return {
-		id: Date.now(),
-		userId,
-		title,
-		message,
-		type: type || "info",
-		isRead: false,
-		createdAt: new Date(),
-	};
+	return await safeTransaction(async (tx) => {
+		return await tx.notification.create({
+			data: {
+				userId,
+				type,
+				title,
+				message,
+				relatedId,
+			},
+		});
+	});
 }
 
-async function readNotifications({ userId }: { userId: number }) {
-	// For now, return empty array since Notification model doesn't exist in schema
-	return [];
+async function readNotificationsByUserId({
+	userId,
+	limit = 50,
+}: {
+	userId: number;
+	limit?: number;
+}) {
+	return await prisma.notification.findMany({
+		where: { userId },
+		orderBy: { createdAt: "desc" },
+		take: limit,
+	});
 }
 
-async function markAsRead({ notificationId }: { notificationId: number }) {
-	// For now, return success response
-	return { success: true };
+async function markNotificationAsRead({ id }: { id: number }) {
+	return await safeTransaction(async (tx) => {
+		return await tx.notification.update({
+			where: { id },
+			data: { isRead: true },
+		});
+	});
 }
 
-async function deleteNotification({ notificationId }: { notificationId: number }) {
-	// For now, return success response
-	return { success: true };
+async function markAllNotificationsAsRead({ userId }: { userId: number }) {
+	return await safeTransaction(async (tx) => {
+		return await tx.notification.updateMany({
+			where: { userId, isRead: false },
+			data: { isRead: true },
+		});
+	});
+}
+
+async function deleteNotification({ id }: { id: number }) {
+	return await safeTransaction(async (tx) => {
+		return await tx.notification.delete({
+			where: { id },
+		});
+	});
+}
+
+async function getUnreadNotificationCount({ userId }: { userId: number }) {
+	return await prisma.notification.count({
+		where: { userId, isRead: false },
+	});
 }

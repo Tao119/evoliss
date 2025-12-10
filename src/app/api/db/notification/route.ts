@@ -1,16 +1,25 @@
+import { NextRequest, NextResponse } from "next/server";
 import { notificationFuncs } from "@/model/notification";
-import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
 	try {
-		const { funcName, param } = await req.json();
-		if (!Object.keys(notificationFuncs).includes(funcName)) {
-			return NextResponse.json({ success: false, message: "Invalid function" });
+		const { funcName, ...params } = await request.json();
+
+		if (!funcName || !notificationFuncs[funcName]) {
+			return NextResponse.json(
+				{ success: false, error: "Invalid function name" },
+				{ status: 400 }
+			);
 		}
-		const result = await notificationFuncs[funcName](param);
+
+		const result = await notificationFuncs[funcName](params);
+
 		return NextResponse.json({ success: true, data: result });
-	} catch (e) {
-		console.error(e);
-		return NextResponse.json({ success: false, message: "Error occurred" });
+	} catch (error: any) {
+		console.error("Notification API Error:", error);
+		return NextResponse.json(
+			{ success: false, error: error.message },
+			{ status: 500 }
+		);
 	}
 }

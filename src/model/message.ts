@@ -66,24 +66,103 @@ async function sendMessage({
 	roomId,
 	senderId,
 	content,
-}: { roomId: number; senderId: number; content: string }) {
+	imageUrl,
+	imageSize,
+	imageType,
+}: {
+	roomId: number;
+	senderId: number;
+	content: string;
+	imageUrl?: string;
+	imageSize?: number;
+	imageType?: string;
+}) {
 	const result = await safeTransaction(async (tx) => {
 		const room = await tx.messageRoom.findUnique({
 			where: { id: roomId },
+			include: {
+				customer: true,
+				coach: true,
+			},
 		});
 
 		if (!room || (room.customerId !== senderId && room.coachId !== senderId)) {
 			throw new Error("Unauthorized");
 		}
 
-		return await tx.message.create({
+		const message = await tx.message.create({
 			data: {
 				roomId,
 				senderId,
 				content,
+				imageUrl,
+				imageSize,
+				imageType,
 			},
 			include: { sender: true },
 		});
+
+		// 受信者を特定
+		const recipientId = senderId === room.customerId ? room.coachId : room.customerId;
+		const recipient = senderId === room.customerId ? room.coach : room.customer;
+		const sender = senderId === room.customerId ? room.customer : room.coach;
+
+		// メッセージルームの未読フラグを更新
+		const updateData: any = {};
+		if (senderId === room.customerId) {
+			updateData.hasUnreadForCoach = true;
+		} else {
+			updateData.hasUnreadForCustomer = true;
+		}
+
+		await tx.messageRoom.update({
+			where: { id: roomId },
+			data: updateData,
+		});
+
+		// 受信者への通知を作成（非同期で実行）
+		if (recipientId && recipient) {
+			// Web通知
+			try {
+				await tx.notification.create({
+					data: {
+						userId: recipientId,
+						type: "message",
+						title: "新しいメッセージ",
+						message: `${sender?.name || "ユーザー"}様からメッセージが届きました`,
+						relatedId: roomId,
+					},
+				});
+			} catch (notifError) {
+				console.error("❌ Failed to create message notification:", notifError);
+			}
+
+			// メール通知（非同期で実行、エラーは無視）
+			setImmediate(async () => {
+				try {
+					const { sendEmail, getMessageNotificationEmailTemplate } = await import("@/lib/email/emailService");
+					const emailTemplate = getMessageNotificationEmailTemplate({
+						recipientName: recipient.name || "ユーザー",
+						senderName: sender?.name || "ユーザー",
+						messagePreview: content,
+						roomKey: room.roomKey,
+					});
+
+					await sendEmail({
+						to: recipient.email,
+						subject: emailTemplate.subject,
+						html: emailTemplate.html,
+						text: emailTemplate.text,
+					});
+
+					console.log("📧 Message notification email sent");
+				} catch (emailError) {
+					console.error("❌ Failed to send message notification email:", emailError);
+				}
+			});
+		}
+
+		return message;
 	});
 
 	// メッセージ送信後にキャッシュを無効化
@@ -302,6 +381,7 @@ export async function markMessagesAsRead({
 	roomKey,
 }: { userId: number; roomKey: string }) {
 	return safeTransaction(async (tx) => {
+		// メッセージを既読にする
 		await tx.message.updateMany({
 			where: {
 				room: { roomKey },
@@ -310,14 +390,29 @@ export async function markMessagesAsRead({
 			},
 			data: { isRead: true },
 		});
-		// await tx.purchaseMessage.updateMany({
-		//     where: {
-		//         room: { roomKey },
-		//         senderId: { not: userId },
-		//         isRead: false,
-		//     },
-		//     data: { isRead: true },
-		// });
+
+		// メッセージルームの未読フラグをクリア
+		const room = await tx.messageRoom.findUnique({
+			where: { roomKey },
+			select: { id: true, customerId: true, coachId: true },
+		});
+
+		if (room) {
+			const updateData: any = {};
+			if (userId === room.customerId) {
+				updateData.hasUnreadForCustomer = false;
+			} else if (userId === room.coachId) {
+				updateData.hasUnreadForCoach = false;
+			}
+
+			if (Object.keys(updateData).length > 0) {
+				await tx.messageRoom.update({
+					where: { id: room.id },
+					data: updateData,
+				});
+			}
+		}
+
 		return true;
 	});
 }

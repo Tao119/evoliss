@@ -109,9 +109,10 @@
             height: 24px;
             top: -30px;
             font-size: $fs-text;
-            font-weight: 100;
+            font-weight: $fw-bold;
             left: 70px;
             margin-left: 0;
+            padding-top: 0;
         }
 
         &.-big {

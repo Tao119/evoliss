@@ -24,6 +24,7 @@ import React, {
 } from "react";
 import { UserDataContext, useHeader } from "../contextProvider";
 import { useBreakpoint } from "@/hooks/useBreakPoint";
+import { NotificationBell } from "../(component)/notificationBell";
 
 interface Prop {
 	setShowSideBar: Dispatch<SetStateAction<boolean>>;
@@ -48,6 +49,7 @@ const Header = ({ setShowSideBar }: Prop) => {
 	const mainRoutes = [
 		{ path: "/courses/coach", text: "コーチから探す" },
 		{ path: "/courses", text: "講座から探す" },
+		{ path: "/mypage/coach/create", text: "コーチをする", requireAuth: true },
 	];
 
 	const pushRoute = (path: string) => {
@@ -74,29 +76,34 @@ const Header = ({ setShowSideBar }: Prop) => {
 					/>
 				</div>
 				<ul className="p-header__container -upper">
-					{mainRoutes.map(({ path, text }) => (
-						<div
-							onClick={() => pushRoute(path)}
-							key={path}
-							className={`p-header__list ${pathname.replace("/", "").split("/")[0] ==
-								`${path.replace("/", "")}`
-								? "-active"
-								: ""
-								}`}
-						>
-							{text && (
-								<div
-									className={`p-header__page-text ${pathname.replace("/", "").split("/")[0] ==
-										`${path.replace("/", "")}`
-										? "-active"
-										: ""
-										}`}
-								>
-									{text}
-								</div>
-							)}
-						</div>
-					))}
+					{mainRoutes.map(({ path, text, requireAuth }) => {
+						// 認証が必要なルートで未ログインの場合はスキップ
+						if (requireAuth && !userData) return null;
+
+						return (
+							<div
+								onClick={() => pushRoute(path)}
+								key={path}
+								className={`p-header__list ${pathname.replace("/", "").split("/")[0] ==
+									`${path.replace("/", "")}`
+									? "-active"
+									: ""
+									}`}
+							>
+								{text && (
+									<div
+										className={`p-header__page-text ${pathname.replace("/", "").split("/")[0] ==
+											`${path.replace("/", "")}`
+											? "-active"
+											: ""
+											}`}
+									>
+										{text}
+									</div>
+								)}
+							</div>
+						);
+					})}
 				</ul>
 				<ul className="p-header__container -lower">
 					{userData?.isAdmin && (
@@ -111,6 +118,7 @@ const Header = ({ setShowSideBar }: Prop) => {
 							</div>
 						</Link>
 					)}
+					{userData && <NotificationBell />}
 					{userData ? (
 						<Link
 							href={`/mypage`}

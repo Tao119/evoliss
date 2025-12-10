@@ -31,6 +31,7 @@ const CoachEditPage = () => {
 	const [gameId, setGameId] = useState<number | string>("");
 	const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
 	const [isPublic, setIsPublic] = useState(false);
+	const [welcomeMessage, setWelcomeMessage] = useState("");
 
 	// 画像関連
 	const [currentImageUrl, setCurrentImageUrl] = useState<string>("");
@@ -64,6 +65,7 @@ const CoachEditPage = () => {
 			setSelectedTagIds(course.tagCourses?.map(t => t.tagId) || []);
 			setCurrentImageUrl(course.image || "");
 			setIsPublic(course.isPublic);
+			setWelcomeMessage(course.welcomeMessage || "");
 
 			setIsLoading(false);
 			animation.endAnimation();
@@ -211,6 +213,7 @@ const CoachEditPage = () => {
 				gameId: Number.parseInt(gameId as string),
 				tagIds: selectedTagIds,
 				image: imageUrl,
+				welcomeMessage: welcomeMessage.trim() || null,
 			});
 
 			if (response.success) {
@@ -377,6 +380,21 @@ const CoachEditPage = () => {
 							maxHeight={150}
 						/>
 					</div>
+				</div>
+
+				<div className="p-create__section">
+					<div className="p-create__label">購入後の固定メッセージ（任意）</div>
+					<div className="p-create__input-wrapper -textarea">
+						<MultilineInput
+							className="p-create__textarea"
+							value={welcomeMessage}
+							onChange={(e) => setWelcomeMessage(e.target.value)}
+							placeholder="ご購入ありがとうございます。当日はGoogle Meetにてコーチングさせていただきます。&#10;&#10;前日までに以下をご記入ください：&#10;・プレイ歴と使用デッキ&#10;・現在悩んでいる点&#10;・当面の目標&#10;&#10;よろしくお願いいたします。"
+							minHeight={150}
+							maxHeight={150}
+						/>
+					</div>
+					<div className="p-create__helper">※購入完了時に自動送信されるメッセージです</div>
 				</div>
 
 				{/* ゲーム選択 */}

@@ -17,6 +17,25 @@ interface Props {
 export const CourseCardUpcoming: React.FC<Props> = ({ course, reservation, children }) => {
 	const router = useRouter();
 
+	// 未読通知があるかチェック
+	const hasUnread = reservation.hasUnreadNotification || reservation.room?.hasUnreadForCustomer;
+
+	// メッセージボタンをクリックした際に未読フラグをクリア
+	const handleMessageClick = async () => {
+		if (hasUnread && reservation.id) {
+			try {
+				const { requestDB } = await import("@/services/axios");
+				await requestDB("reservation", "markReservationAsRead", {
+					id: reservation.id,
+					userId: reservation.customerId,
+				});
+			} catch (error) {
+				console.error("Failed to mark as read:", error);
+			}
+		}
+		router.push(`/mypage/message/${reservation.room?.roomKey}`);
+	};
+
 	let dateTime = null;
 	// courseTimeがある場合はそれを使用、ない場合はtimeSlotsから取得（互換性のため）
 	if (reservation.courseTime) {
@@ -61,6 +80,7 @@ export const CourseCardUpcoming: React.FC<Props> = ({ course, reservation, child
 	return (
 		<>
 			<div className={`p-course-card ${isCanceled ? '-canceled' : ''}`}>
+				{hasUnread && <div className="p-course-card__unread-badge" />}
 				<div className="p-course-card__coach">
 					<ImageBox
 						className="p-course-card__coach-icon"
@@ -109,7 +129,7 @@ export const CourseCardUpcoming: React.FC<Props> = ({ course, reservation, child
 									</div>
 									}
 									<div className="p-course-card__button"
-										onClick={() => router.push(`/mypage/message/${reservation.room?.roomKey}`)}>
+										onClick={handleMessageClick}>
 										<div className="p-course-card__tag-text">メッセージ</div>
 									</div>
 

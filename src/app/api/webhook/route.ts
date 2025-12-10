@@ -148,6 +148,105 @@ export async function POST(request: NextRequest) {
 				method: "card",
 			});
 
+			// 予約情報を取得
+			const reservationRes = await requestDB("reservation", "readReservationById", {
+				id: parsedReservationId,
+			});
+			const reservation = reservationRes.data;
+
+			// コーチへの購入通知メールを送信
+			try {
+				const { sendEmail, getPurchaseEmailTemplate } = await import("@/lib/email/emailService");
+				const emailTemplate = getPurchaseEmailTemplate({
+					coachName: course.coach.name || "コーチ",
+					customerName: user.name || "お客様",
+					courseTitle: course.title,
+					courseTime: reservation.courseTime || "",
+					welcomeMessage: course.welcomeMessage,
+				});
+
+				await sendEmail({
+					to: course.coach.email,
+					subject: emailTemplate.subject,
+					html: emailTemplate.html,
+					text: emailTemplate.text,
+				});
+
+				console.log("📧 Purchase notification email sent to coach");
+			} catch (emailError) {
+				console.error("❌ Failed to send purchase notification email:", emailError);
+			}
+
+			// 顧客への購入確認メールを送信
+			try {
+				const { sendEmail, getPurchaseConfirmationEmailTemplate } = await import("@/lib/email/emailService");
+				const emailTemplate = getPurchaseConfirmationEmailTemplate({
+					customerName: user.name || "お客様",
+					courseTitle: course.title,
+					courseTime: reservation.courseTime || "",
+					coachName: course.coach.name || "コーチ",
+					welcomeMessage: course.welcomeMessage,
+				});
+
+				await sendEmail({
+					to: user.email,
+					subject: emailTemplate.subject,
+					html: emailTemplate.html,
+					text: emailTemplate.text,
+				});
+
+				console.log("📧 Purchase confirmation email sent to customer");
+			} catch (emailError) {
+				console.error("❌ Failed to send purchase confirmation email:", emailError);
+			}
+
+			// コーチへのWeb通知を作成
+			try {
+				await requestDB("notification", "createNotification", {
+					userId: course.coachId,
+					type: "purchase",
+					title: "講座が購入されました",
+					message: `${user.name || "お客様"}様が「${course.title}」を購入しました`,
+					relatedId: parsedReservationId,
+				});
+
+				console.log("🔔 Purchase notification created for coach");
+			} catch (notifError) {
+				console.error("❌ Failed to create purchase notification:", notifError);
+			}
+
+			// 講座30分前のリマインダーをスケジュール
+			try {
+				const { scheduleReminder } = await import("@/lib/queue/reminderQueue");
+				await scheduleReminder(parsedReservationId);
+				console.log("⏰ Reminder scheduled for reservation");
+			} catch (reminderError) {
+				console.error("❌ Failed to schedule reminder:", reminderError);
+			}
+
+			// welcomeMessageがある場合、メッセージルームに自動送信
+			if (course.welcomeMessage) {
+				try {
+					await prisma.message.create({
+						data: {
+							roomId: messageRoom.id,
+							senderId: course.coachId,
+							content: course.welcomeMessage,
+						},
+					});
+
+					// メッセージルームの未読フラグを更新
+					await prisma.messageRoom.update({
+						where: { id: messageRoom.id },
+						data: { hasUnreadForCustomer: true },
+					});
+
+					console.log("💬 Welcome message sent to customer");
+				} catch (msgError) {
+					console.error("❌ Failed to send welcome message:", msgError);
+				}
+			}
+
 			console.log("📝 Payment Processing Completed:", {
 				userId: parsedUserId,
 				courseId: parsedCourseId,

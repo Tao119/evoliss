@@ -28,6 +28,7 @@ const CoachCreatePage = () => {
 	const [duration, setDuration] = useState(30);
 	const [gameId, setGameId] = useState<number | string>("");
 	const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+	const [welcomeMessage, setWelcomeMessage] = useState("");
 
 	// 画像関連
 	const [tempImageFile, setTempImageFile] = useState<File | null>(null);
@@ -130,6 +131,10 @@ const CoachCreatePage = () => {
 			alert("講座の内容は1000文字以内で入力してください");
 			return false;
 		}
+		if (welcomeMessage && welcomeMessage.length > 1000) {
+			alert("購入後メッセージは1000文字以内で入力してください");
+			return false;
+		}
 		if (!gameId) {
 			alert("ゲームを選択してください");
 			return false;
@@ -169,13 +174,14 @@ const CoachCreatePage = () => {
 				gameId: Number.parseInt(gameId as string),
 				tagIds: selectedTagIds,
 				image: imageUrl,
+				welcomeMessage: welcomeMessage.trim() || null,
 			});
 
 			if (response.success) {
 				alert("講座を作成しました！");
 				// UserDataを再取得してからリダイレクト
 				await fetchUserData();
-				router.push("/mypage/coach/list");
+				router.push("/mypage/coach/create/success");
 			} else {
 				alert("講座の作成に失敗しました");
 			}
@@ -289,6 +295,21 @@ const CoachCreatePage = () => {
 						/>
 					</div>
 					{/* <div className="p-create__helper">※1000文字以内</div> */}
+				</div>
+
+				<div className="p-create__section">
+					<div className="p-create__label">購入後の固定メッセージ（任意）</div>
+					<div className="p-create__input-wrapper -textarea">
+						<MultilineInput
+							className="p-create__textarea"
+							value={welcomeMessage}
+							onChange={(e) => setWelcomeMessage(e.target.value)}
+							placeholder="ご購入ありがとうございます。当日はGoogle Meetにてコーチングさせていただきます。&#10;&#10;前日までに以下をご記入ください：&#10;・プレイ歴と使用デッキ&#10;・現在悩んでいる点&#10;・当面の目標&#10;&#10;よろしくお願いいたします。"
+							minHeight={150}
+							maxHeight={150}
+						/>
+					</div>
+					<div className="p-create__helper">※購入完了時に自動送信されるメッセージです</div>
 				</div>
 
 				{/* ゲーム選択 */}

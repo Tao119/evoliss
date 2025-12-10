@@ -34,6 +34,7 @@ model User {
   userPayment      UserPayment[]
   reviews          Review[]
   timeSlots        TimeSlot[]
+  notifications    Notification[]
 }
 
 model PaymentAccount {
@@ -70,6 +71,7 @@ model Course {
   updatedAt    DateTime       @updatedAt
   gameId       Int?
   duration     Int            @default(30)
+  welcomeMessage String?      @db.Text // 購入後の固定メッセージ
   coach        User           @relation(fields: [coachId], references: [id], onDelete: Cascade)
   game         Game?          @relation(fields: [gameId], references: [id])
   accesses     CourseAccess[]
@@ -114,6 +116,7 @@ model Reservation {
   refunds    Refund[]
   status     Int
   courseTime String?  // YYYY/MM/dd HH:mm~HH:mm形式で保存
+  hasUnreadNotification Boolean @default(true) // 未読通知フラグ（購入・メッセージ）
   course     Course   @relation("CourseReservations", fields: [courseId], references: [id])
   customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
   timeSlots   TimeSlot[]
@@ -132,6 +135,8 @@ model MessageRoom {
   coachId          Int?
   customerId       Int
   roomKey          String            @unique
+  hasUnreadForCoach Boolean          @default(false) // コーチ側の未読フラグ
+  hasUnreadForCustomer Boolean       @default(false) // 顧客側の未読フラグ
   messages         Message[]
   coach            User?             @relation("CoachMessageRooms", fields: [coachId], references: [id])
   customer         User              @relation("CustomerMessageRooms", fields: [customerId], references: [id], onDelete: Cascade)
@@ -150,6 +155,9 @@ model Message {
   roomId   Int
   room     MessageRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
   sender   User?       @relation(fields: [senderId], references: [id])
+  imageUrl String?     // 画像のURL
+  imageSize Int?       // 画像のファイルサイズ（バイト）
+  imageType String?    // 画像のMIMEタイプ
 
   @@index([roomId], map: "Message_roomId_fkey")
   @@index([senderId], map: "Message_senderId_fkey")
@@ -242,5 +250,19 @@ model Contact {
   status    Int      @default(0) // 0: 未対応, 1: 対応中, 2: 対応済み
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   // 'purchase', 'message', 'reminder'
+  title     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  relatedId Int?     // 関連するID（予約ID、メッセージルームIDなど）
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "Notification_userId_fkey")
 }
 

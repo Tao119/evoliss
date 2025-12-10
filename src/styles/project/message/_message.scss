@@ -329,6 +329,207 @@
         font-size: $fs-text;
         font-weight: $fw-bold;
     }
+
+    // 画像アップロード関連のスタイル
+    &__image-upload {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    &__image-drop-area {
+        border: 2px dashed $gray;
+        border-radius: 10px;
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: rgba($white, 0.05);
+
+        &:hover {
+            border-color: $theme;
+            background-color: rgba($theme, 0.1);
+        }
+    }
+
+    &__image-drop-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    &__image-drop-icon {
+        font-size: 48px;
+        opacity: 0.7;
+    }
+
+    &__image-drop-text {
+        font-size: $fs-text;
+        color: $white;
+        font-weight: $fw-bold;
+    }
+
+    &__image-drop-subtext {
+        font-size: $fs-small;
+        color: $gray;
+    }
+
+    &__image-preview {
+        background-color: rgba($white, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    &__image-preview-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    &__image-preview-image {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    &__image-preview-info {
+        text-align: center;
+    }
+
+    &__image-preview-name {
+        font-size: $fs-text;
+        color: $white;
+        font-weight: $fw-bold;
+        word-break: break-all;
+    }
+
+    &__image-preview-size {
+        font-size: $fs-small;
+        color: $gray;
+        margin-top: 5px;
+    }
+
+    &__image-preview-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    &__image-cancel-button {
+        background-color: $gray;
+        color: $white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: $fs-small;
+
+        &:hover {
+            background-color: darken($gray, 10%);
+        }
+    }
+
+    &__image-upload-button {
+        background: linear-gradient(90deg, #5900FF 0%, #FFAA00 100%);
+        color: $white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: $fs-small;
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    &__image-error {
+        color: $red;
+        font-size: $fs-small;
+        text-align: center;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: rgba($red, 0.1);
+        border-radius: 5px;
+        border: 1px solid rgba($red, 0.3);
+    }
+
+    &__button-group {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+        align-items: center;
+    }
+
+    &__image-button {
+        background-color: rgba($white, 0.1);
+        color: $white;
+        border: 1px solid $gray;
+        padding: 10px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: $fs-small;
+        flex-shrink: 0;
+
+        &:hover {
+            background-color: rgba($white, 0.2);
+        }
+    }
+
+    &__close-image-button {
+        background-color: $gray;
+        color: $white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: $fs-small;
+        align-self: center;
+
+        &:hover {
+            background-color: darken($gray, 10%);
+        }
+    }
+
+    // メッセージ内の画像表示
+    &__message-image-container {
+        margin-top: 10px;
+    }
+
+    &__message-image {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+
+        &:hover {
+            transform: scale(1.02);
+        }
+
+        @include mq(sp) {
+            max-width: 250px;
+            max-height: 250px;
+        }
+    }
+
+    &__message-image-caption {
+        margin-top: 10px;
+        font-size: $fs-small;
+        color: $gray;
+        font-style: italic;
+    }
+
+    &__message-text {
+        color: $black;
+        line-height: 1.6;
+    }
 }
 
 .p-message-box {

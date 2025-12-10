@@ -24,6 +24,7 @@ export const reservationFuncs: { [funcName: string]: Function } = {
 	readReservationsByCourseId,
 	readReservationsByUserId,
 	doneCourse,
+	markReservationAsRead,
 };
 
 async function createReservation({
@@ -859,4 +860,46 @@ async function rescheduleReservation({
 	}
 
 	return result;
+}
+
+
+async function markReservationAsRead({
+	id,
+	userId,
+}: {
+	id: number;
+	userId: number;
+}) {
+	return safeTransaction(async (tx) => {
+		// 予約を取得して権限を確認
+		const reservation = await tx.reservation.findUnique({
+			where: { id },
+			select: {
+				customerId: true,
+				course: {
+					select: { coachId: true },
+				},
+			},
+		});
+
+		if (!reservation) {
+			throw new Error("予約が見つかりません");
+		}
+
+		// ユーザーが顧客またはコーチであることを確認
+		if (
+			reservation.customerId !== userId &&
+			reservation.course.coachId !== userId
+		) {
+			throw new Error("この予約にアクセスする権限がありません");
+		}
+
+		// 未読フラグをクリア
+		await tx.reservation.update({
+			where: { id },
+			data: { hasUnreadNotification: false },
+		});
+
+		return { success: true };
+	});
 }

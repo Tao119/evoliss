@@ -42,7 +42,9 @@ export const SearchBox = ({ name, className }: Props) => {
 		if (onReady) {
 			animation.endAnimation();
 		}
-	}, [onReady]);
+	}, [onReady
+
+	]);
 
 	const onInputChange = (event: { target: HTMLInputElement }) => {
 		setSearchText(event.target.value);

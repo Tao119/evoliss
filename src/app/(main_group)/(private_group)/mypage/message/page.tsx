@@ -124,7 +124,11 @@ const MessagePage = () => {
 						>
 							<MessageBox
 								user={otherUser!}
-								latestMessage={lastMessage?.content}
+								latestMessage={
+									lastMessage?.imageUrl
+										? "📷 画像を送信しました"
+										: lastMessage?.content
+								}
 								unread={hasUnread}
 							/>
 						</div>

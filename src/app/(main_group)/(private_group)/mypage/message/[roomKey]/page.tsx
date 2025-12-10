@@ -17,6 +17,7 @@ import Border from "@/components/border";
 import { MultilineInput } from "@/components/multilineInput";
 import { useSocket } from "@/hooks/useSocket";
 import { BackButton } from "@/components/backbutton";
+import { ImageUploadArea } from "./ImageUploadArea";
 
 dayjs.locale("ja");
 
@@ -30,6 +31,7 @@ const MessageRoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [reservations, setReservations] = useState<Reservation[]>([]);
 	const [currentReservationIndex, setCurrentReservationIndex] = useState(0);
+	const [showImageUpload, setShowImageUpload] = useState(false);
 
 	const router = useRouter()
 
@@ -222,6 +224,44 @@ const MessageRoomPage = () => {
 		animation.endAnimation();
 	};
 
+	const handleImageUpload = async (imageData: {
+		url: string;
+		size: number;
+		type: string;
+	}) => {
+		if (!room) return;
+
+		animation.startAnimation();
+		try {
+			const response = await requestDB("message", "sendMessage", {
+				roomId: room.id,
+				senderId: userData.id,
+				content: "画像を送信しました",
+				imageUrl: imageData.url,
+				imageSize: imageData.size,
+				imageType: imageData.type
+			});
+
+			if (response.success && response.data) {
+				// 送信したメッセージを即座に追加
+				setMessages(prev => [...prev, response.data]);
+				// Socket.ioでメッセージをブロードキャスト
+				if (socket) {
+					socket.emit("sendMessage", {
+						data: response.data,
+						roomKey,
+					});
+				}
+				setShowImageUpload(false);
+			} else {
+				alert("画像の送信に失敗しました");
+			}
+		} catch (error) {
+			alert("画像の送信に失敗しました");
+		}
+		animation.endAnimation();
+	};
+
 	const handleIndexChange = (newIndex: number) => {
 		setCurrentReservationIndex(newIndex);
 	};
@@ -253,23 +293,49 @@ const MessageRoomPage = () => {
 			)}
 
 			<div className="p-message__input-area">
+				{showImageUpload ? (
+					<ImageUploadArea
+						onImageUpload={handleImageUpload}
+						userId={userData.id}
+					/>
+				) : (
+					<>
+						<div className="p-message__input-outline">
+							<MultilineInput
+								className="p-message__input"
+								value={message}
+								onChange={(e) => setMessage(e.target.value)}
+								minHeight={150}
+								maxHeight={150}
+								placeholder="メッセージを入力する"
+							/>
+						</div>
+						<div className="p-message__button-group">
+							<Button
+								className="p-message__image-button"
+								onClick={() => setShowImageUpload(true)}
+							>
+								📷 画像
+							</Button>
+							<Button
+								className="p-message__send-button"
+								onClick={handleSendMessage}
+								disabled={!message.trim()}
+							>
+								メッセージを送る
+							</Button>
+						</div>
+					</>
+				)}
 
-				<div className="p-message__input-outline">
-					<MultilineInput
-						className="p-message__input"
-						value={message}
-						onChange={(e) => setMessage(e.target.value)}
-						minHeight={150}
-						maxHeight={150}
-						placeholder="メッセージを入力する"
-					/></div>
-				<Button
-					className="p-message__send-button"
-					onClick={handleSendMessage}
-					disabled={!message.trim()}
-				>
-					メッセージを送る
-				</Button>
+				{showImageUpload && (
+					<Button
+						className="p-message__close-image-button"
+						onClick={() => setShowImageUpload(false)}
+					>
+						キャンセル
+					</Button>
+				)}
 			</div>
 
 			<div className="p-message__messages">
@@ -296,7 +362,26 @@ const MessageRoomPage = () => {
 									{msg.sender?.name}
 								</div>
 							</div>
-							{msg.content}
+
+							{msg.imageUrl ? (
+								<div className="p-message__message-image-container">
+									<ImageBox
+										className="p-message__message-image"
+										src={msg.imageUrl}
+										objectFit="contain"
+										onClick={() => msg.imageUrl && window.open(msg.imageUrl, '_blank')}
+									/>
+									{msg.content && msg.content !== "画像を送信しました" && (
+										<div className="p-message__message-image-caption">
+											{msg.content}
+										</div>
+									)}
+								</div>
+							) : (
+								<div className="p-message__message-text">
+									{msg.content}
+								</div>
+							)}
 						</div>
 						<div className="p-message__message-time">
 							{dayjs(msg.sentAt).format("MM/DD HH:mm")}

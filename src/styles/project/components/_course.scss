@@ -5,9 +5,37 @@
     align-items: flex-start;
     width: 400px;
     gap: 10px;
+    position: relative;
 
     @include mq(sp) {
         width: 100%;
+    }
+
+    &__unread-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 16px;
+        height: 16px;
+        background: #ff4444;
+        border-radius: 50%;
+        border: 2px solid white;
+        z-index: 10;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
     }
 
     &__coach {

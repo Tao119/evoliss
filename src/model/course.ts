@@ -405,6 +405,7 @@ async function createCourse({
 	image,
 	gameId, // tag から gameId に変更
 	tagIds, // タグIDの配列を追加
+	welcomeMessage, // 購入後の固定メッセージ
 }: {
 	title: string;
 	description: string;
@@ -414,6 +415,7 @@ async function createCourse({
 	image?: string;
 	gameId: number; // 直接ゲームIDを指定
 	tagIds?: number[]; // タグIDの配列
+	welcomeMessage?: string | null; // 購入後の固定メッセージ
 }) {
 	return await withTransaction(async (tx) => {
 		const newCourse = await tx.course.create({
@@ -425,6 +427,7 @@ async function createCourse({
 				coachId,
 				image,
 				gameId,
+				welcomeMessage,
 			},
 		});
 
@@ -467,6 +470,7 @@ async function updateCourse({
 	gameId,
 	tagIds,
 	isPublic,
+	welcomeMessage,
 }: {
 	id: number;
 	title?: string;
@@ -477,12 +481,13 @@ async function updateCourse({
 	gameId?: number;
 	tagIds?: number[];
 	isPublic?: boolean;
+	welcomeMessage?: string | null;
 }) {
 	const result = await safeTransaction(async (tx) => {
 		// コースの基本情報を更新
 		const updatedCourse = await tx.course.update({
 			where: { id },
-			data: { title, description, price, duration, image, gameId, isPublic },
+			data: { title, description, price, duration, image, gameId, isPublic, welcomeMessage },
 		});
 
 		// タグの更新処理

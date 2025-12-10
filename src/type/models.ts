@@ -67,6 +67,7 @@ export interface Course {
 	gameId: number | null;
 	duration: number;
 	isPublic: boolean;
+	welcomeMessage?: string | null;
 	tagCourses: TagCourse[];
 
 	coach: User;
@@ -107,6 +108,7 @@ export interface Reservation {
 	updatedAt: Date;
 	status: reservationStatus;
 	courseTime: string | null; // YYYY/MM/dd HH:mm~HH:mm形式
+	hasUnreadNotification?: boolean;
 
 	customer: User;
 	timeSlots: TimeSlot[];
@@ -139,6 +141,8 @@ export interface MessageRoom {
 	coach?: User;
 	customerId: number;
 	customer: User;
+	hasUnreadForCoach?: boolean;
+	hasUnreadForCustomer?: boolean;
 	messages: Message[];
 	reservations: Reservation[];
 }
@@ -152,6 +156,9 @@ export interface Message {
 	content: string;
 	isRead: boolean;
 	sentAt: Date;
+	imageUrl?: string | null;
+	imageSize?: number | null;
+	imageType?: string | null;
 }
 
 // Payment型
@@ -249,4 +256,17 @@ export enum ContactStatus {
 	Pending = 0,    // 未対応
 	InProgress = 1, // 対応中
 	Resolved = 2,   // 対応済み
+}
+
+// Notification型
+export interface Notification {
+	id: number;
+	userId: number;
+	type: string; // 'purchase', 'message', 'reminder'
+	title: string;
+	message: string;
+	isRead: boolean;
+	relatedId: number | null;
+	createdAt: Date;
+	user?: User;
 }
