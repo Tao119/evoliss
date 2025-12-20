@@ -34,33 +34,34 @@ if ! command -v git &> /dev/null; then
 fi
 
 # GitHub認証確認
-log_info "GitHub認証を確認中..."
-log_info "GitHub認証が未設定の場合は、以下のコマンドで設定してください："
-log_info "  Personal Access Token: ./setup-github-auth.sh pat"
-log_info "  Deploy Key: ./setup-github-auth.sh deploy-key"
-log_info "  パブリックリポジトリ: ./setup-github-auth.sh public"
-log_info ""
-log_info "続行しますか？ (y/n)"
-read -r response
-if [[ ! "$response" =~ ^[Yy]$ ]]; then
-    log_info "デプロイをキャンセルしました"
-    exit 0
+log_info "GitHub認証を自動確認中..."
+
+# Personal Access Tokenが設定されているかチェック
+if [ -f "aws-deployment/.env.production" ] && grep -q "GITHUB_TOKEN" "aws-deployment/.env.production"; then
+    log_info "Personal Access Tokenが設定済みです"
+else
+    # GitHub CLIでトークンを自動取得
+    if command -v gh &> /dev/null && gh auth status &> /dev/null; then
+        log_info "GitHub CLIからトークンを取得中..."
+        GITHUB_TOKEN=$(gh auth token)
+        echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> aws-deployment/.env.production
+        log_info "Personal Access Tokenを設定しました"
+    else
+        log_error "GitHub認証が設定されていません"
+        log_error "GitHub CLIで認証するか、リポジトリをパブリックにしてください"
+        exit 1
+    fi
 fi
 
 # キーペア確認
 KEY_NAME="evoliss-keypair"
 if ! aws ec2 describe-key-pairs --key-names $KEY_NAME --region ap-northeast-1 &> /dev/null; then
-    log_warn "キーペア '$KEY_NAME' が存在しません"
-    log_info "キーペアを作成しますか？ (y/n)"
-    read -r response
-    if [[ "$response" =~ ^[Yy]$ ]]; then
-        aws ec2 create-key-pair --key-name $KEY_NAME --region ap-northeast-1 --query 'KeyMaterial' --output text > ${KEY_NAME}.pem
-        chmod 400 ${KEY_NAME}.pem
-        log_info "キーペアを作成しました: ${KEY_NAME}.pem"
-    else
-        log_error "キーペアが必要です"
-        exit 1
-    fi
+    log_info "キーペア '$KEY_NAME' を自動作成中..."
+    aws ec2 create-key-pair --key-name $KEY_NAME --region ap-northeast-1 --query 'KeyMaterial' --output text > ${KEY_NAME}.pem
+    chmod 400 ${KEY_NAME}.pem
+    log_info "キーペアを作成しました: ${KEY_NAME}.pem"
+else
+    log_info "キーペア '$KEY_NAME' は既に存在します"
 fi
 
 log_info "前提条件チェック完了"
