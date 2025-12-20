@@ -1,36 +1,215 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Evoliss - オンラインコーチングプラットフォーム
 
-## Getting Started
+Evoliss は、コーチとクライアントをつなぐオンラインコーチングプラットフォームです。
 
-First, run the development server:
+## 技術スタック
+
+- **フロントエンド**: Next.js 15, React 19, TypeScript
+- **バックエンド**: Next.js API Routes, Prisma ORM
+- **データベース**: MySQL (AWS RDS)
+- **認証**: AWS Cognito, NextAuth.js
+- **決済**: Stripe
+- **ファイルストレージ**: AWS S3
+- **メール**: AWS SES
+- **キュー**: Redis, Bull
+- **インフラ**: AWS (EC2, ALB, VPC, Route53)
+
+## 開発環境セットアップ
+
+### 前提条件
+
+- Node.js 20 以上
+- npm または yarn
+- MySQL
+- Redis
+
+### インストール
 
 ```bash
+# リポジトリクローン
+git clone https://github.com/Tao119/evoliss.git
+cd evoliss
+
+# 依存関係インストール
+npm install
+
+# 環境変数設定
+cp .env.example .env
+# .envファイルを編集して必要な値を設定
+
+# データベースセットアップ
+npx prisma generate
+npx prisma db push
+
+# 開発サーバー起動
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 本番環境デプロイ
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### AWS 本番デプロイ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+統合されたデプロイスクリプトを使用して、AWS に完全なインフラストラクチャとアプリケーションをデプロイできます。
 
-## Learn More
+#### 前提条件
 
-To learn more about Next.js, take a look at the following resources:
+1. **AWS CLI 設定済み**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   aws configure
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **適切な AWS 権限**（EC2, VPC, ALB, IAM, SSM 等）
 
-## Deploy on Vercel
+3. **GitHub 認証設定**（以下のいずれか）
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   **方法 1: Personal Access Token（推奨）**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   ./setup-github-auth.sh pat
+   ```
+
+   **方法 2: Deploy Key**
+
+   ```bash
+   ./setup-github-auth.sh deploy-key
+   ```
+
+   **方法 3: パブリックリポジトリ**
+
+   ```bash
+   ./setup-github-auth.sh public
+   ```
+
+#### デプロイ実行
+
+```bash
+# 完全デプロイ実行
+./deploy-evoliss.sh
+```
+
+このスクリプトは以下を自動実行します：
+
+1. **リソースクリーンアップ**: 既存の重複リソースを削除
+2. **インフラ構築**: VPC, サブネット, セキュリティグループ, ALB, ターゲットグループ
+3. **EC2 インスタンス作成**: Amazon Linux 2023, Node.js 20, Nginx, Redis
+4. **SSM 設定**: VPC エンドポイント, IAM ロール
+5. **アプリケーションデプロイ**: GitHub からクローン, ビルド, PM2 起動
+6. **ヘルスチェック**: ALB ターゲットヘルス確認
+
+#### デプロイ後の管理
+
+```bash
+# リソース状態確認
+./aws-deployment/manage-evoliss.sh status
+
+# アプリケーションログ確認
+./aws-deployment/manage-evoliss.sh logs
+
+# アプリケーション再起動
+./aws-deployment/manage-evoliss.sh restart
+
+# 最新コードで再デプロイ
+./aws-deployment/manage-evoliss.sh deploy
+
+# SSM接続
+./aws-deployment/manage-evoliss.sh connect
+
+# 全リソース削除
+./aws-deployment/manage-evoliss.sh cleanup
+```
+
+### セキュリティ機能
+
+- **ALB セキュリティグループ**: HTTP/HTTPS のみ許可
+- **EC2 セキュリティグループ**: ALB からのアクセスのみ許可
+- **SSM 接続**: SSH 不要のセキュアな管理
+- **VPC エンドポイント**: プライベート通信
+- **IAM ロール**: 最小権限の原則
+
+### パフォーマンス最適化
+
+- **Nginx 設定**:
+  - Keep-alive 接続
+  - Gzip 圧縮
+  - 静的ファイルキャッシュ
+  - プロキシバッファリング
+- **タイムアウト対策**:
+  - 適切なプロキシタイムアウト設定
+  - ヘルスチェック最適化
+  - 502/504 エラー対策
+
+### 監視・ログ
+
+- **CloudWatch**: メトリクス収集
+- **アプリケーションログ**: PM2 経由
+- **Nginx ログ**: アクセス・エラーログ
+- **ヘルスチェック**: `/health` エンドポイント
+
+## 開発
+
+### ローカル開発
+
+```bash
+# 開発サーバー起動
+npm run dev
+
+# ビルド
+npm run build
+
+# 本番モード起動
+npm start
+
+# リント
+npm run lint
+```
+
+### データベース
+
+```bash
+# Prismaスキーマ更新
+npx prisma db push
+
+# Prismaクライアント再生成
+npx prisma generate
+
+# データベースリセット
+npx prisma db reset
+```
+
+## 環境変数
+
+主要な環境変数：
+
+```bash
+# データベース
+DATABASE_URI=mysql://user:password@host:port/database
+
+# AWS Cognito
+COGNITO_CLIENT_ID=your_client_id
+COGNITO_CLIENT_SECRET=your_client_secret
+COGNITO_ISSUER=your_cognito_issuer
+
+# AWS S3
+S3_BUCKET_NAME=your_bucket_name
+NEXT_PUBLIC_S3_ACCESS_KEY=your_access_key
+NEXT_PUBLIC_S3_SECRET_ACCESS_KEY=your_secret_key
+
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_publishable_key
+STRIPE_SECRET_KEY=your_secret_key
+STRIPE_WEBHOOK_SECRET=your_webhook_secret
+
+# Redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=your_password
+
+# NextAuth
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=your_secret
+```
+
+## ライセンス
+
+このプロジェクトはプライベートプロジェクトです。

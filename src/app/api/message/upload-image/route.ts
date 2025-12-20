@@ -70,8 +70,7 @@ export async function POST(req: NextRequest) {
             Key: s3Key,
             Body: buffer,
             ContentType: fileType,
-            // 画像を公開読み取り可能に設定
-            ACL: 'public-read'
+            // ACLを削除（バケットポリシーで制御）
         });
 
         // S3にアップロード
@@ -89,8 +88,19 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error("Message Image Upload Error:", error);
+
+        // より詳細なエラー情報を提供
+        let errorMessage = "画像のアップロードに失敗しました";
+        if (error instanceof Error) {
+            console.error("Error details:", error.message);
+            // 本番環境では詳細なエラーメッセージを隠す
+            if (process.env.NODE_ENV === 'development') {
+                errorMessage += `: ${error.message}`;
+            }
+        }
+
         return NextResponse.json(
-            { error: "画像のアップロードに失敗しました" },
+            { error: errorMessage },
             { status: 500 }
         );
     }

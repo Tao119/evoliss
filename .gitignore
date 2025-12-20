@@ -49,3 +49,5 @@ package-lock.json
 
 /.kiro/
 /.claude/
+
+/aws-deployment/
