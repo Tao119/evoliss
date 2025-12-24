@@ -54,11 +54,11 @@ const socketSingleton = (() => {
 				});
 
 				// トランスポートの変更を監視
-				instance.io.on("upgrade", () => {
+				instance.io.engine.on("upgrade", () => {
 					console.log(`⬆️ Upgraded to transport: ${instance?.io.engine.transport.name}`);
 				});
 
-				instance.io.on("upgradeError", (error) => {
+				instance.io.engine.on("upgradeError", (error) => {
 					console.error("❌ Transport upgrade error:", error);
 				});
 			}
