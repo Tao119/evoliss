@@ -31,7 +31,12 @@ export default function handler(
 			origin: "*",
 			methods: ["GET", "POST"],
 		},
-		transports: ["websocket", "polling"],
+		transports: ["polling", "websocket"], // pollingを最初に許可
+		allowUpgrades: true, // WebSocketへのアップグレードを許可
+		pingTimeout: 60000, // ping タイムアウトを延長
+		pingInterval: 25000, // ping 間隔を設定
+		upgradeTimeout: 10000, // アップグレードタイムアウト
+		maxHttpBufferSize: 1e6, // バッファサイズを設定
 	});
 
 	io.on("connection", (socket) => {

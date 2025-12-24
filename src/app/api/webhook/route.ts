@@ -7,31 +7,86 @@ import { prisma } from "@/lib/prisma";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
+// Stripe webhookのためにbodyParserを無効化
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
 	console.log("🔍 Webhook Request Received");
 
-	const body = await request.text();
-	const headersList = await headers();
-	const signature = headersList.get("stripe-signature");
+	let body: string;
+	let signature: string | null;
+
+	try {
+		// リクエストボディを生のテキストとして取得
+		body = await request.text();
+
+		// ヘッダーから署名を取得
+		const headersList = await headers();
+		signature = headersList.get("stripe-signature");
+
+		console.log("📥 Raw Body Length:", body.length);
+		console.log("🔑 Signature Present:", !!signature);
+	} catch (error) {
+		console.error("❌ Error reading request:", error);
+		return NextResponse.json(
+			{ error: "Failed to read request body" },
+			{ status: 400 }
+		);
+	}
 
 	if (!signature) {
 		console.error("🚨 Missing Stripe Signature");
 		return NextResponse.json(
-			{ message: "🚨 Bad request: Missing signature" },
+			{ error: "Missing stripe-signature header" },
 			{ status: 400 },
 		);
 	}
 
-	try {
-		console.log("📥 Raw Body Length:", body.length);
+	if (!process.env.STRIPE_WEBHOOK_SECRET) {
+		console.error("🚨 Missing STRIPE_WEBHOOK_SECRET environment variable");
+		return NextResponse.json(
+			{ error: "Webhook secret not configured" },
+			{ status: 500 },
+		);
+	}
 
-		const event = stripe.webhooks.constructEvent(
+	let event: Stripe.Event;
+
+	try {
+		// Stripe署名を検証してイベントを構築
+		event = stripe.webhooks.constructEvent(
 			body,
 			signature,
-			process.env.STRIPE_WEBHOOK_SECRET as string,
+			process.env.STRIPE_WEBHOOK_SECRET,
 		);
 
-		console.log("✅ Webhook Event Received:", event.type);
+		console.log("✅ Webhook signature verified successfully");
+		console.log("📋 Event Type:", event.type);
+		console.log("🆔 Event ID:", event.id);
+	} catch (err: any) {
+		console.error("🚨 Webhook signature verification failed:", err.message);
+		console.error("🔍 Signature:", signature);
+		console.error("🔍 Body length:", body.length);
+		console.error("🔍 Webhook secret configured:", !!process.env.STRIPE_WEBHOOK_SECRET);
+
+		return NextResponse.json(
+			{
+				error: `Webhook signature verification failed: ${err.message}`,
+				details: {
+					signaturePresent: !!signature,
+					bodyLength: body.length,
+					secretConfigured: !!process.env.STRIPE_WEBHOOK_SECRET
+				}
+			},
+			{ status: 400 }
+		);
+	}
+
+	try {
+		if (event.type === "checkout.session.completed") {
+			{ status: 400 }
+		);
+		}
 
 		if (event.type === "checkout.session.completed") {
 			const session = event.data.object as Stripe.Checkout.Session;
