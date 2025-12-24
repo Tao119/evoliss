@@ -20,29 +20,28 @@ const socketSingleton = (() => {
 					process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
 					{
 						path: "/api/socket",
-						transports: ["polling", "websocket"], // pollingを最初に試行
-						upgrade: true, // pollingからwebsocketへのアップグレードを許可
-						rememberUpgrade: true, // 成功したアップグレードを記憶
+						transports: ["polling"], // pollingのみを使用
+						upgrade: false, // WebSocketアップグレードを無効化
 						reconnection: true,
-						reconnectionAttempts: 10, // 再接続試行回数を増加
-						reconnectionDelay: 1000, // 再接続間隔を短縮
+						reconnectionAttempts: 10,
+						reconnectionDelay: 1000,
 						reconnectionDelayMax: 5000,
-						timeout: 20000, // 接続タイムアウトを設定
-						forceNew: false, // 既存の接続を再利用
+						timeout: 20000,
+						forceNew: false,
 					},
 				);
 
 				instance.on("connect", () => {
-					console.log(`✅ Connected to WebSocket server ${instance?.id}`);
+					console.log(`✅ Connected to Socket.io server ${instance?.id}`);
 					console.log(`🔗 Transport: ${instance?.io.engine.transport.name}`);
 				});
 
 				instance.on("disconnect", (reason) => {
-					console.log("🔌 Disconnected from WebSocket server:", reason);
+					console.log("🔌 Disconnected from Socket.io server:", reason);
 				});
 
 				instance.on("connect_error", (error) => {
-					console.error("❌ WebSocket connection error:", error);
+					console.error("❌ Socket.io connection error:", error);
 				});
 
 				instance.on("reconnect", (attemptNumber) => {
@@ -51,15 +50,6 @@ const socketSingleton = (() => {
 
 				instance.on("reconnect_error", (error) => {
 					console.error("❌ Reconnection error:", error);
-				});
-
-				// トランスポートの変更を監視
-				instance.io.engine.on("upgrade", () => {
-					console.log(`⬆️ Upgraded to transport: ${instance?.io.engine.transport.name}`);
-				});
-
-				instance.io.engine.on("upgradeError", (error) => {
-					console.error("❌ Transport upgrade error:", error);
 				});
 			}
 			return instance;

@@ -31,12 +31,11 @@ export default function handler(
 			origin: "*",
 			methods: ["GET", "POST"],
 		},
-		transports: ["polling", "websocket"], // pollingを最初に許可
-		allowUpgrades: true, // WebSocketへのアップグレードを許可
-		pingTimeout: 60000, // ping タイムアウトを延長
-		pingInterval: 25000, // ping 間隔を設定
-		upgradeTimeout: 10000, // アップグレードタイムアウト
-		maxHttpBufferSize: 1e6, // バッファサイズを設定
+		transports: ["polling"], // pollingのみを許可
+		allowUpgrades: false, // WebSocketアップグレードを無効化
+		pingTimeout: 60000,
+		pingInterval: 25000,
+		maxHttpBufferSize: 1e6,
 	});
 
 	io.on("connection", (socket) => {
