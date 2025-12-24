@@ -4,7 +4,14 @@ const withVideos = require('next-videos');
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["user-icon-bucket.s3.ap-northeast-1.amazonaws.com"],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'evoliss-s3.s3.ap-northeast-1.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      }
+    ],
   },
   // パフォーマンス最適化
   experimental: {
@@ -39,7 +46,7 @@ const nextConfig = {
         ],
       },
       {
-        source: "/socket.io/(.*)",
+        source: "/api/socket",
         headers: [
           {
             key: "Access-Control-Allow-Origin",
@@ -47,11 +54,19 @@ const nextConfig = {
           },
           {
             key: "Access-Control-Allow-Methods",
-            value: "GET, POST",
+            value: "GET, POST, OPTIONS",
           },
           {
             key: "Access-Control-Allow-Headers",
-            value: "Content-Type",
+            value: "Content-Type, Authorization",
+          },
+          {
+            key: "Upgrade",
+            value: "websocket",
+          },
+          {
+            key: "Connection",
+            value: "Upgrade",
           },
         ],
       },
