@@ -24,7 +24,7 @@ dayjs.locale("ja");
 const MessageRoomPage = () => {
 	const { userData } = useContext(UserDataContext)!;
 	const animation = useContext(AnimationContext)!;
-	const { socket, isConnected } = useSocket();
+	const { socket, isConnected, send } = useSocket();
 	const { roomKey } = useParams() as { roomKey: string };
 	const [message, setMessage] = useState("");
 	const [room, setRoom] = useState<MessageRoom | null>(null);
@@ -57,51 +57,60 @@ const MessageRoomPage = () => {
 		};
 	}, [userData, roomKey]);
 
-	// Socket.ioのイベントリスナーを設定
+	// WebSocketのイベントリスナーを設定
 	useEffect(() => {
 		if (!socket || !userData || !roomKey || !room) return;
 
-		console.log('Setting up socket listeners for room:', room.id);
+		console.log('Setting up WebSocket listeners for room:', room.id);
 
-		socket.emit("joinRoom", {
+		// ルームに参加
+		send({
+			type: "joinRoom",
 			roomKey,
 			userId: userData.id,
 		});
 
-		const handleNewMessage = (data: any) => {
-			console.log("New message received:", data);
-			if (data && data.roomId === room.id) {
-				setMessages(prev => {
-					const exists = prev.some((msg: Message) => msg.id === data.id);
-					if (!exists) {
-						console.log('Adding new message to state');
-						// 自分以外からのメッセージの場合、既読処理を実行
-						if (data.senderId !== userData.id) {
-							markMessagesAsRead(roomKey);
-						}
-						return [...prev, data];
+		const handleWebSocketMessage = (event: CustomEvent) => {
+			const message = event.detail;
+			console.log("WebSocket message received:", message);
+
+			switch (message.type) {
+				case 'newMessage':
+					if (message.data && message.data.roomId === room.id) {
+						setMessages(prev => {
+							const exists = prev.some((msg: Message) => msg.id === message.data.id);
+							if (!exists) {
+								console.log('Adding new message to state');
+								// 自分以外からのメッセージの場合、既読処理を実行
+								if (message.data.senderId !== userData.id) {
+									markMessagesAsRead(roomKey);
+								}
+								return [...prev, message.data];
+							}
+							return prev;
+						});
 					}
-					return prev;
-				});
+					break;
+
+				case 'messagesRead':
+					if (message.roomKey === roomKey) {
+						console.log('Messages marked as read');
+						setMessages(prev =>
+							prev.map((msg: Message) => ({ ...msg, isRead: true }))
+						);
+					}
+					break;
 			}
 		};
 
-		const handleMessagesRead = (data: any) => {
-			if (data.roomKey === roomKey) {
-				fetchMessages();
-			}
-		};
-
-		socket.on("newMessage", handleNewMessage);
-		socket.on("messagesRead", handleMessagesRead);
+		// WebSocketメッセージリスナーを追加
+		window.addEventListener('websocket-message', handleWebSocketMessage as EventListener);
 
 		return () => {
-			console.log('Cleaning up socket listeners');
-			socket.off("newMessage", handleNewMessage);
-			socket.off("messagesRead", handleMessagesRead);
+			console.log('Cleaning up WebSocket listeners');
+			window.removeEventListener('websocket-message', handleWebSocketMessage as EventListener);
 		};
 	}, [socket, userData, roomKey, room]);
-
 
 	const fetchRoomData = async () => {
 		try {
@@ -171,9 +180,10 @@ const MessageRoomPage = () => {
 				userId: userData.id
 			});
 
-			// 既読処理が成功したらSocketで通知
-			if (response && response.success && socket) {
-				socket.emit("markAsRead", {
+			// 既読処理が成功したらWebSocketで通知
+			if (response && response.success && send) {
+				send({
+					type: "markAsRead",
 					userId: userData.id,
 					roomKey
 				});
@@ -208,9 +218,10 @@ const MessageRoomPage = () => {
 				setMessage("");
 				// 送信したメッセージを即座に追加
 				setMessages(prev => [...prev, response.data]);
-				// Socket.ioでメッセージをブロードキャスト
-				if (socket) {
-					socket.emit("sendMessage", {
+				// WebSocketでメッセージをブロードキャスト
+				if (send) {
+					send({
+						type: "sendMessage",
 						data: response.data,
 						roomKey,
 					});
@@ -245,9 +256,10 @@ const MessageRoomPage = () => {
 			if (response.success && response.data) {
 				// 送信したメッセージを即座に追加
 				setMessages(prev => [...prev, response.data]);
-				// Socket.ioでメッセージをブロードキャスト
-				if (socket) {
-					socket.emit("sendMessage", {
+				// WebSocketでメッセージをブロードキャスト
+				if (send) {
+					send({
+						type: "sendMessage",
 						data: response.data,
 						roomKey,
 					});

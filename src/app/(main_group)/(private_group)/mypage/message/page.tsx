@@ -35,26 +35,30 @@ const MessagePage = () => {
 		};
 	}, []);
 
-	// Socket.ioでメッセージの更新を監視
+	// WebSocketのイベントリスナーを設定
 	useEffect(() => {
 		if (!socket || !userData) return;
 
-		const handleNewMessage = () => {
-			// 新しいメッセージが来たら一覧を更新
-			fetchMessageRooms();
+		const handleWebSocketMessage = (event: CustomEvent) => {
+			const message = event.detail;
+
+			switch (message.type) {
+				case 'newMessage':
+					// 新しいメッセージが来たら一覧を更新
+					fetchMessageRooms();
+					break;
+				case 'messagesRead':
+					// 既読状態が変更されたら一覧を更新
+					fetchMessageRooms();
+					break;
+			}
 		};
 
-		const handleMessagesRead = () => {
-			// 既読状態が変更されたら一覧を更新
-			fetchMessageRooms();
-		};
-
-		socket.on("newMessage", handleNewMessage);
-		socket.on("messagesRead", handleMessagesRead);
+		// WebSocketメッセージリスナーを追加
+		window.addEventListener('websocket-message', handleWebSocketMessage as EventListener);
 
 		return () => {
-			socket.off("newMessage", handleNewMessage);
-			socket.off("messagesRead", handleMessagesRead);
+			window.removeEventListener('websocket-message', handleWebSocketMessage as EventListener);
 		};
 	}, [socket, userData]);
 

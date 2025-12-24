@@ -29,7 +29,7 @@ const Page = () => {
 	const [reservationData, setReservationData] = useState<Reservation>();
 	const [courseData, setCourseData] = useState<Course>();
 	const [isLoading, setIsLoading] = useState(true);
-	const { socket, isConnected } = useSocket();
+	const { socket, isConnected, send } = useSocket();
 
 	useEffect(() => {
 		if (!reservationId || isNaN(reservationId) || !userData) {
@@ -118,9 +118,10 @@ const Page = () => {
 							content: messageText,
 						});
 
-						if (messageResponse.success && socket && isConnected) {
-							// Socketでも送信
-							socket.emit("sendMessage", {
+						if (messageResponse.success && send) {
+							// WebSocketでも送信
+							send({
+								type: "sendMessage",
 								roomKey: reservationData.room?.roomKey,
 								data: messageResponse.data,
 							});

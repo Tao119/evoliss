@@ -22,7 +22,7 @@ const CoachCancelRequestPage = () => {
 	const router = useRouter();
 	const searchParams = useSearchParams()!;
 	const reservationId = searchParams.get("reservationId");
-	const { socket, isConnected } = useSocket();
+	const { socket, isConnected, send } = useSocket();
 
 	const [reservation, setReservation] = useState<Reservation | null>(null);
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -98,9 +98,10 @@ const CoachCancelRequestPage = () => {
 							content: messageText,
 						});
 
-						if (messageResponse.success && socket && isConnected) {
-							// Socketでも送信
-							socket.emit("sendMessage", {
+						if (messageResponse.success && send) {
+							// WebSocketでも送信
+							send({
+								type: "sendMessage",
 								roomKey: reservation.room?.roomKey,
 								data: messageResponse.data,
 							});

@@ -26,7 +26,7 @@ export default function GuestLayout({
 }) {
 	const { fetchUserData, userData, userDataStatus } =
 		useContext(UserDataContext)!;
-	const { socket } = useContext(SocketContext)!;
+	const { socket, send } = useContext(SocketContext)!;
 	const { breakpoint, orLower } = useContext(BreakPointContext)!;
 
 	const [joinedRooms, setJoinedRooms] = useState<string[]>([]);
@@ -129,7 +129,7 @@ export default function GuestLayout({
 		userData.customerMessageRooms?.forEach((room) => {
 			if (!newRooms.has(room.roomKey)) {
 				console.log(`🔗 Joining room: ${room.roomKey}`);
-				socket.emit("joinRoom", { roomKey: room.roomKey, userId: userData.id });
+				send({ type: "joinRoom", roomKey: room.roomKey, userId: userData.id });
 				newRooms.add(room.roomKey);
 			}
 		});
@@ -137,7 +137,8 @@ export default function GuestLayout({
 		userData.coachMessageRooms?.forEach((room) => {
 			if (!newRooms.has(room.roomKey)) {
 				console.log(`🔗 Joining room: ${room.roomKey}`);
-				socket.emit("joinRoom", {
+				send({
+					type: "joinRoom",
 					roomKey: room.roomKey,
 					userId: userData.id,
 				});
@@ -151,52 +152,62 @@ export default function GuestLayout({
 	useEffect(() => {
 		if (!socket) return;
 
-		const messageHandler = () => {
-			console.log("new message!!");
-			if (!hasNewMessageRef.current) {
-				console.log("new message and update");
-				hasNewMessageRef.current = true;
-				fetchUserData();
+		const messageHandler = (event: CustomEvent) => {
+			const data = event.detail;
+			if (data.type === "newMessage") {
+				console.log("new message!!");
+				if (!hasNewMessageRef.current) {
+					console.log("new message and update");
+					hasNewMessageRef.current = true;
+					fetchUserData();
+				}
 			}
 		};
-		// const notificationHandler = () => {
-		//   console.log("new notification!!");
-		//   if (!hasNewNotificationRef.current) {
-		//     console.log("new notification and update");
-		//     hasNewNotificationRef.current = true;
-		//     fetchUserData();
+		// const notificationHandler = (event: CustomEvent) => {
+		//   const data = event.detail;
+		//   if (data.type === "newNotification") {
+		//     console.log("new notification!!");
+		//     if (!hasNewNotificationRef.current) {
+		//       console.log("new notification and update");
+		//       hasNewNotificationRef.current = true;
+		//       fetchUserData();
+		//     }
 		//   }
 		// };
 
-		socket.on("newMessage", messageHandler);
-		// socket.on("newNotification", notificationHandler);
+		window.addEventListener("websocket-message", messageHandler as EventListener);
+		// window.addEventListener("websocket-message", notificationHandler as EventListener);
 
 		return () => {
-			socket.off("newMessage", messageHandler);
-			// socket.off("newNotification", notificationHandler);
+			window.removeEventListener("websocket-message", messageHandler as EventListener);
+			// window.removeEventListener("websocket-message", notificationHandler as EventListener);
 		};
 	}, [socket]);
 
 	useEffect(() => {
 		if (!socket) return;
 
-		const handleMessagesRead = ({ roomKey }: { roomKey: string }) => {
-			console.log("update start...", hasNewMessage);
-			if (hasNewMessageRef.current) {
-				console.log("updating..........!!!!!");
-				if (timeoutRef.current) clearTimeout(timeoutRef.current);
-				timeoutRef.current = setTimeout(() => {
-					hasNewMessageRef.current = false;
-					console.log("updating..........");
-					fetchUserData();
-				}, 500);
+		const handleMessagesRead = (event: CustomEvent) => {
+			const data = event.detail;
+			if (data.type === "messagesRead") {
+				const { roomKey } = data;
+				console.log("update start...", hasNewMessage);
+				if (hasNewMessageRef.current) {
+					console.log("updating..........!!!!!");
+					if (timeoutRef.current) clearTimeout(timeoutRef.current);
+					timeoutRef.current = setTimeout(() => {
+						hasNewMessageRef.current = false;
+						console.log("updating..........");
+						fetchUserData();
+					}, 500);
+				}
 			}
 		};
 
-		socket.on("messagesRead", handleMessagesRead);
+		window.addEventListener("websocket-message", handleMessagesRead as EventListener);
 
 		return () => {
-			socket.off("messagesRead", handleMessagesRead);
+			window.removeEventListener("websocket-message", handleMessagesRead as EventListener);
 		};
 	}, [socket, userData]);
 

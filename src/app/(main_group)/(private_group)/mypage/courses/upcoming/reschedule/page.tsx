@@ -31,7 +31,7 @@ const Page = () => {
 	const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
 	const [chosenSchedule, setChosenSchedule] = useState<string>();
 	const [isLoading, setIsLoading] = useState(true);
-	const { socket, isConnected } = useSocket();
+	const { socket, isConnected, send } = useSocket();
 
 	useEffect(() => {
 		if (!reservationId || isNaN(reservationId) || !userData) {
@@ -196,8 +196,9 @@ const Page = () => {
 							content: messageText,
 						});
 
-						if (messageResponse.success && socket && isConnected) {
-							socket.emit("sendMessage", {
+						if (messageResponse.success && send) {
+							send({
+								type: "sendMessage",
 								roomKey: reservationData.room?.roomKey,
 								data: messageResponse.data,
 							});
