@@ -50,4 +50,6 @@ package-lock.json
 /.kiro/
 /.claude/
 
-/aws-deployment/
+# AWS deployment files (セキュリティのため)
+aws-deployment/*
+ecosystem.config.js
