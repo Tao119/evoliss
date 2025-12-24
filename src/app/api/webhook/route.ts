@@ -84,11 +84,6 @@ export async function POST(request: NextRequest) {
 
 	try {
 		if (event.type === "checkout.session.completed") {
-			{ status: 400 }
-		);
-		}
-
-		if (event.type === "checkout.session.completed") {
 			const session = event.data.object as Stripe.Checkout.Session;
 			console.log(
 				"💳 Checkout Session Completed:",
