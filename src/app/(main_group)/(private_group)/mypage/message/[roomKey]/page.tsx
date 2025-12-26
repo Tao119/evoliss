@@ -64,8 +64,7 @@ const MessageRoomPage = () => {
 		console.log('Setting up WebSocket listeners for room:', room.id);
 
 		// ルームに参加
-		send({
-			type: "joinRoom",
+		send("joinRoom", {
 			roomKey,
 			userId: userData.id,
 		});
@@ -182,8 +181,7 @@ const MessageRoomPage = () => {
 
 			// 既読処理が成功したらWebSocketで通知
 			if (response && response.success && send) {
-				send({
-					type: "markAsRead",
+				send("markAsRead", {
 					userId: userData.id,
 					roomKey
 				});
@@ -220,8 +218,7 @@ const MessageRoomPage = () => {
 				setMessages(prev => [...prev, response.data]);
 				// WebSocketでメッセージをブロードキャスト
 				if (send) {
-					send({
-						type: "sendMessage",
+					send("sendMessage", {
 						data: response.data,
 						roomKey,
 					});
@@ -258,8 +255,7 @@ const MessageRoomPage = () => {
 				setMessages(prev => [...prev, response.data]);
 				// WebSocketでメッセージをブロードキャスト
 				if (send) {
-					send({
-						type: "sendMessage",
+					send("sendMessage", {
 						data: response.data,
 						roomKey,
 					});

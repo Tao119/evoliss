@@ -1,14 +1,13 @@
-import type { Server as HttpServer } from "http";
-import type { Socket as NetSocket } from "net";
-import { requestDB } from "@/services/axios";
 import type { NextApiRequest } from "next";
 import type { NextApiResponse } from "next";
-import { Server as SocketServer } from "socket.io";
+import { Server as SocketIOServer } from "socket.io";
+import type { Server as HttpServer } from "http";
+import type { Socket as NetSocket } from "net";
 
 export type NextApiResponseWithSocket = NextApiResponse & {
 	socket: NetSocket & {
 		server: HttpServer & {
-			io?: SocketServer;
+			io?: SocketIOServer;
 		};
 	};
 };
@@ -17,97 +16,78 @@ export default function handler(
 	req: NextApiRequest,
 	res: NextApiResponseWithSocket,
 ) {
+	console.log(`🔌 Socket.IO handler called: ${req.method} ${req.url}`);
+
 	if (res.socket.server.io) {
-		console.log("⚡ Socket.io is already running.");
+		console.log("⚡ Socket.IO server is already running.");
 		res.end();
 		return;
 	}
 
-	console.log("🔌 Initializing Socket.io server...");
+	console.log("🔌 Initializing Socket.IO server...");
 
-	const io = new SocketServer(res.socket.server, {
+	const io = new SocketIOServer(res.socket.server, {
 		path: "/api/socket",
+		addTrailingSlash: false,
 		cors: {
-			origin: "*",
+			origin: ["https://evoliss.jp", "http://localhost:3000"],
 			methods: ["GET", "POST"],
+			credentials: true
 		},
-		transports: ["polling"], // pollingのみを許可
-		allowUpgrades: false, // WebSocketアップグレードを無効化
-		pingTimeout: 60000,
-		pingInterval: 25000,
-		maxHttpBufferSize: 1e6,
-	});
-
-	io.on("connection", (socket) => {
-		console.log(`✅ A user connected: ${socket.id}`);
-
-		socket.on("joinRoom", ({ roomKey, userId }) => {
-			console.log(`📢 User ${socket.id} joined room: room-${roomKey}`);
-			socket.join(`room-${roomKey}`);
-			socket.join(`user-${userId}`);
-
-			io.in(`room-${roomKey}`)
-				.fetchSockets()
-				.then((sockets) => {
-					console.log(
-						`👥 Users in room ${roomKey}:`,
-						sockets.map((s) => s.id),
-					);
-				});
-		});
-
-		socket.on("sendMessage", async ({ data, roomKey }) => {
-			try {
-				io.in(`room-${roomKey}`)
-					.fetchSockets()
-					.then((sockets) => {
-						console.log(
-							`👀 Broadcasting newMessage to:`,
-							sockets.map((s) => s.id),
-						);
-					});
-
-				io.to(`room-${roomKey}`).emit("newMessage", data);
-			} catch (error) {
-				console.error("❌ Error sending message:", error);
-			}
-		});
-
-		socket.on("markAsRead", async ({ userId, roomKey }) => {
-			console.log("🟢 markAsRead received:", userId, roomKey);
-
-			try {
-				const result = await requestDB("message", "markMessagesAsRead", {
-					userId,
-					roomKey,
-				});
-
-				if (result.success) {
-					console.log(`✅ Messages in room ${roomKey} marked as read`);
-					io.to(`room-${roomKey}`).emit("messagesRead", { roomKey });
-				} else {
-					console.log("⚠️ Failed to mark messages as read");
-				}
-			} catch (error) {
-				console.error("❌ Error marking messages as read:", error);
-			}
-		});
-
-		socket.on("sendNotification", async ({ data, userId }) => {
-			try {
-				console.log(`🔔 Sending notification to user ${userId}`);
-
-				io.to(`user-${userId}`).emit("newNotification", data);
-			} catch (error) {
-				console.error("❌ Error sending notification:", error);
-			}
-		});
-
-		socket.on("disconnect", () => {
-			console.log(`⚡ Client disconnected: ${socket.id}`);
-		});
+		transports: ["websocket", "polling"],
+		allowEIO3: true
 	});
 
 	res.socket.server.io = io;
+
+	io.on("connection", (socket) => {
+		console.log(`✅ Socket.IO client connected: ${socket.id}`);
+
+		// ルーム参加
+		socket.on("joinRoom", ({ roomKey, userId }) => {
+			socket.join(roomKey);
+			socket.data.roomKey = roomKey;
+			socket.data.userId = userId;
+			console.log(`📢 User ${userId} joined room: ${roomKey}`);
+		});
+
+		// メッセージ送信
+		socket.on("sendMessage", (data) => {
+			const roomKey = socket.data.roomKey;
+			if (roomKey) {
+				socket.to(roomKey).emit("newMessage", data);
+				console.log(`📨 Message sent to room ${roomKey}:`, data);
+			}
+		});
+
+		// 既読マーク
+		socket.on("markAsRead", ({ roomKey }) => {
+			socket.to(roomKey).emit("messagesRead", { roomKey });
+			console.log(`👁️ Messages marked as read in room: ${roomKey}`);
+		});
+
+		// 通知送信
+		socket.on("sendNotification", ({ userId, data }) => {
+			// 特定のユーザーに通知を送信
+			io.sockets.sockets.forEach((clientSocket) => {
+				if (clientSocket.data.userId === userId) {
+					clientSocket.emit("newNotification", data);
+				}
+			});
+			console.log(`🔔 Notification sent to user ${userId}:`, data);
+		});
+
+		// 切断処理
+		socket.on("disconnect", (reason) => {
+			console.log(`🔌 Socket.IO client disconnected: ${socket.id}, reason: ${reason}`);
+		});
+
+		// エラーハンドリング
+		socket.on("error", (error) => {
+			console.error(`❌ Socket.IO error for ${socket.id}:`, error);
+		});
+	});
+
+	console.log("✅ Socket.IO server initialized");
 	res.end();
 }

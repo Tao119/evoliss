@@ -129,7 +129,7 @@ export default function GuestLayout({
 		userData.customerMessageRooms?.forEach((room) => {
 			if (!newRooms.has(room.roomKey)) {
 				console.log(`🔗 Joining room: ${room.roomKey}`);
-				send({ type: "joinRoom", roomKey: room.roomKey, userId: userData.id });
+				send("joinRoom", { roomKey: room.roomKey, userId: userData.id });
 				newRooms.add(room.roomKey);
 			}
 		});
@@ -137,8 +137,7 @@ export default function GuestLayout({
 		userData.coachMessageRooms?.forEach((room) => {
 			if (!newRooms.has(room.roomKey)) {
 				console.log(`🔗 Joining room: ${room.roomKey}`);
-				send({
-					type: "joinRoom",
+				send("joinRoom", {
 					roomKey: room.roomKey,
 					userId: userData.id,
 				});

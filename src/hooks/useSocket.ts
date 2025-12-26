@@ -1,69 +1,89 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { io, Socket } from "socket.io-client";
 
 export interface SocketContextType {
-	socket: WebSocket | null;
+	socket: Socket | null;
 	isConnected: boolean;
-	send: (data: any) => void;
+	send: (event: string, data: any) => void;
 }
 
 const socketSingleton = (() => {
-	let instance: WebSocket | null = null;
+	let instance: Socket | null = null;
 
 	return {
 		getInstance: () => {
-			if (!instance || instance.readyState === WebSocket.CLOSED) {
-				console.log("🌐 Creating new WebSocket connection...");
+			if (!instance || !instance.connected) {
+				console.log("🌐 Creating new Socket.IO connection...");
 
-				const wsUrl = process.env.NEXT_PUBLIC_APP_URL?.replace('https://', 'wss://').replace('http://', 'ws://') ?? "ws://localhost:3000";
-				instance = new WebSocket(`${wsUrl}/api/websocket`);
+				const serverUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+				instance = io(serverUrl, {
+					path: "/api/socket",
+					transports: ["websocket", "polling"],
+					upgrade: true,
+					rememberUpgrade: true,
+					timeout: 20000,
+					forceNew: false,
+					reconnection: true,
+					reconnectionAttempts: 5,
+					reconnectionDelay: 1000,
+					reconnectionDelayMax: 5000,
+					maxReconnectionAttempts: 5
+				});
 
-				instance.onopen = () => {
-					console.log("✅ WebSocket connected");
-				};
+				instance.on("connect", () => {
+					console.log("✅ Socket.IO connected");
+				});
 
-				instance.onclose = (event) => {
-					console.log("🔌 WebSocket disconnected:", event.code, event.reason);
-					// 自動再接続
-					setTimeout(() => {
-						if (instance?.readyState === WebSocket.CLOSED) {
-							instance = null;
-							socketSingleton.getInstance();
-						}
-					}, 3000);
-				};
+				instance.on("disconnect", (reason) => {
+					console.log("🔌 Socket.IO disconnected:", reason);
+				});
 
-				instance.onerror = (error) => {
-					console.error("❌ WebSocket error:", error);
-				};
+				instance.on("connect_error", (error) => {
+					console.error("❌ Socket.IO connection error:", error);
+				});
 
-				instance.onmessage = (event) => {
-					try {
-						const data = JSON.parse(event.data);
-						console.log("📨 WebSocket message received:", data);
-						// カスタムイベントを発火してコンポーネントに通知
-						window.dispatchEvent(new CustomEvent('websocket-message', { detail: data }));
-					} catch (error) {
-						console.error("❌ Failed to parse WebSocket message:", error);
-					}
-				};
+				instance.on("reconnect", (attemptNumber) => {
+					console.log("🔄 Socket.IO reconnected after", attemptNumber, "attempts");
+				});
+
+				instance.on("reconnect_error", (error) => {
+					console.error("❌ Socket.IO reconnection error:", error);
+				});
+
+				// カスタムイベントリスナー
+				instance.on("newMessage", (data) => {
+					console.log("📨 New message received:", data);
+					window.dispatchEvent(new CustomEvent('socket-message', { detail: { type: 'newMessage', data } }));
+				});
+
+				instance.on("messagesRead", (data) => {
+					console.log("👁️ Messages read:", data);
+					window.dispatchEvent(new CustomEvent('socket-message', { detail: { type: 'messagesRead', data } }));
+				});
+
+				instance.on("newNotification", (data) => {
+					console.log("🔔 New notification:", data);
+					window.dispatchEvent(new CustomEvent('socket-message', { detail: { type: 'newNotification', data } }));
+				});
 			}
 			return instance;
 		},
-		send: (data: any) => {
-			const ws = socketSingleton.getInstance();
-			if (ws && ws.readyState === WebSocket.OPEN) {
-				ws.send(JSON.stringify(data));
+		send: (event: string, data: any) => {
+			const socket = socketSingleton.getInstance();
+			if (socket && socket.connected) {
+				socket.emit(event, data);
+				console.log(`📤 Socket.IO event sent: ${event}`, data);
 			} else {
-				console.warn("⚠️ WebSocket not connected, message not sent:", data);
+				console.warn("⚠️ Socket.IO not connected, event not sent:", event, data);
 			}
 		}
 	};
 })();
 
 export const useSocket = (): SocketContextType => {
-	const [socket, setSocket] = useState<WebSocket | null>(null);
+	const [socket, setSocket] = useState<Socket | null>(null);
 	const [isConnected, setIsConnected] = useState(false);
 
 	useEffect(() => {
@@ -71,7 +91,7 @@ export const useSocket = (): SocketContextType => {
 		setSocket(socketInstance);
 
 		const updateConnectionStatus = () => {
-			setIsConnected(socketInstance?.readyState === WebSocket.OPEN);
+			setIsConnected(socketInstance?.connected ?? false);
 		};
 
 		// 接続状態を定期的にチェック
