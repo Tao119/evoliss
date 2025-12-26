@@ -120,8 +120,7 @@ const Page = () => {
 
 						if (messageResponse.success && send) {
 							// WebSocketでも送信
-							send({
-								type: "sendMessage",
+							send("sendMessage", {
 								roomKey: reservationData.room?.roomKey,
 								data: messageResponse.data,
 							});

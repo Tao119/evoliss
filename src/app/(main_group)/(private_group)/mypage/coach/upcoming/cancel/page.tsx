@@ -100,8 +100,7 @@ const CoachCancelRequestPage = () => {
 
 						if (messageResponse.success && send) {
 							// WebSocketでも送信
-							send({
-								type: "sendMessage",
+							send("sendMessage", {
 								roomKey: reservation.room?.roomKey,
 								data: messageResponse.data,
 							});

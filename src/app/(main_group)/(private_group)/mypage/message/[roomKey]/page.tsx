@@ -103,11 +103,11 @@ const MessageRoomPage = () => {
 		};
 
 		// WebSocketメッセージリスナーを追加
-		window.addEventListener('websocket-message', handleWebSocketMessage as EventListener);
+		window.addEventListener('socket-message', handleWebSocketMessage as EventListener);
 
 		return () => {
 			console.log('Cleaning up WebSocket listeners');
-			window.removeEventListener('websocket-message', handleWebSocketMessage as EventListener);
+			window.removeEventListener('socket-message', handleWebSocketMessage as EventListener);
 		};
 	}, [socket, userData, roomKey, room]);
 

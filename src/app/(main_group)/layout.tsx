@@ -174,12 +174,12 @@ export default function GuestLayout({
 		//   }
 		// };
 
-		window.addEventListener("websocket-message", messageHandler as EventListener);
-		// window.addEventListener("websocket-message", notificationHandler as EventListener);
+		window.addEventListener("socket-message", messageHandler as EventListener);
+		// window.addEventListener("socket-message", notificationHandler as EventListener);
 
 		return () => {
-			window.removeEventListener("websocket-message", messageHandler as EventListener);
-			// window.removeEventListener("websocket-message", notificationHandler as EventListener);
+			window.removeEventListener("socket-message", messageHandler as EventListener);
+			// window.removeEventListener("socket-message", notificationHandler as EventListener);
 		};
 	}, [socket]);
 
@@ -203,10 +203,10 @@ export default function GuestLayout({
 			}
 		};
 
-		window.addEventListener("websocket-message", handleMessagesRead as EventListener);
+		window.addEventListener("socket-message", handleMessagesRead as EventListener);
 
 		return () => {
-			window.removeEventListener("websocket-message", handleMessagesRead as EventListener);
+			window.removeEventListener("socket-message", handleMessagesRead as EventListener);
 		};
 	}, [socket, userData]);
 

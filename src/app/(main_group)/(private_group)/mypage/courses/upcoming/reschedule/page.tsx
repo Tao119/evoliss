@@ -197,8 +197,7 @@ const Page = () => {
 						});
 
 						if (messageResponse.success && send) {
-							send({
-								type: "sendMessage",
+							send("sendMessage", {
 								roomKey: reservationData.room?.roomKey,
 								data: messageResponse.data,
 							});
