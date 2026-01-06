@@ -59,15 +59,9 @@ const MessageRoomPage = () => {
 
 	// WebSocketのイベントリスナーを設定
 	useEffect(() => {
-		if (!socket || !userData || !roomKey || !room) return;
+		if (!userData || !roomKey || !room) return;
 
 		console.log('Setting up WebSocket listeners for room:', room.id);
-
-		// ルームに参加
-		send("joinRoom", {
-			roomKey,
-			userId: userData.id,
-		});
 
 		const handleWebSocketMessage = (event: CustomEvent) => {
 			const message = event.detail;
@@ -76,24 +70,28 @@ const MessageRoomPage = () => {
 			switch (message.type) {
 				case 'newMessage':
 					if (message.data && message.data.roomId === room.id) {
+						console.log('Processing new message for room:', room.id, message.data);
 						setMessages(prev => {
 							const exists = prev.some((msg: Message) => msg.id === message.data.id);
 							if (!exists) {
-								console.log('Adding new message to state');
+								console.log('Adding new message to state:', message.data);
 								// 自分以外からのメッセージの場合、既読処理を実行
 								if (message.data.senderId !== userData.id) {
-									markMessagesAsRead(roomKey);
+									setTimeout(() => markMessagesAsRead(roomKey), 100);
 								}
 								return [...prev, message.data];
 							}
+							console.log('Message already exists, skipping');
 							return prev;
 						});
+					} else {
+						console.log('Message not for this room:', message.data?.roomId, 'vs', room.id);
 					}
 					break;
 
 				case 'messagesRead':
-					if (message.roomKey === roomKey) {
-						console.log('Messages marked as read');
+					if (message.data && message.data.roomKey === roomKey) {
+						console.log('Messages marked as read for room:', roomKey);
 						setMessages(prev =>
 							prev.map((msg: Message) => ({ ...msg, isRead: true }))
 						);
@@ -105,11 +103,20 @@ const MessageRoomPage = () => {
 		// WebSocketメッセージリスナーを追加
 		window.addEventListener('socket-message', handleWebSocketMessage as EventListener);
 
+		// Socket.IOが接続されたらルームに参加
+		if (socket && isConnected) {
+			console.log('Joining room:', roomKey, 'for user:', userData.id);
+			send("joinRoom", {
+				roomKey,
+				userId: userData.id,
+			});
+		}
+
 		return () => {
 			console.log('Cleaning up WebSocket listeners');
 			window.removeEventListener('socket-message', handleWebSocketMessage as EventListener);
 		};
-	}, [socket, userData, roomKey, room]);
+	}, [socket, isConnected, userData, roomKey, room, send]);
 
 	const fetchRoomData = async () => {
 		try {
@@ -218,10 +225,8 @@ const MessageRoomPage = () => {
 				setMessages(prev => [...prev, response.data]);
 				// WebSocketでメッセージをブロードキャスト
 				if (send) {
-					send("sendMessage", {
-						data: response.data,
-						roomKey,
-					});
+					console.log('Broadcasting message via WebSocket:', response.data);
+					send("sendMessage", response.data);
 				}
 			} else {
 				alert("メッセージの送信に失敗しました");
@@ -255,10 +260,8 @@ const MessageRoomPage = () => {
 				setMessages(prev => [...prev, response.data]);
 				// WebSocketでメッセージをブロードキャスト
 				if (send) {
-					send("sendMessage", {
-						data: response.data,
-						roomKey,
-					});
+					console.log('Broadcasting image message via WebSocket:', response.data);
+					send("sendMessage", response.data);
 				}
 				setShowImageUpload(false);
 			} else {

@@ -3,7 +3,7 @@ import { notificationFuncs } from "@/model/notification";
 
 export async function POST(request: NextRequest) {
 	try {
-		const { funcName, ...params } = await request.json();
+		const { funcName, param } = await request.json();
 
 		if (!funcName || !notificationFuncs[funcName]) {
 			return NextResponse.json(
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		const result = await notificationFuncs[funcName](params);
+		const result = await notificationFuncs[funcName](param);
 
 		return NextResponse.json({ success: true, data: result });
 	} catch (error: any) {

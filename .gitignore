@@ -57,3 +57,5 @@ ecosystem.config.js
 # Documentation and test files
 /docs/
 /test/
+
+docker-compose.yml

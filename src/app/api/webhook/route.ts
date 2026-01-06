@@ -206,28 +206,24 @@ export async function POST(request: NextRequest) {
 
 			// コーチへの購入通知メールを送信
 			try {
-				const { sendEmail, getPurchaseEmailTemplate } = await import("@/lib/email/emailService");
-				const emailTemplate = getPurchaseEmailTemplate({
+				const { sendPurchaseNotificationToCoach } = await import("@/lib/notification/notificationService");
+				await sendPurchaseNotificationToCoach({
+					coachId: course.coachId,
+					coachEmail: course.coach.email,
 					coachName: course.coach.name || "コーチ",
 					customerName: user.name || "お客様",
 					courseTitle: course.title,
 					courseTime: reservation.courseTime || "",
+					reservationId: parsedReservationId,
 					welcomeMessage: course.welcomeMessage,
 				});
 
-				await sendEmail({
-					to: course.coach.email,
-					subject: emailTemplate.subject,
-					html: emailTemplate.html,
-					text: emailTemplate.text,
-				});
-
-				console.log("📧 Purchase notification email sent to coach");
+				console.log("📧 Purchase notification sent to coach");
 			} catch (emailError) {
-				console.error("❌ Failed to send purchase notification email:", emailError);
+				console.error("❌ Failed to send purchase notification:", emailError);
 			}
 
-			// 顧客への購入確認メールを送信
+			// 顧客への購入確認メール（通知ではなく確認メール）
 			try {
 				const { sendEmail, getPurchaseConfirmationEmailTemplate } = await import("@/lib/email/emailService");
 				const emailTemplate = getPurchaseConfirmationEmailTemplate({
@@ -248,21 +244,6 @@ export async function POST(request: NextRequest) {
 				console.log("📧 Purchase confirmation email sent to customer");
 			} catch (emailError) {
 				console.error("❌ Failed to send purchase confirmation email:", emailError);
-			}
-
-			// コーチへのWeb通知を作成
-			try {
-				await requestDB("notification", "createNotification", {
-					userId: course.coachId,
-					type: "purchase",
-					title: "講座が購入されました",
-					message: `${user.name || "お客様"}様が「${course.title}」を購入しました`,
-					relatedId: parsedReservationId,
-				});
-
-				console.log("🔔 Purchase notification created for coach");
-			} catch (notifError) {
-				console.error("❌ Failed to create purchase notification:", notifError);
 			}
 
 			// 講座30分前のリマインダーをスケジュール

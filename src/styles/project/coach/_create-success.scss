@@ -1,20 +1,15 @@
+@use '../../foundation' as *;
+
 .p-create-success {
     padding: 40px 20px;
     max-width: 800px;
     margin: 0 auto;
 
-    &__content {
-        background: #fff;
-        border-radius: 12px;
-        padding: 40px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
 
     &__heading {
         font-size: 24px;
         font-weight: bold;
-        color: #333;
+        color: $black;
         margin-bottom: 30px;
     }
 
@@ -24,7 +19,7 @@
         p {
             font-size: 16px;
             line-height: 1.8;
-            color: #666;
+            color: $dark-gray;
             margin-bottom: 15px;
 
             &:last-child {
@@ -51,12 +46,12 @@
         transition: all 0.3s;
 
         &.-primary {
-            background: #4CAF50;
+            background: $dark-gray;
             color: #fff;
             border: none;
 
             &:hover {
-                background: #45a049;
+                background: $gray;
             }
         }
 

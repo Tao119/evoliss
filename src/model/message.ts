@@ -120,44 +120,22 @@ async function sendMessage({
 			data: updateData,
 		});
 
-		// 受信者への通知を作成（非同期で実行）
-		if (recipientId && recipient) {
-			// Web通知
-			try {
-				await tx.notification.create({
-					data: {
-						userId: recipientId,
-						type: "message",
-						title: "新しいメッセージ",
-						message: `${sender?.name || "ユーザー"}様からメッセージが届きました`,
-						relatedId: roomId,
-					},
-				});
-			} catch (notifError) {
-				console.error("❌ Failed to create message notification:", notifError);
-			}
-
-			// メール通知（非同期で実行、エラーは無視）
+		// 受信者への通知を作成（送信者以外に送信）
+		if (recipientId && recipient && recipientId !== senderId) {
+			// 統合通知サービスを使用
 			setImmediate(async () => {
 				try {
-					const { sendEmail, getMessageNotificationEmailTemplate } = await import("@/lib/email/emailService");
-					const emailTemplate = getMessageNotificationEmailTemplate({
+					const { sendMessageNotification } = await import("@/lib/notification/notificationService");
+					await sendMessageNotification({
+						recipientId,
+						recipientEmail: recipient.email,
 						recipientName: recipient.name || "ユーザー",
 						senderName: sender?.name || "ユーザー",
-						messagePreview: content,
+						messageContent: content,
 						roomKey: room.roomKey,
 					});
-
-					await sendEmail({
-						to: recipient.email,
-						subject: emailTemplate.subject,
-						html: emailTemplate.html,
-						text: emailTemplate.text,
-					});
-
-					console.log("📧 Message notification email sent");
-				} catch (emailError) {
-					console.error("❌ Failed to send message notification email:", emailError);
+				} catch (notifError) {
+					console.error("❌ Failed to send message notification:", notifError);
 				}
 			});
 		}

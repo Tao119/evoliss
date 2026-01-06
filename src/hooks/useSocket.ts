@@ -11,24 +11,54 @@ export interface SocketContextType {
 
 const socketSingleton = (() => {
 	let instance: Socket | null = null;
+	let initPromise: Promise<Socket> | null = null;
+
+	const initializeServer = async () => {
+		try {
+			const serverUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+			const response = await fetch(`${serverUrl}/api/socket`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+			console.log("🔧 Socket.IO server initialization response:", await response.json());
+		} catch (error) {
+			console.warn("⚠️ Failed to initialize Socket.IO server:", error);
+		}
+	};
 
 	return {
 		getInstance: () => {
-			if (!instance || !instance.connected) {
+			if (instance && instance.connected) {
+				return Promise.resolve(instance);
+			}
+
+			if (initPromise) {
+				return initPromise;
+			}
+
+			initPromise = (async () => {
 				console.log("🌐 Creating new Socket.IO connection...");
+
+				// サーバーの初期化を確実にする
+				await initializeServer();
 
 				const serverUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 				instance = io(serverUrl, {
 					path: "/api/socket",
-					transports: ["websocket", "polling"],
+					transports: ["polling", "websocket"], // pollingを優先
 					upgrade: true,
-					rememberUpgrade: true,
-					timeout: 20000,
+					rememberUpgrade: false, // 本番環境では無効化
+					timeout: 30000, // タイムアウトを延長
 					forceNew: false,
 					reconnection: true,
-					reconnectionAttempts: 5,
-					reconnectionDelay: 1000,
-					reconnectionDelayMax: 5000
+					reconnectionAttempts: 10, // 再接続試行回数を増加
+					reconnectionDelay: 2000,
+					reconnectionDelayMax: 10000,
+					// 本番環境用の追加設定
+					autoConnect: true,
+					withCredentials: true
 				});
 
 				instance.on("connect", () => {
@@ -66,17 +96,21 @@ const socketSingleton = (() => {
 					console.log("🔔 New notification:", data);
 					window.dispatchEvent(new CustomEvent('socket-message', { detail: { type: 'newNotification', data } }));
 				});
-			}
-			return instance;
+
+				return instance;
+			})();
+
+			return initPromise;
 		},
 		send: (event: string, data: any) => {
-			const socket = socketSingleton.getInstance();
-			if (socket && socket.connected) {
-				socket.emit(event, data);
-				console.log(`📤 Socket.IO event sent: ${event}`, data);
-			} else {
-				console.warn("⚠️ Socket.IO not connected, event not sent:", event, data);
-			}
+			socketSingleton.getInstance().then(socketInstance => {
+				if (socketInstance && socketInstance.connected) {
+					socketInstance.emit(event, data);
+					console.log(`📤 Socket.IO event sent: ${event}`, data);
+				} else {
+					console.warn("⚠️ Socket.IO not connected, event not sent:", event, data);
+				}
+			});
 		}
 	};
 })();
@@ -86,20 +120,28 @@ export const useSocket = (): SocketContextType => {
 	const [isConnected, setIsConnected] = useState(false);
 
 	useEffect(() => {
-		const socketInstance = socketSingleton.getInstance();
-		setSocket(socketInstance);
+		const initSocket = async () => {
+			try {
+				const socketInstance = await socketSingleton.getInstance();
+				setSocket(socketInstance);
 
-		const updateConnectionStatus = () => {
-			setIsConnected(socketInstance?.connected ?? false);
+				const updateConnectionStatus = () => {
+					setIsConnected(socketInstance?.connected ?? false);
+				};
+
+				// 接続状態を定期的にチェック
+				const interval = setInterval(updateConnectionStatus, 1000);
+				updateConnectionStatus();
+
+				return () => {
+					clearInterval(interval);
+				};
+			} catch (error) {
+				console.error("Failed to initialize socket:", error);
+			}
 		};
 
-		// 接続状態を定期的にチェック
-		const interval = setInterval(updateConnectionStatus, 1000);
-		updateConnectionStatus();
-
-		return () => {
-			clearInterval(interval);
-		};
+		initSocket();
 	}, []);
 
 	return {

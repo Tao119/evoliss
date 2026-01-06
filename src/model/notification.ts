@@ -38,15 +38,23 @@ async function createNotification({
 
 async function readNotificationsByUserId({
 	userId,
-	limit = 50,
+	limit = 10,
+	offset = 0,
 }: {
 	userId: number;
 	limit?: number;
+	offset?: number;
 }) {
+	if (!userId || userId <= 0) {
+		console.warn("⚠️ Invalid userId provided to readNotificationsByUserId:", userId);
+		return [];
+	}
+
 	return await prisma.notification.findMany({
 		where: { userId },
 		orderBy: { createdAt: "desc" },
 		take: limit,
+		skip: offset,
 	});
 }
 

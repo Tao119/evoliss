@@ -82,6 +82,17 @@ export async function sendEmail({ to, subject, html, text }: EmailParams) {
         };
     } catch (error: any) {
         console.error("❌ Email sending failed:", error);
+
+        // サンドボックスモードのエラーの場合、開発環境では警告のみ
+        if (error.name === "MessageRejected" && error.message.includes("not verified") && process.env.NODE_ENV === "development") {
+            console.warn("⚠️ Email not sent due to SES sandbox mode. Email would be sent in production.");
+            return {
+                success: true,
+                message: "Email skipped (SES sandbox mode in development)",
+                warning: "SES is in sandbox mode - email not actually sent"
+            };
+        }
+
         return { success: false, error: error.message || error };
     }
 }
@@ -198,8 +209,44 @@ export function getReminderEmailTemplate({
 				<li><strong>開始時刻:</strong> ${courseTime}</li>
 			</ul>
 			<p>準備をお願いいたします。</p>
-			<a href="${process.env.NEXT_PUBLIC_BASE_URL}/mypage/${isCoach ? 'coach' : 'courses'}/upcoming">マイページを開く</a>
+			<a href="${process.env.NEXT_PUBLIC_APP_URL}/mypage/${isCoach ? 'coach' : 'courses'}/upcoming">マイページを開く</a>
 		`,
         text: `講座開始のリマインダー\n\n${recipientName}様\n\nまもなく講座「${courseTitle}」が始まります。\n開始時刻: ${courseTime}\n\n準備をお願いいたします。`,
     };
+}
+
+// リマインダー通知送信
+export async function sendReminderNotification({
+    userId,
+    userEmail,
+    userName,
+    courseTitle,
+    courseTime,
+    isCoach,
+    reservationId,
+}: {
+    userId: number;
+    userEmail: string;
+    userName: string;
+    courseTitle: string;
+    courseTime: string;
+    isCoach: boolean;
+    reservationId: number;
+}) {
+    const { sendNotification } = await import("@/lib/notification/notificationService");
+
+    return sendNotification({
+        userId,
+        type: 'reminder',
+        title: 'まもなく講座が始まります',
+        message: `「${courseTitle}」が30分後に始まります`,
+        relatedId: reservationId,
+        emailData: {
+            recipientEmail: userEmail,
+            recipientName: userName,
+            courseTitle,
+            courseTime,
+            isCoach,
+        },
+    });
 }

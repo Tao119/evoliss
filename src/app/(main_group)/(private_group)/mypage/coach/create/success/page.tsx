@@ -63,7 +63,7 @@ const CourseCreateSuccessPage = () => {
             <div className="p-create-success">
                 <div className="p-create-success__content">
                     <h2 className="p-create-success__heading">
-                        🎉 講座の作成が完了しました！
+                        講座の作成が完了しました！
                     </h2>
 
                     <div className="p-create-success__message">
