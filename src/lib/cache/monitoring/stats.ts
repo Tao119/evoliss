@@ -35,6 +35,8 @@ class CacheMonitor {
 
   private readonly STATS_KEY = 'cache:stats';
   private readonly STATS_TTL = 86400 * 7; // 7日間保持
+  private saveStatsTimeout: NodeJS.Timeout | null = null;
+  private readonly SAVE_STATS_DEBOUNCE = 5000; // 5秒ごとにまとめて保存
 
   async initialize() {
     try {
@@ -104,8 +106,8 @@ class CacheMonitor {
     } else if (action === 'set' && ttl) {
       // TTLの移動平均を計算
       const totalAccess = keyStats.hits + keyStats.misses;
-      keyStats.avgTTL = totalAccess === 0 
-        ? ttl 
+      keyStats.avgTTL = totalAccess === 0
+        ? ttl
         : (keyStats.avgTTL * totalAccess + ttl) / (totalAccess + 1);
     }
   }
@@ -161,12 +163,20 @@ class CacheMonitor {
   }
 
   private async saveStats() {
-    try {
-      const client = getRedisClient();
-      await client.setex(this.STATS_KEY, this.STATS_TTL, JSON.stringify(this.stats));
-    } catch (error) {
-      console.error('Failed to save cache stats:', error);
+    // 既存のタイムアウトをクリア
+    if (this.saveStatsTimeout) {
+      clearTimeout(this.saveStatsTimeout);
     }
+
+    // 5秒後にまとめて保存
+    this.saveStatsTimeout = setTimeout(async () => {
+      try {
+        const client = getRedisClient();
+        await client.setex(this.STATS_KEY, this.STATS_TTL, JSON.stringify(this.stats));
+      } catch (error) {
+        console.error('Failed to save cache stats:', error);
+      }
+    }, this.SAVE_STATS_DEBOUNCE);
   }
 
   getStats(): CacheStats {
@@ -243,8 +253,15 @@ class CacheMonitor {
 export const cacheMonitor = new CacheMonitor();
 
 // モニタリング統計を定期的に出力する関数
+let monitoringInterval: NodeJS.Timeout | null = null;
+
 export function startCacheMonitoring(intervalMinutes: number = 60) {
-  setInterval(() => {
+  // 既に実行中の場合はスキップ
+  if (monitoringInterval) {
+    return;
+  }
+
+  monitoringInterval = setInterval(() => {
     const stats = cacheMonitor.getDetailedStats();
     console.log('=== Cache Statistics ===');
     console.log(`Total Hit Rate: ${stats.hitRate.toFixed(2)}%`);
@@ -252,7 +269,7 @@ export function startCacheMonitoring(intervalMinutes: number = 60) {
     console.log(`Sets: ${stats.sets}, Deletes: ${stats.deletes}`);
     console.log(`Errors: ${stats.errors}`);
     console.log(`Last Reset: ${stats.lastReset.toISOString()}`);
-    
+
     console.log('\n=== Cache Statistics by Prefix ===');
     Object.entries(stats.byPrefix).forEach(([prefix, prefixStats]) => {
       console.log(`${prefix}: Hit Rate ${prefixStats.hitRate.toFixed(2)}%, Hits: ${prefixStats.hits}, Misses: ${prefixStats.misses}`);
