@@ -94,6 +94,19 @@ async function sendRealtimeNotification(userId: number, notificationData: any) {
     }
 }
 
+// 通知データにメタデータを追加するヘルパー関数
+function enrichNotificationData(data: NotificationData, additionalData?: any) {
+    return {
+        id: 0, // プレースホルダー、実際のIDはDBから取得後に設定
+        type: data.type,
+        title: data.title,
+        message: data.message,
+        relatedId: data.relatedId,
+        createdAt: new Date().toISOString(),
+        ...additionalData,
+    };
+}
+
 // メール通知送信
 async function sendEmailNotification(type: string, emailData: any) {
     try {
@@ -169,6 +182,7 @@ export async function sendMessageNotification({
     senderName,
     messageContent,
     roomKey,
+    roomId,
 }: {
     recipientId: number;
     recipientEmail: string;
@@ -176,20 +190,55 @@ export async function sendMessageNotification({
     senderName: string;
     messageContent: string;
     roomKey: string;
+    roomId?: number;
 }) {
-    return sendNotification({
-        userId: recipientId,
-        type: 'message',
-        title: `${senderName}様からメッセージが届きました`,
-        message: messageContent.substring(0, 50) + (messageContent.length > 50 ? '...' : ''),
-        emailData: {
-            recipientEmail,
+    try {
+        console.log(`🔔 Sending message notification to user ${recipientId}:`, { roomKey, senderName });
+
+        // 1. データベースに通知を保存
+        const notification = await prisma.notification.create({
+            data: {
+                userId: recipientId,
+                type: 'message',
+                title: `${senderName}様からメッセージが届きました`,
+                message: messageContent.substring(0, 50) + (messageContent.length > 50 ? '...' : ''),
+                relatedId: roomId || null,
+            },
+        });
+
+        // 2. リアルタイム通知（Socket.IO）- roomKeyを含める
+        await sendRealtimeNotification(recipientId, {
+            id: notification.id,
+            type: 'message',
+            title: `${senderName}様からメッセージが届きました`,
+            message: messageContent.substring(0, 50) + (messageContent.length > 50 ? '...' : ''),
+            relatedId: roomId || null,
+            roomKey, // メッセージ通知にはroomKeyを含める
+            createdAt: notification.createdAt.toISOString(),
+        });
+
+        // 3. メール通知
+        const emailTemplate = getMessageNotificationEmailTemplate({
             recipientName,
             senderName,
             messagePreview: messageContent,
             roomKey,
-        },
-    });
+        });
+
+        await sendEmail({
+            to: recipientEmail,
+            subject: emailTemplate.subject,
+            html: emailTemplate.html,
+            text: emailTemplate.text,
+        });
+
+        console.log(`✅ Message notification sent successfully to user ${recipientId}`);
+        return { success: true, notificationId: notification.id };
+
+    } catch (error) {
+        console.error(`❌ Failed to send message notification:`, error);
+        return { success: false, error };
+    }
 }
 
 // 講座購入通知（コーチ向けのみ）

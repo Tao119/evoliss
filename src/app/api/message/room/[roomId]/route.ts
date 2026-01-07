@@ -3,12 +3,13 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { roomId: string } }
+    { params }: { params: Promise<{ roomId: string }> }
 ) {
     try {
-        const roomId = parseInt(params.roomId);
+        const { roomId } = await params;
+        const roomIdNum = parseInt(roomId);
 
-        if (isNaN(roomId)) {
+        if (isNaN(roomIdNum)) {
             return NextResponse.json(
                 { error: "Invalid room ID" },
                 { status: 400 }
@@ -16,7 +17,7 @@ export async function GET(
         }
 
         const room = await prisma.messageRoom.findUnique({
-            where: { id: roomId },
+            where: { id: roomIdNum },
             select: {
                 id: true,
                 roomKey: true,

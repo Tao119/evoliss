@@ -16,6 +16,7 @@ interface Notification {
     isRead: boolean;
     relatedId: number | null;
     createdAt: string;
+    roomKey?: string; // Socket.IOから来た通知用
 }
 
 export const NotificationBell = () => {
@@ -90,7 +91,25 @@ export const NotificationBell = () => {
             });
 
             if (response.success) {
-                const newNotifications = response.data;
+                let newNotifications = response.data;
+
+                // メッセージ通知の場合、roomKeyを取得
+                newNotifications = await Promise.all(
+                    newNotifications.map(async (n: Notification) => {
+                        if (n.type === "message" && n.relatedId && !n.roomKey) {
+                            try {
+                                const roomResponse = await fetch(`/api/message/room/${n.relatedId}`);
+                                const roomData = await roomResponse.json();
+                                if (roomData.success && roomData.data?.roomKey) {
+                                    return { ...n, roomKey: roomData.data.roomKey };
+                                }
+                            } catch (error) {
+                                console.error(`Failed to fetch roomKey for notification ${n.id}:`, error);
+                            }
+                        }
+                        return n;
+                    })
+                );
 
                 if (reset) {
                     setNotifications(newNotifications);
@@ -135,19 +154,34 @@ export const NotificationBell = () => {
         }
 
         // 通知タイプに応じて遷移
-        if (notification.type === "message" && notification.relatedId) {
-            // メッセージ通知の場合、roomIdからroomKeyを取得してメッセージページに遷移
-            try {
-                const response = await fetch(`/api/message/room/${notification.relatedId}`);
-                const roomData = await response.json();
+        if (notification.type === "message") {
+            // メッセージ通知の場合、roomKeyを使用して遷移
+            const roomKey = notification.roomKey;
+            console.log("🔔 Message notification clicked:", { roomKey, relatedId: notification.relatedId });
 
-                if (roomData.success && roomData.data) {
-                    router.push(`/mypage/message/${roomData.data.roomKey}`);
-                } else {
+            if (roomKey) {
+                console.log(`📍 Navigating to /mypage/message/${roomKey}`);
+                router.push(`/mypage/message/${roomKey}`);
+            } else if (notification.relatedId) {
+                // フォールバック：roomIdからroomKeyを取得
+                console.log(`📍 Fetching room data for roomId: ${notification.relatedId}`);
+                try {
+                    const response = await fetch(`/api/message/room/${notification.relatedId}`);
+                    const roomData = await response.json();
+
+                    if (roomData.success && roomData.data?.roomKey) {
+                        console.log(`📍 Got roomKey from API: ${roomData.data.roomKey}`);
+                        router.push(`/mypage/message/${roomData.data.roomKey}`);
+                    } else {
+                        console.warn("⚠️ No roomKey in response, navigating to messages list");
+                        router.push("/mypage/message");
+                    }
+                } catch (error) {
+                    console.error("Failed to get room key:", error);
                     router.push("/mypage/message");
                 }
-            } catch (error) {
-                console.error("Failed to get room key:", error);
+            } else {
+                console.warn("⚠️ No roomKey or relatedId found, navigating to messages list");
                 router.push("/mypage/message");
             }
         } else if (notification.type === "purchase" && notification.relatedId) {

@@ -19,6 +19,9 @@ const nextConfig = {
     // Next.js 14のキャッシュを無効化
     ppr: false, // Partial Prerenderingを無効化
   },
+  // ビルド最適化
+  productionBrowserSourceMaps: false,
+  compress: true,
   // キャッシュ無効化設定
   generateBuildId: async () => {
     // ビルドごとに一意のIDを生成し、キャッシュを無効化

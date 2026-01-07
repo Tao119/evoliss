@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../../foundation" as *;
 
 .p-message {
@@ -430,7 +431,7 @@
         font-size: $fs-small;
 
         &:hover {
-            background-color: darken($gray, 10%);
+            background-color: color.adjust($gray, $lightness: -10%);
         }
     }
 
@@ -493,7 +494,7 @@
         align-self: center;
 
         &:hover {
-            background-color: darken($gray, 10%);
+            background-color: color.adjust($gray, $lightness: -10%);
         }
     }
 

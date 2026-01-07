@@ -133,6 +133,7 @@ async function sendMessage({
 						senderName: sender?.name || "ユーザー",
 						messageContent: content,
 						roomKey: room.roomKey,
+						roomId: roomId, // roomIdを追加
 					});
 				} catch (notifError) {
 					console.error("❌ Failed to send message notification:", notifError);

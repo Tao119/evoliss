@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         const updatedReservation = await prisma.reservation.update({
             where: { id: reservationId },
             data: {
-                status: reservationStatus.Cancelled,
+                status: reservationStatus.Canceled,
                 // キャンセル理由があれば保存（必要に応じてスキーマに追加）
             },
         });
