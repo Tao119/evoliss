@@ -74,6 +74,11 @@ const Page = () => {
 				id: courseIdNumber,
 			});
 			if (response.success) {
+				if (!response.data) {
+					animation.endAnimation();
+					alert("講座が見つかりませんでした");
+					router.push("/courses");
+				}
 				// 非公開チェック
 				if (!response.data.isPublic) {
 					animation.endAnimation();

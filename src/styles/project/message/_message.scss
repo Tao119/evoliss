@@ -421,6 +421,13 @@
         justify-content: center;
     }
 
+    &__image-placeholder {
+        padding: 20px;
+        text-align: center;
+        color: $gray;
+        font-size: $fs-small;
+    }
+
     &__image-cancel-button {
         background-color: $gray;
         color: $white;
@@ -432,6 +439,30 @@
 
         &:hover {
             background-color: color.adjust($gray, $lightness: -10%);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    &__image-send-button {
+        background-color: $gray;
+        color: $white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: $fs-small;
+
+        &:hover {
+            background-color: color.adjust($gray, $lightness: -10%);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
     }
 
@@ -501,14 +532,20 @@
     // メッセージ内の画像表示
     &__message-image-container {
         margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     &__message-image {
+        width: auto;
         max-width: 300px;
         max-height: 300px;
+        height: auto;
         border-radius: 8px;
         cursor: pointer;
         transition: transform 0.2s ease;
+        display: block;
 
         &:hover {
             transform: scale(1.02);

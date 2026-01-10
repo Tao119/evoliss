@@ -1,13 +1,16 @@
 /** @type {import('next').NextConfig} */
 const withVideos = require('next-videos');
 
+const s3BucketName = process.env.S3_BUCKET_NAME || 'evoliss-s3';
+const s3Region = process.env.AWS_REGION || 'ap-northeast-1';
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'evoliss-s3.s3.ap-northeast-1.amazonaws.com',
+        hostname: `${s3BucketName}.s3.${s3Region}.amazonaws.com`,
         port: '',
         pathname: '/**',
       }

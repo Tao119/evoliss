@@ -32,6 +32,7 @@ const MessageRoomPage = () => {
 	const [reservations, setReservations] = useState<Reservation[]>([]);
 	const [currentReservationIndex, setCurrentReservationIndex] = useState(0);
 	const [showImageUpload, setShowImageUpload] = useState(false);
+	const imageUploadRef = useRef<HTMLInputElement>(null);
 
 	const router = useRouter()
 
@@ -306,6 +307,7 @@ const MessageRoomPage = () => {
 			<div className="p-message__input-area">
 				{showImageUpload ? (
 					<ImageUploadArea
+						ref={imageUploadRef}
 						onImageUpload={handleImageUpload}
 						userId={userData.id}
 					/>
@@ -324,7 +326,10 @@ const MessageRoomPage = () => {
 						<div className="p-message__button-group">
 							<Button
 								className="p-message__image-button"
-								onClick={() => setShowImageUpload(true)}
+								onClick={() => {
+									setShowImageUpload(true);
+									setTimeout(() => imageUploadRef.current?.click(), 0);
+								}}
 							>
 								📷 画像
 							</Button>
@@ -376,10 +381,10 @@ const MessageRoomPage = () => {
 
 							{msg.imageUrl ? (
 								<div className="p-message__message-image-container">
-									<ImageBox
-										className="p-message__message-image"
+									<img
 										src={msg.imageUrl}
-										objectFit="contain"
+										alt="メッセージ画像"
+										className="p-message__message-image"
 										onClick={() => msg.imageUrl && window.open(msg.imageUrl, '_blank')}
 									/>
 									{msg.content && msg.content !== "画像を送信しました" && (
