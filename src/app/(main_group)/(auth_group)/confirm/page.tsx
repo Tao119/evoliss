@@ -12,6 +12,7 @@ import {
 	ConfirmSignUpCommand,
 	ResendConfirmationCodeCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
+import { getClientAWSConfig } from "@/lib/aws/clientConfig";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 
@@ -52,9 +53,7 @@ const Page = () => {
 		setLoading(true);
 		setError("");
 
-		const client = new CognitoIdentityProviderClient({
-			region: process.env.NEXT_PUBLIC_AWS_REGION,
-		});
+		const client = new CognitoIdentityProviderClient(getClientAWSConfig());
 
 		try {
 			const secretHash = getSecretHash(
@@ -133,9 +132,7 @@ const Page = () => {
 		setResendLoading(true);
 		setError("");
 
-		const client = new CognitoIdentityProviderClient({
-			region: process.env.NEXT_PUBLIC_AWS_REGION,
-		});
+		const client = new CognitoIdentityProviderClient(getClientAWSConfig());
 
 		try {
 			const secretHash = getSecretHash(

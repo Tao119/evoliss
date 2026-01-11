@@ -3,6 +3,7 @@ import {
 	CognitoIdentityProvider,
 	InitiateAuthCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
+import { getAWSConfig } from "../aws/config";
 import { type NextAuthOptions } from "next-auth";
 import CognitoProvider from "next-auth/providers/cognito";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -75,9 +76,7 @@ export const authOptions: NextAuthOptions = {
 					return null;
 				}
 
-				const cognitoClient = new CognitoIdentityProvider({
-					region: process.env.AWS_REGION,
-				});
+				const cognitoClient = new CognitoIdentityProvider(getAWSConfig());
 
 				const email = credentials.email;
 				const password = credentials.password;
@@ -118,19 +117,19 @@ export const authOptions: NextAuthOptions = {
 					}
 				} catch (error: any) {
 					console.error("Cognito authentication error:", error);
-					
+
 					// ユーザーが未確認の場合のエラーハンドリング
 					if (error.name === "UserNotConfirmedException") {
 						console.error("User not confirmed");
 						return null;
 					}
-					
+
 					// その他のCognitoエラー
 					if (error.name === "NotAuthorizedException") {
 						console.error("Invalid credentials");
 						return null;
 					}
-					
+
 					// エラーを再スロー
 					return null;
 				}

@@ -4,12 +4,11 @@ import {
 	ConfirmForgotPasswordCommand,
 	ForgotPasswordCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
+import { getAWSConfig } from "@/lib/aws/config";
 // app/api/reset-password/route.ts
 import { type NextRequest, NextResponse } from "next/server";
 
-const cognitoClient = new CognitoIdentityProvider({
-	region: process.env.AWS_REGION,
-});
+const cognitoClient = new CognitoIdentityProvider(getAWSConfig());
 
 export async function POST(request: NextRequest) {
 	try {

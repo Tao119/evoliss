@@ -10,20 +10,13 @@ export interface EmailParams {
 
 // SESクライアントの作成（シングルトン）
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { getAWSConfig } from "../aws/config";
 
 let sesClient: SESClient | null = null;
 
 function getSESClient() {
     if (!sesClient) {
-        sesClient = new SESClient({
-            region: process.env.AWS_REGION || "ap-northeast-1",
-            credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-                ? {
-                    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-                }
-                : undefined, // デフォルトの認証情報を使用
-        });
+        sesClient = new SESClient(getAWSConfig());
     }
     return sesClient;
 }

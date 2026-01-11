@@ -12,6 +12,7 @@ import {
 	CognitoIdentityProviderClient,
 	SignUpCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
+import { getClientAWSConfig } from "@/lib/aws/clientConfig";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
@@ -69,9 +70,7 @@ const Page = () => {
 				process.env.NEXT_PUBLIC_COGNITO_CLIENT_SECRET!,
 			);
 
-			const client = new CognitoIdentityProviderClient({
-				region: process.env.NEXT_PUBLIC_AWS_REGION,
-			});
+			const client = new CognitoIdentityProviderClient(getClientAWSConfig());
 
 			const params = {
 				ClientId: clientId,
@@ -201,13 +200,13 @@ const Page = () => {
 
 			<Button
 				className={`p-sign-in__submit ${!email ||
-						!password ||
-						!passwordConfirm ||
-						!policyChecked ||
-						!termsChecked ||
-						loading
-						? "-disabled"
-						: ""
+					!password ||
+					!passwordConfirm ||
+					!policyChecked ||
+					!termsChecked ||
+					loading
+					? "-disabled"
+					: ""
 					}`}
 				disabled={
 					!email ||
