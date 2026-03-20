@@ -42,13 +42,16 @@ const Sidebar = ({ setShowSideBar }: Prop) => {
 			return currentPath.startsWith("/courses") && !currentPath.startsWith("/courses/coach");
 		}
 
-		return false;
+		return currentPath.startsWith(targetPath);
 	};
 
 	const mainRoutes = [
-		{ path: "/", text: "TOP" },
+		{ path: "/", text: "ホーム" },
+		{ path: "/courses", text: "講座を探す" },
 		{ path: "/courses/coach", text: "コーチから探す" },
-		{ path: "/courses", text: "講座から探す" },
+		{ path: "/about", text: "EVOLISSとは" },
+		{ path: "/faq", text: "よくある質問" },
+		{ path: "/contact", text: "お問い合わせ" },
 	];
 	const iconRoutes = [
 		{

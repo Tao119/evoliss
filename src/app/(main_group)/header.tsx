@@ -47,13 +47,23 @@ const Header = ({ setShowSideBar }: Prop) => {
 	}, [pathname, setIsTopPanelVisible]);
 
 	const mainRoutes = [
+		{ path: "/", text: "ホーム" },
+		{ path: "/courses", text: "講座を探す" },
 		{ path: "/courses/coach", text: "コーチから探す" },
-		{ path: "/courses", text: "講座から探す" },
-		{ path: "/mypage/coach/create", text: "コーチをする", requireAuth: true },
+		{ path: "/about", text: "EVOLISSとは" },
+		{ path: "/faq", text: "よくある質問" },
+		{ path: "/contact", text: "お問い合わせ" },
 	];
 
 	const pushRoute = (path: string) => {
 		router.push(path);
+	};
+
+	const isActiveRoute = (currentPath: string, targetPath: string) => {
+		if (targetPath === "/") return currentPath === "/";
+		if (targetPath === "/courses/coach") return currentPath.startsWith("/courses/coach");
+		if (targetPath === "/courses") return currentPath.startsWith("/courses") && !currentPath.startsWith("/courses/coach");
+		return currentPath.startsWith(targetPath);
 	};
 
 	// ホームページの判定を厳密に
@@ -76,27 +86,16 @@ const Header = ({ setShowSideBar }: Prop) => {
 					/>
 				</div>
 				<ul className="p-header__container -upper">
-					{mainRoutes.map(({ path, text, requireAuth }) => {
-						// 認証が必要なルートで未ログインの場合はスキップ
-						if (requireAuth && !userData) return null;
-
+					{mainRoutes.map(({ path, text }) => {
 						return (
 							<div
 								onClick={() => pushRoute(path)}
 								key={path}
-								className={`p-header__list ${pathname.replace("/", "").split("/")[0] ==
-									`${path.replace("/", "")}`
-									? "-active"
-									: ""
-									}`}
+								className={`p-header__list ${isActiveRoute(pathname, path) ? "-active" : ""}`}
 							>
 								{text && (
 									<div
-										className={`p-header__page-text ${pathname.replace("/", "").split("/")[0] ==
-											`${path.replace("/", "")}`
-											? "-active"
-											: ""
-											}`}
+										className={`p-header__page-text ${isActiveRoute(pathname, path) ? "-active" : ""}`}
 									>
 										{text}
 									</div>

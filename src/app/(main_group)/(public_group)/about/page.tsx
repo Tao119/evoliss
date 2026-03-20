@@ -7,97 +7,97 @@ import logoImage from "@/assets/logo/png/Evoliss-Logo_Type-4-white_L.png";
 const AboutPage = () => {
 	return (
 		<>
-			<div className="p-about l-page">
-				<div className="p-about__title">Evolissについて</div>
+			<div className="p-about-page">
+				<div className="p-about-page__title">Evolissについて</div>
 				<Border />
 
-				<div className="p-about__hero">
+				<div className="p-about-page__hero">
 					<ImageBox
 						src={logoImage}
-						className="p-about__logo"
+						className="p-about-page__logo"
 						alt="Evoliss"
 					/>
-					<div className="p-about__tagline">
+					<div className="p-about-page__tagline">
 						ゲームスキル向上のための、最高のコーチングプラットフォーム
 					</div>
 				</div>
 
-				<div className="p-about__section">
-					<div className="p-about__section-title">私たちのミッション</div>
-					<div className="p-about__section-content">
+				<div className="p-about-page__section">
+					<div className="p-about-page__section-title">私たちのミッション</div>
+					<div className="p-about-page__section-content">
 						Evolissは、すべてのゲーマーが自分のスキルを向上させ、より楽しくゲームをプレイできる環境を提供することを目指しています。
 						初心者からプロフェッショナルまで、あらゆるレベルのプレイヤーが最適なコーチを見つけ、効率的にスキルアップできるプラットフォームです。
 					</div>
 				</div>
 
-				<div className="p-about__section">
-					<div className="p-about__section-title">サービスの特徴</div>
-					<div className="p-about__features">
-						<div className="p-about__feature">
-							<div className="p-about__feature-title">豊富なコーチ陣</div>
-							<div className="p-about__feature-description">
+				<div className="p-about-page__section">
+					<div className="p-about-page__section-title">サービスの特徴</div>
+					<div className="p-about-page__features">
+						<div className="p-about-page__feature">
+							<div className="p-about-page__feature-title">豊富なコーチ陣</div>
+							<div className="p-about-page__feature-description">
 								プロゲーマーから経験豊富なコーチまで、様々な専門性を持つコーチが在籍しています。
 							</div>
 						</div>
-						<div className="p-about__feature">
-							<div className="p-about__feature-title">柔軟なスケジュール</div>
-							<div className="p-about__feature-description">
+						<div className="p-about-page__feature">
+							<div className="p-about-page__feature-title">柔軟なスケジュール</div>
+							<div className="p-about-page__feature-description">
 								30分単位で予約可能。あなたのペースに合わせて学習を進めることができます。
 							</div>
 						</div>
-						<div className="p-about__feature">
-							<div className="p-about__feature-title">安心の決済システム</div>
-							<div className="p-about__feature-description">
+						<div className="p-about-page__feature">
+							<div className="p-about-page__feature-title">安心の決済システム</div>
+							<div className="p-about-page__feature-description">
 								セキュアな決済システムで、安心してサービスをご利用いただけます。
 							</div>
 						</div>
-						<div className="p-about__feature">
-							<div className="p-about__feature-title">充実したサポート</div>
-							<div className="p-about__feature-description">
+						<div className="p-about-page__feature">
+							<div className="p-about-page__feature-title">充実したサポート</div>
+							<div className="p-about-page__feature-description">
 								メッセージ機能で講師と直接やり取り。きめ細かいフォローアップが可能です。
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div className="p-about__section">
-					<div className="p-about__section-title">ご利用の流れ</div>
-					<div className="p-about__steps">
-						<div className="p-about__step">
-							<div className="p-about__step-number">1</div>
-							<div className="p-about__step-title">会員登録</div>
-							<div className="p-about__step-description">
+				<div className="p-about-page__section">
+					<div className="p-about-page__section-title">ご利用の流れ</div>
+					<div className="p-about-page__steps">
+						<div className="p-about-page__step">
+							<div className="p-about-page__step-number">1</div>
+							<div className="p-about-page__step-title">会員登録</div>
+							<div className="p-about-page__step-description">
 								無料で簡単に会員登録ができます
 							</div>
 						</div>
-						<div className="p-about__step">
-							<div className="p-about__step-number">2</div>
-							<div className="p-about__step-title">コーチを探す</div>
-							<div className="p-about__step-description">
+						<div className="p-about-page__step">
+							<div className="p-about-page__step-number">2</div>
+							<div className="p-about-page__step-title">コーチを探す</div>
+							<div className="p-about-page__step-description">
 								ゲームやスキルレベルに合わせて検索
 							</div>
 						</div>
-						<div className="p-about__step">
-							<div className="p-about__step-number">3</div>
-							<div className="p-about__step-title">予約する</div>
-							<div className="p-about__step-description">
+						<div className="p-about-page__step">
+							<div className="p-about-page__step-number">3</div>
+							<div className="p-about-page__step-title">予約する</div>
+							<div className="p-about-page__step-description">
 								都合の良い時間を選んで予約
 							</div>
 						</div>
-						<div className="p-about__step">
-							<div className="p-about__step-number">4</div>
-							<div className="p-about__step-title">受講する</div>
-							<div className="p-about__step-description">
+						<div className="p-about-page__step">
+							<div className="p-about-page__step-number">4</div>
+							<div className="p-about-page__step-title">受講する</div>
+							<div className="p-about-page__step-description">
 								オンラインでコーチングを受講
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div className="p-about__section">
-					<div className="p-about__section-title">運営会社</div>
-					<div className="p-about__company">
-						<table className="p-about__company-table">
+				<div className="p-about-page__section">
+					<div className="p-about-page__section-title">運営会社</div>
+					<div className="p-about-page__company">
+						<table className="p-about-page__company-table">
 							<tbody>
 								<tr>
 									<th>会社名</th>
@@ -120,11 +120,11 @@ const AboutPage = () => {
 					</div>
 				</div>
 
-				<div className="p-about__cta">
-					<div className="p-about__cta-text">
+				<div className="p-about-page__cta">
+					<div className="p-about-page__cta-text">
 						さあ、あなたもEvolissで新しいゲーム体験を始めましょう
 					</div>
-					<a href="/sign-up" className="p-about__cta-button">
+					<a href="/sign-up" className="p-about-page__cta-button">
 						無料で始める
 					</a>
 				</div>

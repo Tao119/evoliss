@@ -1,286 +1,177 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { UserDataContext } from "../contextProvider";
-import { requestDB } from "@/services/axios";
-import { ImageBox } from "@/components/imageBox";
-import notificationIcon from "@/assets/image/notification.svg";
-import { useRouter } from "next/navigation";
-import { useSocket } from "@/hooks/useSocket";
+import { useContext, useState, useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { UserDataContext, useHeader } from "../contextProvider";
+import {
+    useNotifications,
+    getNotificationPath,
+    AppNotification,
+    LOCALE,
+} from "@/hooks/useNotifications";
 
-interface Notification {
-    id: number;
-    type: string;
-    title: string;
-    message: string;
-    isRead: boolean;
-    relatedId: number | null;
-    createdAt: string;
-    roomKey?: string; // Socket.IOから来た通知用
+const NotificationIcon = () => (
+    <svg
+        className="c-notification-bell__icon"
+        width="46"
+        height="41"
+        viewBox="0 0 46 41"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+    >
+        <path
+            d="M23.3795 7.1059C28.9277 7.1059 33.4321 11.6103 33.4321 17.1585V31.1232H13.3269V17.1585C13.3269 11.6103 17.8313 7.1059 23.3795 7.1059Z"
+            strokeMiterlimit="10"
+        />
+        <path d="M8 31.1233H38.759" strokeMiterlimit="10" />
+        <path
+            d="M23.3795 7.10589V4"
+            strokeMiterlimit="10"
+            strokeLinecap="round"
+        />
+        <path
+            d="M27.1655 33.7255C27.1655 35.8164 25.4706 37.5114 23.3796 37.5114C21.2887 37.5114 19.5938 35.8164 19.5938 33.7255H27.1655Z"
+            strokeMiterlimit="10"
+        />
+    </svg>
+);
+
+interface NotificationItemProps {
+    notification: AppNotification;
+    onClick: (notification: AppNotification) => void;
 }
 
+const NotificationItem = ({ notification, onClick }: NotificationItemProps) => (
+    <button
+        type="button"
+        className={`c-notification-bell__item ${!notification.isRead ? "-unread" : ""}`}
+        onClick={() => onClick(notification)}
+        aria-label={`${notification.title}: ${notification.message}`}
+    >
+        <div className="c-notification-bell__item-title">{notification.title}</div>
+        <div className="c-notification-bell__item-message">{notification.message}</div>
+        <div className="c-notification-bell__item-time">
+            {new Date(notification.createdAt).toLocaleString(LOCALE)}
+        </div>
+    </button>
+);
+
+const DEFAULT_FALLBACK_PATH = "/mypage";
+
 export const NotificationBell = () => {
-    const { userData } = useContext(UserDataContext)!;
-    const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
-    const [offset, setOffset] = useState(0);
+    const context = useContext(UserDataContext);
+    const userData = context?.userData;
     const router = useRouter();
-    const { socket, isConnected } = useSocket();
+    const pathname = usePathname();
+    const { isTopPanelVisible } = useHeader();
 
-    useEffect(() => {
-        if (userData) {
-            fetchNotifications(true);
-            // 30秒ごとに通知を更新
-            const interval = setInterval(() => fetchNotifications(true), 30000);
-            return () => clearInterval(interval);
-        }
-    }, [userData]);
+    const {
+        notifications,
+        unreadCount,
+        loading,
+        hasMore,
+        markAsRead,
+        markAllAsRead,
+        loadMore,
+    } = useNotifications();
 
-    // Socket.IOからのリアルタイム通知を受信
-    useEffect(() => {
-        if (!socket || !userData || !isConnected) return;
+    const [showDropdown, setShowDropdown] = useState(false);
 
-        // ユーザーを通知用に登録
-        socket.emit("registerUser", { userId: userData.id });
-        console.log(`👤 Registered user ${userData.id} for notifications`);
+    const isHomePage = pathname === "/";
+    const shouldUseWhiteIcon = isHomePage && isTopPanelVisible;
 
-        const handleNewNotification = (notificationData: any) => {
-            console.log("🔔 Received realtime notification:", notificationData);
-
-            // 通知リストを更新
-            setNotifications(prev => [notificationData, ...prev.slice(0, 9)]);
-            setUnreadCount(prev => prev + 1);
-
-            // ブラウザ通知を表示（権限がある場合）
-            if (Notification.permission === "granted") {
-                new Notification(notificationData.title, {
-                    body: notificationData.message,
-                    icon: "/favicon.ico",
-                });
-            }
-        };
-
-        socket.on("newNotification", handleNewNotification);
-
-        return () => {
-            socket.off("newNotification", handleNewNotification);
-        };
-    }, [socket, userData, isConnected]);
-
-    // ブラウザ通知の許可を要求
-    useEffect(() => {
-        if (userData && Notification.permission === "default") {
-            Notification.requestPermission();
-        }
-    }, [userData]);
-
-    const fetchNotifications = async (reset = false) => {
-        if (!userData || loading) return;
-
-        setLoading(true);
-        const currentOffset = reset ? 0 : offset;
-
-        try {
-            const response = await requestDB("notification", "readNotificationsByUserId", {
-                userId: userData.id,
-                limit: 10,
-                offset: currentOffset,
-            });
-
-            if (response.success) {
-                let newNotifications = response.data;
-
-                // メッセージ通知の場合、roomKeyを取得
-                newNotifications = await Promise.all(
-                    newNotifications.map(async (n: Notification) => {
-                        if (n.type === "message" && n.relatedId && !n.roomKey) {
-                            try {
-                                const roomResponse = await fetch(`/api/message/room/${n.relatedId}`);
-                                const roomData = await roomResponse.json();
-                                if (roomData.success && roomData.data?.roomKey) {
-                                    return { ...n, roomKey: roomData.data.roomKey };
-                                }
-                            } catch (error) {
-                                console.error(`Failed to fetch roomKey for notification ${n.id}:`, error);
-                            }
-                        }
-                        return n;
-                    })
-                );
-
-                if (reset) {
-                    setNotifications(newNotifications);
-                    setOffset(10);
-                } else {
-                    setNotifications(prev => [...prev, ...newNotifications]);
-                    setOffset(prev => prev + 10);
-                }
-
-                setHasMore(newNotifications.length === 10);
-
-                if (reset) {
-                    const unread = newNotifications.filter((n: Notification) => !n.isRead).length;
-                    setUnreadCount(unread);
-                }
-            }
-        } catch (error) {
-            console.error("Failed to fetch notifications:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleNotificationClick = async (notification: Notification) => {
-        // 未読の場合は既読にする
-        if (!notification.isRead) {
+    const handleNotificationClick = useCallback(
+        async (notification: AppNotification) => {
             try {
-                await requestDB("notification", "markNotificationAsRead", {
-                    id: notification.id,
-                });
-
-                // ローカル状態を更新
-                setNotifications(prev =>
-                    prev.map(n =>
-                        n.id === notification.id ? { ...n, isRead: true } : n
-                    )
-                );
-                setUnreadCount(prev => Math.max(0, prev - 1));
-            } catch (error) {
-                console.error("Failed to mark notification as read:", error);
-            }
-        }
-
-        // 通知タイプに応じて遷移
-        if (notification.type === "message") {
-            // メッセージ通知の場合、roomKeyを使用して遷移
-            const roomKey = notification.roomKey;
-            console.log("🔔 Message notification clicked:", { roomKey, relatedId: notification.relatedId });
-
-            if (roomKey) {
-                console.log(`📍 Navigating to /mypage/message/${roomKey}`);
-                router.push(`/mypage/message/${roomKey}`);
-            } else if (notification.relatedId) {
-                // フォールバック：roomIdからroomKeyを取得
-                console.log(`📍 Fetching room data for roomId: ${notification.relatedId}`);
-                try {
-                    const response = await fetch(`/api/message/room/${notification.relatedId}`);
-                    const roomData = await response.json();
-
-                    if (roomData.success && roomData.data?.roomKey) {
-                        console.log(`📍 Got roomKey from API: ${roomData.data.roomKey}`);
-                        router.push(`/mypage/message/${roomData.data.roomKey}`);
-                    } else {
-                        console.warn("⚠️ No roomKey in response, navigating to messages list");
-                        router.push("/mypage/message");
-                    }
-                } catch (error) {
-                    console.error("Failed to get room key:", error);
-                    router.push("/mypage/message");
+                if (!notification.isRead) {
+                    await markAsRead(notification.id);
                 }
-            } else {
-                console.warn("⚠️ No roomKey or relatedId found, navigating to messages list");
-                router.push("/mypage/message");
+
+                const path = await getNotificationPath(notification);
+                router.push(path);
+            } catch {
+                router.push(DEFAULT_FALLBACK_PATH);
+            } finally {
+                setShowDropdown(false);
             }
-        } else if (notification.type === "purchase" && notification.relatedId) {
-            router.push("/mypage/coach/upcoming");
-        } else if (notification.type === "reminder" && notification.relatedId) {
-            router.push("/mypage/courses/upcoming");
-        } else if (notification.type === "reschedule" && notification.relatedId) {
-            router.push("/mypage/courses/upcoming");
-        } else if (notification.type === "cancel" && notification.relatedId) {
-            router.push("/mypage/courses/upcoming");
-        } else {
-            // デフォルトはマイページ
-            router.push("/mypage");
-        }
+        },
+        [markAsRead, router]
+    );
 
+    const handleMarkAllAsRead = async () => {
+        await markAllAsRead();
+    };
+
+    const toggleDropdown = () => {
+        setShowDropdown(prev => !prev);
+    };
+
+    const closeDropdown = () => {
         setShowDropdown(false);
-    };
-
-    const markAllAsRead = async () => {
-        try {
-            await requestDB("notification", "markAllNotificationsAsRead", {
-                userId: userData?.id,
-            });
-
-            // ローカル状態を更新
-            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-            setUnreadCount(0);
-        } catch (error) {
-            console.error("Failed to mark all as read:", error);
-        }
-    };
-
-    const loadMoreNotifications = () => {
-        if (!loading && hasMore) {
-            fetchNotifications(false);
-        }
     };
 
     if (!userData) return null;
 
     return (
-        <div className="c-notification-bell">
-            <div
+        <div className={`c-notification-bell ${shouldUseWhiteIcon ? "-white" : ""}`}>
+            <button
+                type="button"
                 className="c-notification-bell__icon-wrapper"
-                onClick={() => setShowDropdown(!showDropdown)}
+                onClick={toggleDropdown}
+                aria-label={`通知 ${unreadCount > 0 ? `(${unreadCount}件の未読)` : ""}`}
+                aria-expanded={showDropdown}
+                aria-haspopup="true"
             >
-                <ImageBox
-                    src={notificationIcon}
-                    className="c-notification-bell__icon"
-                />
+                <NotificationIcon />
                 {unreadCount > 0 && (
-                    <span className="c-notification-bell__badge">{unreadCount}</span>
+                    <span className="c-notification-bell__badge" aria-hidden="true">
+                        {unreadCount}
+                    </span>
                 )}
-            </div>
+            </button>
 
             {showDropdown && (
                 <>
                     <div
                         className="c-notification-bell__overlay"
-                        onClick={() => setShowDropdown(false)}
+                        onClick={closeDropdown}
+                        aria-hidden="true"
                     />
-                    <div className="c-notification-bell__dropdown">
+                    <div
+                        className="c-notification-bell__dropdown"
+                        role="menu"
+                        aria-label="通知一覧"
+                    >
                         <div className="c-notification-bell__header">
                             <h3>通知</h3>
                             {unreadCount > 0 && (
-                                <button onClick={markAllAsRead}>すべて既読</button>
+                                <button type="button" onClick={handleMarkAllAsRead}>
+                                    すべて既読
+                                </button>
                             )}
                         </div>
 
-                        <div className="c-notification-bell__list">
+                        <div className="c-notification-bell__list" role="list">
                             {notifications.length === 0 ? (
                                 <div className="c-notification-bell__empty">
                                     通知はありません
                                 </div>
                             ) : (
                                 <>
-                                    {notifications.map((notification) => (
-                                        <div
+                                    {notifications.map(notification => (
+                                        <NotificationItem
                                             key={notification.id}
-                                            className={`c-notification-bell__item ${!notification.isRead ? "-unread" : ""
-                                                }`}
-                                            onClick={() => handleNotificationClick(notification)}
-                                        >
-                                            <div className="c-notification-bell__item-title">
-                                                {notification.title}
-                                            </div>
-                                            <div className="c-notification-bell__item-message">
-                                                {notification.message}
-                                            </div>
-                                            <div className="c-notification-bell__item-time">
-                                                {new Date(notification.createdAt).toLocaleString("ja-JP")}
-                                            </div>
-                                        </div>
+                                            notification={notification}
+                                            onClick={handleNotificationClick}
+                                        />
                                     ))}
 
                                     {hasMore && (
                                         <div className="c-notification-bell__load-more">
                                             <button
-                                                onClick={loadMoreNotifications}
+                                                type="button"
+                                                onClick={loadMore}
                                                 disabled={loading}
                                                 className="c-notification-bell__load-more-btn"
                                             >

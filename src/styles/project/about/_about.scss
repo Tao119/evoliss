@@ -6,7 +6,6 @@
   align-items: center;
   width: 100%;
   height: auto;
-  // padding: 30px;
 
   &__more {
     width: 250px;
@@ -32,18 +31,14 @@
     object-fit: cover;
   }
 
-
-
   &__top-panel-phrase-container {
     margin-top: 20%;
     margin-left: 20%;
     font-size: $fs-medium;
-    // background-color: $green;
     color: $white;
     font-weight: $fw-bold;
     display: flex;
     flex-direction: column;
-    // padding: 0 30px;
     align-items: flex-start;
     justify-content: flex-start;
     gap: 6px;
@@ -65,7 +60,6 @@
     color: $white;
     font-weight: $fw-bold;
     display: flex;
-    // padding: 0 30px;
     align-items: center;
     justify-content: flex-start;
     gap: 10px;
@@ -84,7 +78,6 @@
     height: 20px;
   }
 
-
   &__content {
     display: flex;
     flex-direction: column;
@@ -95,7 +88,6 @@
     gap: 24px;
     margin-top: 48px;
   }
-
 
   &__login-panel {
     height: 200px;
@@ -179,8 +171,6 @@
       height: auto;
     }
   }
-
-
 
   &__panel {
     width: 100%;
