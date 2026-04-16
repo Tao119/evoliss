@@ -231,8 +231,9 @@ const Page = () => {
 				setGames(response.data);
 				// ゲームパラメータが未指定の場合、最初のゲーム（ポケモンカード）をデフォルト選択
 				if (!gamesParam && response.data.length > 0) {
-					const firstGameId = response.data[0].id;
-					router.replace(`/courses?games=${firstGameId}`);
+					const defaultGame = response.data.find((g: Game) => g.isDefault);
+					const defaultGameId = defaultGame ? defaultGame.id : response.data[0].id;
+					router.replace(`/courses?games=${defaultGameId}`);
 				}
 			} else {
 				console.error("Failed to fetch games:", response);

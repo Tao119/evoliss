@@ -54,6 +54,7 @@ export default function AdminLayout({
         { path: "/admin/users", label: "ユーザー管理" },
         { path: "/admin/contacts", label: "お問い合わせ" },
         { path: "/admin/cancels", label: "キャンセル申請" },
+        { path: "/admin/master", label: "マスター管理" },
     ];
 
     return (

@@ -4,6 +4,8 @@ import { withCache, CACHE_PREFIX, CACHE_TTL, createCacheInvalidator } from "@/li
 export const tagFuncs: { [funcName: string]: Function } = {
 	readTags,
 	invalidateTagCache,
+	createTag,
+	deleteTag,
 };
 
 // キャッシュ無効化関数
@@ -28,4 +30,16 @@ async function readTags() {
 // タグキャッシュを無効化（タグが更新された時に使用）
 async function invalidateTagCache() {
 	await tagCacheInvalidator.invalidateAll();
+}
+
+async function createTag({ name }: { name: string }) {
+	const data = await prisma.tag.create({ data: { name } });
+	await tagCacheInvalidator.invalidateAll();
+	return data;
+}
+
+async function deleteTag({ id }: { id: number }) {
+	const data = await prisma.tag.delete({ where: { id } });
+	await tagCacheInvalidator.invalidateAll();
+	return data;
 }

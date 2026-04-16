@@ -61,7 +61,8 @@ const CoachCreatePage = () => {
 			if (gamesResponse.success) {
 				setGames(gamesResponse.data);
 				if (gamesResponse.data.length > 0) {
-					setGameId(gamesResponse.data[0].id);
+					const defaultGame = gamesResponse.data.find((g: Game) => g.isDefault);
+					setGameId(defaultGame ? defaultGame.id : gamesResponse.data[0].id);
 				}
 			}
 

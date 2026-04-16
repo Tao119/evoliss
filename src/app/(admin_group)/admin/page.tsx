@@ -22,6 +22,11 @@ export default function AdminDashboard() {
                     <h3 className="p-admin-dashboard__menu-title">キャンセル申請管理</h3>
                     <p className="p-admin-dashboard__menu-description">キャンセル申請の承認・棄却処理</p>
                 </Link>
+
+                <Link href="/admin/master" className="p-admin-dashboard__menu-card">
+                    <h3 className="p-admin-dashboard__menu-title">マスター管理</h3>
+                    <p className="p-admin-dashboard__menu-description">ゲーム・タグの追加・削除、デフォルトゲーム設定</p>
+                </Link>
             </div>
         </div>
     );

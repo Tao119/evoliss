@@ -211,6 +211,7 @@ model Game {
   name      String
   createdAt DateTime   @default(now())
   image     String?
+  isDefault Boolean    @default(false)
   courses   Course[]
   users     User[]
 }

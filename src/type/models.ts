@@ -218,6 +218,7 @@ export interface Game {
 	id: number;
 	name: string;
 	image: string | null;
+	isDefault: boolean;
 	createdAt: Date;
 
 	courses: Course[];

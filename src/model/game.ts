@@ -10,6 +10,10 @@ export const gameFuncs: { [funcName: string]: Function } = {
 	readGameById,
 	readGamesByQuery,
 	invalidateGameCache,
+	createGame,
+	deleteGame,
+	setDefaultGame,
+	readDefaultGame,
 };
 
 // キャッシュ無効化関数
@@ -183,4 +187,39 @@ async function invalidateGameCache(id?: number) {
 		// トップゲームのキャッシュも削除
 		await deleteCachedData(`${CACHE_PREFIX.TOP}games`);
 	}
+}
+
+async function createGame({ name }: { name: string }) {
+	const data = await prisma.game.create({ data: { name } });
+	await gameCacheInvalidator.invalidateAll();
+	await deleteCachedData(`${CACHE_PREFIX.TOP}games`);
+	return data;
+}
+
+async function deleteGame({ id }: { id: number }) {
+	const data = await prisma.game.delete({ where: { id } });
+	await gameCacheInvalidator.invalidateById(id);
+	await gameCacheInvalidator.invalidateAll();
+	await deleteCachedData(`${CACHE_PREFIX.TOP}games`);
+	return data;
+}
+
+async function setDefaultGame({ id }: { id: number }) {
+	// 全ゲームのisDefaultをfalseにしてから、指定ゲームをtrueにする
+	await prisma.game.updateMany({ data: { isDefault: false } });
+	const data = await prisma.game.update({ where: { id }, data: { isDefault: true } });
+	await gameCacheInvalidator.invalidateAll();
+	await deleteCachedData(`${CACHE_PREFIX.TOP}games`);
+	return data;
+}
+
+async function readDefaultGame() {
+	const cacheKey = `${CACHE_PREFIX.GAME}default`;
+	return withCache(
+		cacheKey,
+		async () => {
+			return prisma.game.findFirst({ where: { isDefault: true } });
+		},
+		CACHE_TTL.LONG
+	);
 }
