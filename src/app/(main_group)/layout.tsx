@@ -297,7 +297,7 @@ export default function GuestLayout({
 								</div>
 							</div>
 							<div className="l-footer__copyright">
-								© はるnチャンネル managed by EVOLISS
+								© EVOLISS
 							</div>
 						</div>
 					</div>

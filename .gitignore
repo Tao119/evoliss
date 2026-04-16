@@ -59,3 +59,4 @@ ecosystem.config.js
 /test/
 
 docker-compose.yml
+.env*.local

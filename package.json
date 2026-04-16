@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "test:aws-auth": "node scripts/test-aws-auth.js"
+    "test:aws-auth": "node scripts/test-aws-auth.js",
+    "seed": "node prisma/seed.js"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.734.0",

@@ -112,6 +112,21 @@ const Sidebar = ({ setShowSideBar }: Prop) => {
 							)}
 						</div>
 					))}
+					<div
+						onClick={() => pushRoute(userData ? "/mypage/coach/create" : `/sign-in?callback=/mypage/coach/create`)}
+						className={`p-side-bar__list p-side-bar__glitch-btn ${isActiveRoute(pathname, "/mypage/coach/create") ? "-active" : ""}`}
+					>
+						<>
+							<div className="p-side-bar__glitch-label">
+								{userData ? "講座を作る" : "コーチになる"}
+							</div>
+							<div className="p-side-bar__glitch-mask"><span>{userData ? "講座を作る" : "コーチになる"}</span></div>
+							<div className="p-side-bar__glitch-mask"><span>{userData ? "講座を作る" : "コーチになる"}</span></div>
+							<div className="p-side-bar__glitch-mask"><span>{userData ? "講座を作る" : "コーチになる"}</span></div>
+							<div className="p-side-bar__glitch-mask"><span>{userData ? "講座を作る" : "コーチになる"}</span></div>
+							<div className="p-side-bar__glitch-mask"><span>{userData ? "講座を作る" : "コーチになる"}</span></div>
+						</>
+					</div>
 				</ul>
 				<ul className="p-side-bar__container -lower">
 					{userData?.isAdmin && (

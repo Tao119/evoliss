@@ -229,6 +229,11 @@ const Page = () => {
 			const response = await requestDB("game", "readAllGames");
 			if (response.success) {
 				setGames(response.data);
+				// ゲームパラメータが未指定の場合、最初のゲーム（ポケモンカード）をデフォルト選択
+				if (!gamesParam && response.data.length > 0) {
+					const firstGameId = response.data[0].id;
+					router.replace(`/courses?games=${firstGameId}`);
+				}
 			} else {
 				console.error("Failed to fetch games:", response);
 				alert("ゲーム情報の取得中にエラーが発生しました");

@@ -117,6 +117,15 @@ const Header = ({ setShowSideBar }: Prop) => {
 							</div>
 						</Link>
 					)}
+					<div
+						onClick={() => pushRoute(userData ? "/mypage/coach/create" : `/sign-in?callback=/mypage/coach/create`)}
+						className={`p-header__list`}
+						style={{ cursor: "pointer" }}
+					>
+						<div className={`p-header__page-text ${isActiveRoute(pathname, "/mypage/coach/create") ? "-active" : ""}`}>
+							{userData ? "講座を作る" : "コーチになる"}
+						</div>
+					</div>
 					{userData && <NotificationBell />}
 					{userData ? (
 						<Link
