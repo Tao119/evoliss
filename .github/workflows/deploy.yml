@@ -43,7 +43,7 @@ jobs:
               "echo === Building application ===",
               "npm run build",
               "echo === Restarting application (zero downtime) ===",
-              "if pm2 describe evoliss > /dev/null 2>&1; then pm2 reload evoliss --update-env; else pm2 start npm --name evoliss -- start; fi",
+              "pm2 describe evoliss > /dev/null 2>&1 && pm2 reload evoliss --update-env || pm2 start npm --name evoliss -- start",
               "pm2 save --force",
               "echo === Deployment complete ==="
             ]' \
