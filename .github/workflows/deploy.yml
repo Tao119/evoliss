@@ -28,25 +28,7 @@ jobs:
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
             --timeout-seconds 1200 \
-            --parameters 'commands=[
-              "set -e",
-              "export HOME=/root",
-              "export PATH=/usr/local/bin:/usr/bin:/bin:$PATH",
-              "cd /opt/evoliss/current",
-              "echo === Pulling latest code ===",
-              "git fetch origin main",
-              "git reset --hard origin/main",
-              "echo === Installing dependencies ===",
-              "npm ci",
-              "echo === Running Prisma migration ===",
-              "npx prisma migrate deploy || npx prisma db push",
-              "echo === Building application ===",
-              "npm run build",
-              "echo === Restarting application (zero downtime) ===",
-              "pm2 describe evoliss > /dev/null 2>&1 && pm2 reload evoliss --update-env || pm2 start npm --name evoliss -- start",
-              "pm2 save --force",
-              "echo === Deployment complete ==="
-            ]' \
+            --parameters commands='["set -e && export HOME=/root && export PATH=/usr/local/bin:/usr/bin:/bin:$PATH && cd /opt/evoliss/current && echo === Pulling latest code === && git fetch origin main && git reset --hard origin/main && echo === Installing dependencies === && npm ci && echo === Running Prisma migration === && (npx prisma migrate deploy || npx prisma db push) && echo === Building application === && npm run build && echo === Restarting application === && (pm2 describe evoliss > /dev/null 2>&1 && pm2 reload evoliss --update-env || pm2 start npm --name evoliss -- start) && pm2 save --force && echo === Deployment complete ==="]' \
             --query 'Command.CommandId' --output text)
 
           echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
