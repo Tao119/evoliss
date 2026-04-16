@@ -60,3 +60,6 @@ ecosystem.config.js
 
 docker-compose.yml
 .env*.local
+*.png
+*.rtf
+.playwright-mcp/
