@@ -124,7 +124,6 @@ export default function MasterPage() {
                             value={newGameName}
                             onChange={(e) => setNewGameName(e.target.value)}
                             placeholder="ゲーム名を入力"
-                            onKeyDown={(e) => e.key === "Enter" && handleAddGame()}
                         />
                         <button className="p-admin-master__btn -add" onClick={handleAddGame}>
                             追加
@@ -155,7 +154,6 @@ export default function MasterPage() {
                             value={newTagName}
                             onChange={(e) => setNewTagName(e.target.value)}
                             placeholder="タグ名を入力"
-                            onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
                         />
                         <button className="p-admin-master__btn -add" onClick={handleAddTag}>
                             追加
