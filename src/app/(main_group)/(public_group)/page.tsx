@@ -203,13 +203,13 @@ const Page = () => {
 				</div>
 
 				<div className="p-about__top-panel-support-container animation-hidden animate-fade-in animate-delay-300">
-					<div className="p-about__top-panel-support">
+					{/* <div className="p-about__top-panel-support">
 						supported by はるnチャンネル
 					</div>
 					<ImageBox
 						className="p-about__top-panel-support-logo"
 						src={harunIcon}
-					/>
+					/> */}
 				</div>
 				{/* </>)} */}
 			</div>
