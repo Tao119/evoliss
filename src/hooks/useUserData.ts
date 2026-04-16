@@ -22,6 +22,18 @@ export const useUserData = (): UserDataContextType => {
 	const session = useSession();
 	const [userDataStatus, setUserDataStatus] = useState(UserDataStatus.Loading);
 
+	// セッション変化時に自動フェッチ
+	useEffect(() => {
+		if (session.status === "loading") return;
+		if (session.status === "unauthenticated") {
+			setUserDataStatus(UserDataStatus.unAuthorized);
+			return;
+		}
+		if (session.data?.user?.email && !userData) {
+			fetchUserData();
+		}
+	}, [session.status, session.data?.user?.email]);
+
 	const fetchUserData = async (forceRefresh: boolean = false) => {
 		try {
 			// forceRefreshが指定された場合、またはuserDataが存在する場合はIDで取得
