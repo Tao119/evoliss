@@ -121,7 +121,7 @@ export const authOptions: NextAuthOptions = {
 					// ユーザーが未確認の場合のエラーハンドリング
 					if (error.name === "UserNotConfirmedException") {
 						console.error("User not confirmed");
-						return null;
+						throw new Error("UserNotConfirmedException");
 					}
 
 					// その他のCognitoエラー
